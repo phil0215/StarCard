@@ -197,76 +197,91 @@
   }
 
   // ---- 右下角同步小面板（可关）----
+  // 消息提示：写进卡片内的提示条（不弹窗，保持账户页风格）
+  var _panelMsg = '';
+  function notice(msg) { _panelMsg = msg || ''; }
+
+  // 把云同步卡片渲染进账户页的 #cs-slot（由 app.js 的 accountPage 提供）
+  // 未配置时插槽保持空白，账户页外观零变化；不再使用任何浮动面板。
   function renderPanel(msg) {
-    // 未配置 / 关闭 UI 时完全不挂载面板，保持原网页外观零变化
+    if (msg !== undefined) notice(msg);
     if (CFG.ui === false || !configured()) return;
-    var box = document.getElementById('cs-panel');
-    if (!box) {
-      box = document.createElement('div');
-      box.id = 'cs-panel';
-      box.style.cssText = 'position:fixed;left:14px;bottom:14px;z-index:99999;max-width:300px;' +
-        'font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#e9e6ff;' +
-        'background:rgba(28,22,48,.96);border:1px solid rgba(168,140,255,.35);border-radius:14px;' +
-        'box-shadow:0 8px 30px rgba(0,0,0,.4);backdrop-filter:blur(8px);';
-      document.body.appendChild(box);
-    }
+    var slot = document.getElementById('cs-slot');
+    if (!slot) return; // 账户页未打开
+
     var s = getSession();
-    var notice = msg ? '<div style="color:#b39dff;font-size:12px;margin-bottom:6px">' + esc(msg) + '</div>' : '';
+    var tip = _panelMsg ? '<div class="subtle" style="color:#8b5cf6;margin-bottom:8px">' + esc(_panelMsg) + '</div>' : '';
+    var html = '<div class="card"><div class="card-head"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M6.5 19a4.5 4.5 0 0 1-.5-8.97A6 6 0 0 1 17.9 9.2A4 4 0 0 1 17.5 19h-11z"/></svg><span>云同步</span></div>';
+
     if (s) {
       var email = esc((s.user && (s.user.email || s.user.phone)) || '已登录用户');
-      box.innerHTML = notice +
-        '<div style="padding:12px">' +
-        '<div style="font-weight:600;margin-bottom:8px">☁ 云同步已连接</div>' +
-        '<div style="font-size:12px;color:#bdb4e6;margin-bottom:10px">' + email + '</div>' +
-        '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
-        '<button id="cs-pull">下载云端</button>' +
-        '<button id="cs-push">上传本机</button>' +
-        '<button id="cs-out">退出</button>' +
-        '</div></div>';
-      var pullBtn = document.getElementById('cs-pull');
-      var pushBtn = document.getElementById('cs-push');
-      var outBtn = document.getElementById('cs-out');
-      var btnCss = 'flex:1;min-width:80px;padding:7px 9px;border:1px solid rgba(168,140,255,.4);' +
-        'background:rgba(168,140,255,.14);color:#e9e6ff;border-radius:9px;cursor:pointer';
-      [pullBtn, pushBtn, outBtn].forEach(function (b) { if (b) b.style.cssText = btnCss; });
-      if (pullBtn) pullBtn.onclick = function () {
+      html += tip +
+        '<div class="kv"><span class="kv-k">状态</span><span class="kv-v ok">已连接云端</span></div>' +
+        '<div class="kv"><span class="kv-k">账号</span><span class="kv-v">' + email + '</span></div>' +
+        '<div class="kv"><span class="kv-k">学习数据</span><span class="kv-v">自动同步到云端，换设备不丢</span></div>' +
+        '<div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">' +
+        '<button class="btn btn-sm" id="cs-pull">下载云端进度</button>' +
+        '<button class="btn btn-sm" id="cs-push">上传本机进度</button>' +
+        '<button class="btn btn-sm" id="cs-out">退出云同步</button>' +
+        '</div>';
+    } else {
+      html += tip +
+        '<div class="subtle" style="margin-bottom:10px">登录后学习进度自动存入云端，换手机、清缓存都不丢。</div>' +
+        '<div class="field"><label>邮箱</label><input id="cs-email" type="email" placeholder="name@example.com" autocomplete="email" /></div>' +
+        '<div class="field"><label>验证码</label>' +
+        '<div class="otp-row"><input id="cs-code" type="text" inputmode="numeric" maxlength="6" placeholder="收到的验证码" autocomplete="one-time-code" />' +
+        '<button type="button" class="btn btn-sm" id="cs-send">发验证码</button></div></div>' +
+        '<button class="btn btn-primary btn-block" id="cs-login">登录 / 开启云同步</button>';
+    }
+    html += '</div>';
+    slot.innerHTML = html;
+
+    // 绑定事件（用 id 直接绑，不走 app.js 的 data-act 委托，两边互不干扰）
+    var bind = function (id, fn) { var el = document.getElementById(id); if (el) el.onclick = fn; };
+    if (s) {
+      bind('cs-pull', function () {
         pull().then(function (r) {
           if (r.has && r.state) {
             rawSet(STATE_KEY, JSON.stringify(r.state));
-            renderPanel('已下载云端进度，刷新后生效');
-          } else renderPanel('云端暂无进度');
+            renderPanel('已下载云端进度，刷新页面后生效');
+          } else renderPanel('云端暂无进度，可先上传本机');
         }).catch(function (e) { renderPanel('下载失败：' + e.message); });
-      };
-      if (pushBtn) pushBtn.onclick = function () {
+      });
+      bind('cs-push', function () {
         var raw = localStorage.getItem(STATE_KEY);
         if (!raw) return renderPanel('本机暂无进度');
         push(JSON.parse(raw)).then(function () { renderPanel('已上传本机进度'); })
           .catch(function (e) { renderPanel('上传失败：' + e.message); });
-      };
-      if (outBtn) outBtn.onclick = function () { signOut(); renderPanel('已退出云同步'); };
+      });
+      bind('cs-out', function () { signOut(); renderPanel('已退出云同步'); });
     } else {
-      box.innerHTML = notice +
-        '<div style="padding:12px">' +
-        '<div style="font-weight:600;margin-bottom:8px">☁ 登录以开启云同步</div>' +
-        '<input id="cs-email" type="email" placeholder="邮箱" style="width:100%;box-sizing:border-box;margin-bottom:6px;padding:7px 9px;border-radius:9px;border:1px solid rgba(168,140,255,.4);background:rgba(255,255,255,.06);color:#fff">' +
-        '<div style="display:flex;gap:6px">' +
-        '<input id="cs-code" type="text" inputmode="numeric" placeholder="验证码" style="flex:1;min-width:0;padding:7px 9px;border-radius:9px;border:1px solid rgba(168,140,255,.4);background:rgba(255,255,255,.06);color:#fff">' +
-        '<button id="cs-send" style="padding:7px 9px;border-radius:9px;border:1px solid rgba(168,140,255,.4);background:rgba(168,140,255,.14);color:#e9e6ff;cursor:pointer;white-space:nowrap">发验证码</button>' +
-        '</div>' +
-        '<button id="cs-login" style="width:100%;margin-top:6px;padding:8px;border-radius:9px;border:0;background:linear-gradient(135deg,#8b5cf6,#6d3fe0);color:#fff;font-weight:600;cursor:pointer">登录</button>' +
-        '</div>';
-      var emailEl = document.getElementById('cs-email');
-      var codeEl = document.getElementById('cs-code');
-      document.getElementById('cs-send').onclick = function () {
-        sendCode(emailEl.value).then(function () { renderPanel('验证码已发到邮箱'); })
+      bind('cs-send', function () {
+        var emailEl = document.getElementById('cs-email');
+        sendCode(emailEl && emailEl.value).then(function () { renderPanel('验证码已发到邮箱，请注意查收'); })
           .catch(function (e) { renderPanel('发送失败：' + e.message); });
-      };
-      document.getElementById('cs-login').onclick = function () {
-        verifyCode(emailEl.value, codeEl.value).then(function () {
+      });
+      bind('cs-login', function () {
+        var emailEl = document.getElementById('cs-email');
+        var codeEl = document.getElementById('cs-code');
+        verifyCode(emailEl && emailEl.value, codeEl && codeEl.value).then(function () {
           boot(); renderPanel('登录成功，云同步已开启');
         }).catch(function (e) { renderPanel('登录失败：' + e.message); });
-      };
+      });
     }
+  }
+
+  // 账户页是动态渲染的：监听 DOM 变化，一旦 #cs-slot 出现就填充卡片
+  function watchSlot() {
+    if (!configured()) return;
+    if (document.getElementById('cs-slot')) { renderPanel(); return; }
+    var obs = new MutationObserver(function () {
+      if (document.getElementById('cs-slot')) { renderPanel(); obs.disconnect(); scheduleWatch(); }
+    });
+    obs.observe(document.body || document.documentElement, { childList: true, subtree: true });
+  }
+  function scheduleWatch() {
+    // 账户页每次重绘会重建 slot，重新挂一个观察器
+    setTimeout(watchSlot, 60);
   }
 
   FC.CloudSync = {
@@ -275,7 +290,7 @@
       BASE = String(CFG.url || '').replace(/\/+$/, '');
       ANON = String(CFG.anonKey || '');
       PUSH_DELAY = CFG.pushDelay || 2000;
-      renderPanel();
+      watchSlot();
     },
     configured: configured,
     available: function () { return configured() && online(); },
@@ -289,9 +304,9 @@
     mount: renderPanel
   };
 
-  // DOM 就绪后挂载面板 + 启动拉取
+  // DOM 就绪后监听账户页插槽 + 启动拉取
   function start() {
-    renderPanel();
+    watchSlot();
     boot();
   }
   if (document.readyState === 'loading') {
