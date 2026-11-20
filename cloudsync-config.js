@@ -12,8 +12,8 @@
  * ============================================================ */
 window.FC = window.FC || {};
 window.FC.CLOUD_SYNC_CONFIG = {
-  url: 'https://aqsbrjiudrqhqazvipj.supabase.co',
-  anonKey: '',        // ← 把 anon public key 填到这里（引号内）
+  url: 'https://aqsbrjiiudrqhqazvipj.supabase.co',
+  anonKey: 'sb_publishable_JwmC49Kdg_6lNKiWQnCgzA_BYjmLw-k',      // ← 已由 AI 自动填入（publishable key）
   autoPush: true,     // 学习进度变化后自动上传
   pushDelay: 2000,    // 防抖：停止操作 2 秒后才上传，避免频繁写
   otpType: 'email',   // 邮箱验证码类型；若登录报 type 错，改成 'magiclink'
