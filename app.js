@@ -6812,6 +6812,9 @@
       '<div class="subtle" style="margin-top:10px">隐私偏好保存在本机，不会随 .srcd 导出。</div>' +
       '</div>';
 
+    // 云同步卡片插槽：由 cloudsync.js 填充（未配置/未启用时为空，不影响外观）
+    html += '<div id="cs-slot"></div>';
+
     html += '</div>';
     return html + tabbar(-1, app);
   }
