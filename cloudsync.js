@@ -154,6 +154,57 @@
     });
   }
 
+  // ---- 统计上报：从进度快照提取数据，写入 study_daily / study_summary ----
+  function reportStats(state, sess) {
+    if (!state || !state.decks || !Array.isArray(state.decks)) return Promise.resolve();
+    var uid = sess.user && (sess.user.id || sess.user.sub);
+    if (!uid) return Promise.resolve();
+    var today = new Date();
+    var dstr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+    var totalReps = 0, totalLapses = 0, totalCards = 0, mastered = 0;
+    for (var i = 0; i < state.decks.length; i++) {
+      var cards = state.decks[i].cards;
+      if (!Array.isArray(cards)) continue;
+      for (var j = 0; j < cards.length; j++) {
+        var sc = cards[j].scheduling;
+        if (!sc) continue;
+        totalCards++;
+        totalReps += Number(sc.reps) || 0;
+        totalLapses += Number(sc.lapses) || 0;
+        // 掌握口径：稳定度 >= 21 天视为已掌握（与主程序 mastered 口径接近）
+        if ((Number(sc.stability) || 0) >= 21) mastered++;
+      }
+    }
+    var daily = {
+      user_id: uid, study_date: dstr,
+      cards_new: Number(state.newToday) || 0,
+      cards_reviewed: Number(state.reviewToday) || 0,
+      cards_mastered: mastered,
+      correct: Math.max(0, totalReps - totalLapses),
+      wrong: totalLapses
+    };
+    var summary = {
+      user_id: uid,
+      total_cards_new: totalCards,
+      total_reviews: totalReps,
+      total_mastered: mastered,
+      total_minutes: 0,
+      last_study_date: dstr,
+      updated_at: new Date().toISOString()
+    };
+    var p1 = request('/rest/v1/study_daily', {
+      method: 'POST',
+      headers: buildHeaders({ 'Prefer': 'resolution=merge-duplicates' }, sess),
+      body: JSON.stringify([daily])
+    }).catch(function () {});
+    var p2 = request('/rest/v1/study_summary', {
+      method: 'POST',
+      headers: buildHeaders({ 'Prefer': 'resolution=merge-duplicates' }, sess),
+      body: JSON.stringify([summary])
+    }).catch(function () {});
+    return Promise.all([p1, p2]);
+  }
+
   // ---- 自动上传：包装 setItem，捕获进度写入 ----
   var _origSetItem = (typeof Storage !== 'undefined' && Storage.prototype && Storage.prototype.setItem)
     ? Storage.prototype.setItem : null;
@@ -171,7 +222,10 @@
       var raw;
       try { raw = localStorage.getItem(STATE_KEY); } catch (e) { return; }
       if (!raw) return;
-      try { push(JSON.parse(raw)); } catch (e) {}
+      try {
+        var st = JSON.parse(raw);
+        push(st).then(function () { reportStats(st, getSession()); }).catch(function () {});
+      } catch (e) {}
     }, PUSH_DELAY);
   }
   if (_origSetItem && !FC.__cloudSyncHooked) {
@@ -250,7 +304,7 @@
       bind('cs-push', function () {
         var raw = localStorage.getItem(STATE_KEY);
         if (!raw) return renderPanel('本机暂无进度');
-        push(JSON.parse(raw)).then(function () { renderPanel('已上传本机进度'); })
+        var st=JSON.parse(raw); push(st).then(function () { reportStats(st, getSession()); renderPanel('已上传本机进度'); })
           .catch(function (e) { renderPanel('上传失败：' + e.message); });
       });
       bind('cs-out', function () { signOut(); renderPanel('已退出云同步'); });
