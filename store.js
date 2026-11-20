@@ -53,18 +53,18 @@
 
   function loadList() {
     S.loading = true; S.error = '';
-    return req('/rest/v1/store_decks?select=' + SEL + '&status=eq.published&order=created_at.desc')
+    return req('/rest/v1/store_decks?select=' + SEL + '&status=eq.published&order=created_at.desc', { method: 'GET', headers: headers() })
       .then(function (rows) { S.items = rows || []; S.loadedList = true; S.loading = false; })
       .catch(function (e) { S.error = e.message; S.loading = false; });
   }
   function loadMine() {
     if (!uid()) { S.mine = []; return Promise.resolve(); }
-    return req('/rest/v1/store_decks?select=' + SEL + '&creator_id=eq.' + encodeURIComponent(uid()) + '&order=created_at.desc')
+    return req('/rest/v1/store_decks?select=' + SEL + '&creator_id=eq.' + encodeURIComponent(uid()) + '&order=created_at.desc', { method: 'GET', headers: headers() })
       .then(function (rows) { S.mine = rows || []; })
       .catch(function (e) { S.error = e.message; });
   }
   function loadDeck(id) {
-    return req('/rest/v1/store_decks?select=*,profiles(display_name)&id=eq.' + encodeURIComponent(id))
+    return req('/rest/v1/store_decks?select=*,profiles(display_name)&id=eq.' + encodeURIComponent(id), { method: 'GET', headers: headers() })
       .then(function (rows) { S.detail = (rows && rows[0]) || null; });
   }
 

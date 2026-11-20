@@ -196,33 +196,57 @@
     }).catch(function () {});
   }
 
-  // ---- 右下角同步小面板（可关）----
+  // ---- 左下角同步小面板：默认收起为胶囊，点击展开，避免遮挡侧边栏与内容 ----
+  var panelOpen = false;
+  var PANEL_CSS = 'position:fixed;left:14px;bottom:14px;z-index:99999;' +
+    'font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#e9e6ff;';
+  var BOX_CSS = PANEL_CSS + 'max-width:300px;background:rgba(28,22,48,.96);' +
+    'border:1px solid rgba(168,140,255,.35);border-radius:14px;' +
+    'box-shadow:0 8px 30px rgba(0,0,0,.4);backdrop-filter:blur(8px);';
+
   function renderPanel(msg) {
     // 未配置 / 关闭 UI 时完全不挂载面板，保持原网页外观零变化
     if (CFG.ui === false || !configured()) return;
+    if (msg) panelOpen = true; // 有操作反馈时自动展开，保证提示可见
     var box = document.getElementById('cs-panel');
     if (!box) {
       box = document.createElement('div');
       box.id = 'cs-panel';
-      box.style.cssText = 'position:fixed;left:14px;bottom:14px;z-index:99999;max-width:300px;' +
-        'font:13px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#e9e6ff;' +
-        'background:rgba(28,22,48,.96);border:1px solid rgba(168,140,255,.35);border-radius:14px;' +
-        'box-shadow:0 8px 30px rgba(0,0,0,.4);backdrop-filter:blur(8px);';
       document.body.appendChild(box);
     }
     var s = getSession();
+
+    // 收起态：一枚小胶囊
+    if (!panelOpen) {
+      box.style.cssText = PANEL_CSS;
+      var chipLabel = s ? '云同步已连接' : '登录云同步';
+      box.innerHTML = '<button id="cs-chip" style="display:flex;align-items:center;gap:7px;padding:9px 13px;border:0;' +
+        'background:rgba(28,22,48,.96);border:1px solid rgba(168,140,255,.35);border-radius:999px;' +
+        'color:#e9e6ff;font:13px/1 inherit;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.35)">' +
+        '☁ <span>' + esc(chipLabel) + '</span></button>';
+      document.getElementById('cs-chip').onclick = function () { panelOpen = true; renderPanel(); };
+      return;
+    }
+
+    // 展开态：完整面板
+    box.style.cssText = BOX_CSS;
     var notice = msg ? '<div style="color:#b39dff;font-size:12px;margin-bottom:6px">' + esc(msg) + '</div>' : '';
+    var head = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
+      '<div style="font-weight:600">' + (s ? '☁ 云同步已连接' : '☁ 登录以开启云同步') + '</div>' +
+      '<button id="cs-min" title="收起" style="border:0;background:transparent;color:#bdb4e6;cursor:pointer;font-size:15px;line-height:1;padding:2px 6px">−</button></div>';
+    var minBtn = function () { var b = document.getElementById('cs-min'); if (b) b.onclick = function () { panelOpen = false; renderPanel(); }; };
+
     if (s) {
       var email = esc((s.user && (s.user.email || s.user.phone)) || '已登录用户');
       box.innerHTML = notice +
-        '<div style="padding:12px">' +
-        '<div style="font-weight:600;margin-bottom:8px">☁ 云同步已连接</div>' +
+        '<div style="padding:12px">' + head +
         '<div style="font-size:12px;color:#bdb4e6;margin-bottom:10px">' + email + '</div>' +
         '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
         '<button id="cs-pull">下载云端</button>' +
         '<button id="cs-push">上传本机</button>' +
         '<button id="cs-out">退出</button>' +
         '</div></div>';
+      minBtn();
       var pullBtn = document.getElementById('cs-pull');
       var pushBtn = document.getElementById('cs-push');
       var outBtn = document.getElementById('cs-out');
@@ -243,11 +267,10 @@
         push(JSON.parse(raw)).then(function () { renderPanel('已上传本机进度'); })
           .catch(function (e) { renderPanel('上传失败：' + e.message); });
       };
-      if (outBtn) outBtn.onclick = function () { signOut(); renderPanel('已退出云同步'); };
+      if (outBtn) outBtn.onclick = function () { signOut(); panelOpen = false; renderPanel('已退出云同步'); };
     } else {
       box.innerHTML = notice +
-        '<div style="padding:12px">' +
-        '<div style="font-weight:600;margin-bottom:8px">☁ 登录以开启云同步</div>' +
+        '<div style="padding:12px">' + head +
         '<input id="cs-email" type="email" placeholder="邮箱" style="width:100%;box-sizing:border-box;margin-bottom:6px;padding:7px 9px;border-radius:9px;border:1px solid rgba(168,140,255,.4);background:rgba(255,255,255,.06);color:#fff">' +
         '<div style="display:flex;gap:6px">' +
         '<input id="cs-code" type="text" inputmode="numeric" placeholder="验证码" style="flex:1;min-width:0;padding:7px 9px;border-radius:9px;border:1px solid rgba(168,140,255,.4);background:rgba(255,255,255,.06);color:#fff">' +
@@ -255,6 +278,7 @@
         '</div>' +
         '<button id="cs-login" style="width:100%;margin-top:6px;padding:8px;border-radius:9px;border:0;background:linear-gradient(135deg,#8b5cf6,#6d3fe0);color:#fff;font-weight:600;cursor:pointer">登录</button>' +
         '</div>';
+      minBtn();
       var emailEl = document.getElementById('cs-email');
       var codeEl = document.getElementById('cs-code');
       document.getElementById('cs-send').onclick = function () {

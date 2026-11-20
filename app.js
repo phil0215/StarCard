@@ -10068,7 +10068,7 @@
     doExport: function (decks, filename) {
       const list = (decks && decks.length) ? decks : this.state.decks;
       if (!list || list.length === 0) { this.toast('没有可导出的牌组'); return; }
-      const text = FC.SrcdCodec.encode(list, this.state.settings, '闪星卡（StarCard）· 小李工作室 / Web 1.5.0');
+      const text = FC.SrcdCodec.encode(list, this.state.settings, '闪星卡（StarCard）· 小李工作室 / Web 1.6.0');
       const blob = new Blob([text], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
