@@ -11,6 +11,11 @@
   --bg-side: #FFFBF5;          /* 与界面同色，右侧仅一条虚线分隔 */
   --surface: #FFFFFF;
   --surface-2: #F8F4FC;
+  /* 别名：沿用既有主题变量，避免旧引用落到未定义变量上（跟随各预设 / 暗色主题） */
+  --surface-1: var(--surface);
+  --bg-2: var(--surface-2);
+  --line-1: var(--line);
+  --primary: var(--brand);
 
   --ink-1: #241C3B;
   --ink-2: #4A4166;
