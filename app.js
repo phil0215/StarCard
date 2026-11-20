@@ -5181,6 +5181,7 @@
     { kind: 'tab', tab: 2, label: '班级', ico: 'users', group: '一起学' },
     { kind: 'tab', tab: 3, label: '同桌', ico: 'link', group: '一起学' },
     { kind: 'tab', tab: 4, label: '比赛', ico: 'zap', group: '一起学' },
+    { kind: 'tab', tab: 7, label: '词店', ico: 'grid', group: '一起学' },
     { kind: 'tab', tab: 5, label: '数据', ico: 'chart', group: '工具' },
     { kind: 'page', act: 'ai-toggle', label: '小星', ico: 'sparkles', group: '工具' },
     { kind: 'page', act: 'cmd-open', label: '面板', ico: 'cmd', group: '工具' },
@@ -7512,6 +7513,9 @@
   const FCUI = {
     esc: esc,
     icon: icon,
+    titlebar: titlebar,
+    tabbar: tabbar,
+    emptyBox: emptyBox,
     aiLayer: aiLayer,
     cmdRowsHtml: cmdRowsHtml,
     aiBriefing: aiBriefing,
@@ -7543,6 +7547,7 @@
       else if (app.tab === 2) body = app.activeClassId ? classroomDetail(app) : classroomList(app);
       else if (app.tab === 3) body = deskmatePage(app);
       else if (app.tab === 4) body = battleConfig(app);
+      else if (app.tab === 7) body = (FC.Store && FC.Store.page) ? FC.Store.page(app) : '';
       else if (app.tab === 5) body = statsPage(app);
       else body = settingsPage(app);
 
@@ -10524,6 +10529,7 @@
       case 'cmd-mask': if (e.target === el) App.cmdClose(); break;
       case 'cmd-pick': App.cmdPick(parseInt(d.i, 10)); break;
       case 'tab': App.tab = parseInt(d.tab, 10); App.seriesId = ''; App.cardManageDeckId = ''; App.accountOpen = false; App.activeClassId = ''; App.aiOpen = false; App.cmdOpen = false; App.noticePageOpen = false; App.backupPageOpen = false; App.modal = null; App.render(); break;
+      case 'store-action': if (FC.Store) FC.Store.onAction(d, App); break;
       case 'new-deck': App.openModal({ type: 'deck', id: '', name: '', desc: '' }); break;
       case 'deck-open': App.cardManageDeckId = d.id; App.render(); break;
       case 'deck-back': App.cardManageDeckId = ''; App.render(); break;
