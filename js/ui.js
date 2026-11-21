@@ -2700,7 +2700,7 @@
         '<div class="field"><label>截止日期（可选）</label>' +
         '<input id="mCEnds" type="date" /></div>' +
         '</div>' +
-        '<div class="hint">密钥只给班级成员，随时可以在班级里换新的；换完旧密钥立即失效。</div>' +
+        '<div class="hint" style="margin-top:14px">密钥只给班级成员，随时可以在班级里换新的；换完旧密钥立即失效。</div>' +
         '<div class="dialog-actions"><button class="btn" data-act="modal-cancel">取消</button>' +
         '<button class="btn btn-primary" data-act="modal-ok">创建并生成密钥</button></div>';
     } else if (m.type === 'join') {

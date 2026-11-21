@@ -7030,7 +7030,8 @@ html[data-theme="dark"][data-look="plain"] .streak-mini .sm-week {
   width: 100% !important;
   height: 5px !important;
   margin-left: 0 !important;
-=======
+}
+
 /* ===== 班级 v2（密钥 / 学习量 / 榜） ===== */
 .cls-tag {
   display: inline-block;
@@ -7115,7 +7116,7 @@ html[data-theme="dark"][data-look="plain"] .streak-mini .sm-week {
   flex: none;
 }
 .cls-row .li-main { min-width: 0; }
-.cls-item .li-main { min-width: 0; }
+.cls-item .li-main { min-width: 0; flex: 1 1 auto; }
 
 .cls-login {
   text-align: center;
@@ -7179,7 +7180,8 @@ html[data-theme="dark"][data-look="plain"] .streak-mini .sm-week {
   white-space: nowrap;
 }
 
-/* ============================================================
+/* =====================================================
+
    2026-11-21 · 账户菜单：贴头像上方弹出，背景不模糊 / 不变暗
    ============================================================ */
 .acct-menu-mask,
@@ -7196,3 +7198,9 @@ html[data-theme="dark"][data-look="plain"] .streak-mini .sm-week {
 @media (max-width: 600px) {
   .acct-menu { left: 10px !important; right: 10px !important; width: auto !important; }
 }
+
+/* 班级页整宽：.content 是自适应网格，密钥卡/统计/成员行/脚注要占满整行 */
+.content > .cls-item,
+.content > .cls-stats,
+.content > .cls-row,
+.content > .cls-foot { grid-column: 1 / -1; }
