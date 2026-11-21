@@ -6697,3 +6697,41 @@ html[data-theme="light"][data-look="plain"] .set-pane .set-card.set-nav:last-of-
   margin-bottom: 48px !important;
 }
 html[data-theme="light"][data-look="plain"] .set-pane .set-card.set-nav { background: #F6F6F7 !important; }
+
+/* ============================================================
+   2026-11-21 · 侧栏打卡去卡片化（火苗不再套框）
+   + 设置页内嵌登录卡 / 隐私开关（原个人中心页已移除）
+   ============================================================ */
+.streak-mini,
+.streak-mini.lit,
+html[data-look="plain"] .streak-mini,
+html[data-look="plain"] .streak-mini.lit,
+html[data-theme="dark"] .streak-mini,
+html[data-theme="dark"][data-look="plain"] .streak-mini,
+html[data-theme="dark"][data-look="plain"] .streak-mini.lit {
+  background: none !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  padding: 2px 8px 2px !important;
+  margin: 0 0 10px !important;
+}
+.streak-mini .sm-txt b { font-weight: 650; }
+.streak-mini:not(.lit) .sm-txt b { color: var(--ink-3) !important; font-weight: 550 !important; }
+.streak-mini .sm-week { margin-left: auto; flex: 0 1 92px; }
+.streak-mini .sm-week i { height: 4px; }
+@media (max-width: 600px) {
+  .streak-mini, .streak-mini.lit { padding: 2px 0 !important; margin: 0 0 12px !important; }
+  .streak-mini .sm-week { display: none; }
+}
+
+.set-login .set-block-sub { margin-bottom: 10px; }
+.set-login .login-tabs { margin: 0 0 12px; }
+.set-login .login-form .field { margin-bottom: 10px; }
+.set-login .login-form .field > label { font-size: 11.5px; }
+.set-login .otp-row > input { height: 36px; }
+.set-login .agree { font-size: 11.5px; margin: 2px 0 10px; }
+.set-login .login-msg { margin: -2px 0 8px; }
+.set-block .privacy-row { padding: 10px 0; }
+.set-block .privacy-row:first-of-type { border-top: 0; }
+.set-val.ok { color: var(--green); }
