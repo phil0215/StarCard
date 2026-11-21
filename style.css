@@ -146,12 +146,9 @@ body {
 }
 .tabbar::-webkit-scrollbar { width: 0; }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 4px 8px 20px;
-}
+/* 旧品牌块已移除：侧栏顶部改为 .streak-mini（火苗 + 连续打卡） */
+.tabbar > .brand,
+.brand-head { display: none !important; }
 .logo {
   width: 30px;
   height: 30px;
@@ -164,23 +161,6 @@ body {
 }
 .logo img { width: 100%; height: 100%; display: block; object-fit: contain; }
 .logo svg { width: 17px; height: 17px; display: block; }
-.brand-txt { min-width: 0; }
-.brand-cn {
-  display: block;
-  font-size: 14.5px;
-  font-weight: 650;
-  letter-spacing: -.3px;
-  color: var(--ink-1);
-  line-height: 1.2;
-}
-.brand-en {
-  display: block;
-  font-size: 9.5px;
-  font-weight: 600;
-  letter-spacing: .9px;
-  color: var(--ink-4);
-  margin-top: 2px;
-}
 
 .nav-label {
   margin: 14px 0 0;
@@ -191,7 +171,6 @@ body {
   padding: 0 10px;
   margin-bottom: 6px;
 }
-.brand + .nav-label { margin-top: 2px; }
 
 .tab {
   display: flex;
@@ -1675,7 +1654,6 @@ body.privacy-covered::after {
 @media (max-width: 860px) {
   :root { --side-w: 132px; }
   .tabbar { padding: 14px 8px 10px; }
-  .brand { padding: 4px 0 18px; }
   .tab { padding: 0 8px; gap: 8px; }
   .topbar { padding: 16px 18px 10px; }
   .topbar h1 { font-size: 22px; }
@@ -1689,8 +1667,7 @@ body.privacy-covered::after {
 @media (max-width: 600px) {
   :root { --side-w: 60px; }
   .tabbar { align-items: center; }
-  .brand { justify-content: center; }
-  .brand-txt, .nav-label, .tab .lab, .sa-txt { display: none; }
+  .nav-label, .tab .lab, .sa-txt { display: none; }
   .tab { width: 44px; height: 40px; justify-content: center; padding: 0; }
   .tab .side-badge { position: absolute; top: 3px; right: 3px; min-width: 14px; height: 14px; line-height: 14px; font-size: 8.5px; padding: 0 3px; }
   .content { grid-template-columns: minmax(0, 1fr); }
@@ -3307,8 +3284,6 @@ html[data-motion="off"] .toast-ai .ic { animation: none; }
 .tab.active .ico { color: var(--brand); animation: xlPop .45s var(--ease) both; }
 @keyframes xlPop { 0% { transform: scale(.8); } 60% { transform: scale(1.18); } 100% { transform: scale(1); } }
 
-/* 品牌 Logo 轻微浮动（作品集 device-card 的灵动感） */
-.brand .logo { animation: none; }
 @keyframes xlFloat {
   0%, 100% { transform: translateY(0) rotate(0); }
   50% { transform: translateY(-3px) rotate(-4deg); }
@@ -3340,7 +3315,6 @@ html[data-motion="off"] .preset-card:hover,
 html[data-motion="off"] .tab:hover,
 html[data-motion="off"] .chip:hover,
 html[data-motion="off"] .rate-btn:hover { transform: none !important; }
-html[data-motion="off"] .brand .logo,
 html[data-motion="off"] .tab.active .ico { animation: none !important; }
 
 /* ============================================================
@@ -3857,7 +3831,6 @@ html[data-motion="off"] .tab.active .ico { animation: none !important; }
 .empty-ico { animation: bobY 4.4s ease-in-out infinite; }
 .sf-badge, .dchip, .acct-badge { transition: transform var(--dur-2) var(--spring); }
 .series-folder:hover .sf-badge { transform: translateY(-1px) scale(1.04); }
-.brand .logo { will-change: transform; }
 .resume-study-banner { overflow: hidden; }
 .resume-study-banner .rsb-ico { animation: bobY 3.6s ease-in-out infinite; }
 .sg-toggle { transition: background var(--dur-2) var(--ease-soft), opacity var(--dur-2), transform var(--dur-2) var(--spring); }
@@ -6310,11 +6283,6 @@ html[data-look="plain"] .streak-mini.lit { background: rgba(232,137,74,.10) !imp
 html[data-look="plain"] .streak-mini.lit .sm-flame,
 html[data-theme="dark"][data-look="plain"] .streak-mini.lit .sm-flame { color: #D98A4E !important; }
 
-/* 侧栏品牌头（对齐豆包顶部应用名） */
-.brand-head { display: flex; align-items: center; gap: 9px; padding: 2px 6px 14px; }
-.brand-head .brand-logo { width: 22px; height: 22px; border-radius: 7px; display: block; }
-.brand-name b { display: block; font-size: 15px; font-weight: 700; letter-spacing: -.2px; line-height: 1.15; color: var(--ink-1); }
-.brand-name small { display: block; font-size: 10.5px; line-height: 1.2; margin-top: 1px; color: var(--ink-4); }
 
 /* 词书空状态：大紫块改为淡紫图标底 */
 html[data-look="plain"] .ww-ico {
