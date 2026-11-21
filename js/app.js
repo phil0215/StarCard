@@ -1423,20 +1423,25 @@
 
     // ---- 账户 / 个人中心：云端验证码登录 + 本机学习数据 ----
     openAccount: function () {
-      // 账户页与通知 / 备份 / 小星 / 命令面板互斥：否则从这些页面点「我的」看不到反应
+      // 「个人中心」整页已并入 设置 → 账户与身份
+      const page = String((typeof window !== 'undefined' && window.SC_PAGE) || '');
+      if (page && page !== 'settings') {
+        try { sessionStorage.setItem('sc_set_pane', 'account'); } catch (err) {}
+        window.location.href = FC.siteRoot() + 'settings/';
+        return;
+      }
       this.accountMenuOpen = false;
-      this.aiOpen = false;
-      this.cmdOpen = false;
-      this.noticePageOpen = false;
-      this.backupPageOpen = false;
+      this.aiOpen = false; this.cmdOpen = false;
+      this.noticePageOpen = false; this.backupPageOpen = false;
       this.modal = null;
-      this.accountOpen = true;
-      // seriesId / cardManageDeckId 的渲染优先级高于 accountOpen，
-      // 不清掉的话，在「系列详情」「牌组管理」里点「我的」会毫无反应。
+      this.accountOpen = false;
       this.seriesId = ''; this.cardManageDeckId = ''; this.activeClassId = '';
       this.study = null; this.wb = null; this.battle = null;
+      this.tab = 6;
+      this.settingsPane = 'account';
       this.setLoginMsg('');
       this.render();
+      try { window.scrollTo(0, 0); } catch (err) {}
     },
     // 关闭「显示昵称」后，界面统一显示为「学习者」
     accountDisplayName: function () {
@@ -3378,6 +3383,12 @@
       App.cardManageDeckId = '';
       App.activeClassId = '';
       App.browser = null;
+      if (page === 'settings') {
+        try {
+          var wantPane = sessionStorage.getItem('sc_set_pane');
+          if (wantPane) { App.settingsPane = wantPane; sessionStorage.removeItem('sc_set_pane'); }
+        } catch (err) {}
+      }
     } else if (page === 'browse') {
       App.browser = { query: '', deckId: '', sortKey: 'due', sortDir: 'desc', selected: {}, previewId: '', limit: 300 };
       App.modal = null;
