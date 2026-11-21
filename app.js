@@ -6286,6 +6286,9 @@
 
     let html = titlebar('数据', '学习统计') + '<div class="content">';
 
+    // 连续打卡（空状态 / 正常状态都显示，顶部第一块）
+    html += streakCardHtml(st, now);
+
     if (totalReviews === 0) {
       html += '<div class="stat-grid">' +
         statBox(totalCards, '卡片总数', false, 'cards') +
@@ -6418,9 +6421,99 @@
     return html + tabbar(5, app);
   }
 
+  // —— 连续打卡卡：天数 + 本周打卡 + 最近 7 天复习折线 ——
+  function streakCardHtml(st, now) {
+    const by = {};
+    const stats = Array.isArray(st.stats) ? st.stats : [];
+    for (let i = 0; i < stats.length; i++) {
+      const e = stats[i];
+      if (!e || !e.date) continue;
+      by[e.date] = (by[e.date] || 0) + (e.reviews || 0);
+    }
+    const key = function (ts) { return FC.dateKey(ts); };
+    const todayKey = key(now);
+    const doneToday = (by[todayKey] || 0) > 0;
+
+    // 连续天数：今天有学从今天起算；今天还没学但昨天学过，仍算在连击中
+    let streak = 0;
+    const cur = new Date(now);
+    if (!doneToday) cur.setDate(cur.getDate() - 1);
+    while ((by[key(cur.getTime())] || 0) > 0) {
+      streak++;
+      cur.setDate(cur.getDate() - 1);
+    }
+
+    // 历史最长连续
+    const keys = [];
+    for (const k in by) if (by[k] > 0) keys.push(k);
+    keys.sort();
+    let longest = 0, run = 0, prevT = null;
+    for (let i = 0; i < keys.length; i++) {
+      const t = Date.parse(keys[i] + 'T00:00:00');
+      if (isNaN(t)) continue;
+      run = (prevT !== null && Math.round((t - prevT) / FC.DAY_MS) === 1) ? run + 1 : 1;
+      if (run > longest) longest = run;
+      prevT = t;
+    }
+
+    // 最近 7 天
+    const WK = ['日', '一', '二', '三', '四', '五', '六'];
+    let dots = '';
+    const vals = [];
+    let weekOn = 0;
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now - i * FC.DAY_MS);
+      const k = key(d.getTime());
+      const n = by[k] || 0;
+      vals.push(n);
+      if (n > 0) weekOn++;
+      dots += '<span class="sk-dot' + (n > 0 ? ' on' : '') + (i === 0 ? ' today' : '') +
+        '" title="' + esc(k) + '：' + n + ' 次复习"><i></i><small>' +
+        (i === 0 ? '今' : WK[d.getDay()]) + '</small></span>';
+    }
+
+    // 迷你折线
+    const maxV = Math.max(1, Math.max.apply(null, vals));
+    const cw = 200, ch = 46, stp = cw / 6;
+    let line = '';
+    for (let i = 0; i < 7; i++) {
+      const x = (i * stp).toFixed(1);
+      const y = (ch - 6 - (vals[i] / maxV) * (ch - 14)).toFixed(1);
+      line += (i ? 'L' : 'M') + x + ' ' + y + ' ';
+    }
+    const area = line + 'L ' + cw + ' ' + ch + ' L 0 ' + ch + ' Z';
+
+    let tip;
+    if (doneToday) tip = '今天已打卡，保持住';
+    else if (streak > 0) tip = '今天还没打卡 · 学一张就续上';
+    else tip = '学完一张卡就算打卡';
+
+    return '<div class="streak-card' + (doneToday ? ' done' : '') + '">' +
+      '<div class="sk-main">' +
+      '<span class="sk-badge">' + icon('zap', 'i22') + '</span>' +
+      '<div class="sk-body">' +
+      '<div class="sk-num"><b>' + streak + '</b><span>天</span></div>' +
+      '<div class="sk-txt"><b>' + (streak > 0 ? '连续打卡' : '开始打卡') + '</b>' +
+      '<small>' + esc(tip) + '</small>' +
+      '<small>本周 ' + weekOn + ' 天 · 最长 ' + longest + ' 天</small></div>' +
+      '</div></div>' +
+      '<div class="sk-chart">' +
+      '<svg class="sk-spark" viewBox="0 0 ' + cw + ' ' + ch + '" preserveAspectRatio="none" aria-hidden="true">' +
+      '<defs><linearGradient id="skLineGrad" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0" stop-color="#8B6BFF" stop-opacity=".30"/>' +
+      '<stop offset="1" stop-color="#8B6BFF" stop-opacity="0"/></linearGradient></defs>' +
+      '<path d="' + area + '" fill="url(#skLineGrad)"/>' +
+      '<path d="' + line.trim() + '" fill="none" stroke="#8B6BFF" stroke-width="2" ' +
+      'stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>' +
+      '</svg>' +
+      '<div class="sk-dots">' + dots + '</div>' +
+      '<div class="sk-axis"><small>7 天前</small><small>今天</small></div>' +
+      '</div></div>';
+  }
+
   function statBox(v, k, accent, ico) {
     return '<div class="stat-box">' +
-      (ico ? '<span class="stat-ico">' + icon(ico, 'i16') + '</span>' : '') +
+      (ico ? '<span class="stat-ico ico-' + esc(ico) + '">' + icon(ico, 'i16') + '</span>' : '') +
       '<div class="k">' + esc(k) + '</div>' +
       '<div class="v' + (accent ? ' accent' : '') + '">' + esc(v) + '</div></div>';
   }
@@ -8185,7 +8278,7 @@
 
   function statBox(v, k, accent, ico) {
     return '<div class="stat-box">' +
-      (ico ? '<span class="stat-ico">' + icon(ico, 'i16') + '</span>' : '') +
+      (ico ? '<span class="stat-ico ico-' + esc(ico) + '">' + icon(ico, 'i16') + '</span>' : '') +
       '<div class="k">' + esc(k) + '</div>' +
       '<div class="v' + (accent ? ' accent' : '') + '">' + esc(v) + '</div></div>';
   }
