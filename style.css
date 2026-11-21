@@ -6074,3 +6074,119 @@ html[data-look="plain"] .set-acct { background: var(--surface) !important; backg
 html[data-look="plain"] .ai-fab,
 html[data-look="plain"] .ai-fab:hover { box-shadow: 0 2px 8px rgba(0, 0, 0, .10) !important; }
 html[data-look="plain"] .ai-fab::after { display: none !important; }
+
+/* ===== 豆包深色规范：中性灰阶 + 品牌紫点缀，统一分割线/图标/控件 ===== */
+html[data-theme="dark"] {
+  --bg: #1A1A1A; --bg-side: #1A1A1A;
+  --surface: #232323; --surface-2: #2A2A2A;
+  --ink-1: #EDEDED; --ink-2: #B6B6B6; --ink-3: #8A8A8A; --ink-4: #666666;
+  --line: rgba(255,255,255,.07); --line-2: rgba(255,255,255,.12);
+  --brand: #8B7BF0; --brand-strong: #A794FF;
+  --brand-soft: rgba(139,123,240,.16); --brand-ring: rgba(139,123,240,.28);
+  --sh-xs: 0 1px 2px rgba(0,0,0,.28);
+  --sh-sm: 0 2px 8px rgba(0,0,0,.32);
+  --sh-md: 0 8px 20px rgba(0,0,0,.38);
+  --sh-lg: 0 16px 40px rgba(0,0,0,.44);
+}
+html[data-theme="dark"] body { background: var(--bg); background-image: none; }
+html[data-theme="dark"] .tabbar { background: var(--bg); border-right: 1px solid var(--line); }
+html[data-theme="dark"] .tab.active { background: rgba(255,255,255,.07) !important; background-image: none !important; color: var(--ink-1) !important; box-shadow: none !important; }
+html[data-theme="dark"] .tab:hover { background: rgba(255,255,255,.045) !important; background-image: none !important; }
+html[data-theme="dark"] .tab.active .ico { color: var(--brand) !important; }
+html[data-theme="dark"] .nav-label { color: var(--ink-4); }
+html[data-theme="dark"] .nav-label::before { background: rgba(255,255,255,.25) !important; }
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .home-card,
+html[data-theme="dark"] .deck-item,
+html[data-theme="dark"] .notice-item,
+html[data-theme="dark"] .overview-hero,
+html[data-theme="dark"] .pk-hero,
+html[data-theme="dark"] .set-acct,
+html[data-theme="dark"] .import-card {
+  background: var(--surface) !important;
+  background-image: none !important;
+  border: 1px solid var(--line) !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] .overview-hero::before,
+html[data-theme="dark"] .overview-hero::after,
+html[data-theme="dark"] .hero-float,
+html[data-theme="dark"] .acct-hero::before,
+html[data-theme="dark"] .home-card::before { display: none !important; }
+html[data-theme="dark"] .field input,
+html[data-theme="dark"] .field textarea,
+html[data-theme="dark"] .field select,
+html[data-theme="dark"] .set-select,
+html[data-theme="dark"] .set-num,
+html[data-theme="dark"] .cmd-search {
+  background: var(--surface-2) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 10px !important;
+  color: var(--ink-1) !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"] .field input:focus,
+html[data-theme="dark"] .field select:focus,
+html[data-theme="dark"] .field textarea:focus { border-color: var(--brand) !important; box-shadow: 0 0 0 2px var(--brand-ring) !important; }
+html[data-theme="dark"] .btn-primary,
+html[data-theme="dark"] .btn-primary:hover { background: var(--brand) !important; background-image: none !important; color: #fff !important; border-color: var(--brand) !important; box-shadow: none !important; }
+html[data-theme="dark"] .ai-fab { background: var(--brand) !important; box-shadow: 0 2px 8px rgba(0,0,0,.32) !important; }
+html[data-theme="dark"] .ai-fab::after { display: none !important; }
+html[data-theme="dark"] .progress > span,
+html[data-theme="dark"] .deck-prog > span { background-image: none !important; background: var(--brand) !important; }
+html[data-theme="dark"] .set-ico,
+html[data-theme="dark"] .set-ico[class*="t-"] { box-shadow: none !important; background-image: none !important; }
+html[data-theme="dark"] .set-ico.t-blue { background: rgba(91,140,255,.16) !important; color: #8FB0FF !important; }
+html[data-theme="dark"] .set-ico.t-green { background: rgba(22,167,142,.16) !important; color: #5FE0C7 !important; }
+html[data-theme="dark"] .set-ico.t-orange, html[data-theme="dark"] .set-ico.t-amber { background: rgba(255,138,91,.16) !important; color: #FFB27E !important; }
+html[data-theme="dark"] .set-ico.t-cyan { background: rgba(46,211,183,.16) !important; color: #7FE9D9 !important; }
+html[data-theme="dark"] .set-ico.t-pink { background: rgba(255,107,157,.16) !important; color: #FFA3C2 !important; }
+html[data-theme="dark"] .set-ico.t-indigo, html[data-theme="dark"] .set-ico.t-purple { background: var(--brand-soft) !important; color: var(--brand-strong) !important; }
+html[data-theme="dark"] .set-ico.t-slate, html[data-theme="dark"] .set-ico.t-gray { background: rgba(255,255,255,.08) !important; color: var(--ink-3) !important; }
+html[data-theme="dark"] [class*="ava-c"],
+html[data-theme="dark"] .acct-ava { background: var(--brand-soft) !important; color: var(--brand-strong) !important; box-shadow: none !important; }
+html[data-theme="dark"] .pk-ava { background: var(--brand) !important; color: #fff !important; box-shadow: none !important; }
+html[data-theme="dark"] .dc-new, html[data-theme="dark"] .dc-due, html[data-theme="dark"] .dc-done,
+html[data-theme="dark"] .cap-warn { background: rgba(255,255,255,.07) !important; color: var(--ink-3) !important; border-color: var(--line) !important; }
+
+/* ---- 深色 + 素白 组合：回填中性灰阶与品牌紫（压过白的默认） ---- */
+html[data-theme="dark"][data-look="plain"] {
+  --bg: #1A1A1A; --bg-side: #1A1A1A;
+  --surface: #232323; --surface-2: #2A2A2A;
+  --ink-1: #EDEDED; --ink-2: #B6B6B6; --ink-3: #8A8A8A; --ink-4: #666666;
+  --line: rgba(255,255,255,.07); --line-2: rgba(255,255,255,.12);
+  --brand: #8B7BF0; --brand-strong: #A794FF;
+  --brand-soft: rgba(139,123,240,.16); --brand-ring: rgba(139,123,240,.28);
+  --brand-ink: #FFFFFF;
+  --sh-xs: 0 1px 2px rgba(0,0,0,.28);
+  --sh-sm: 0 2px 8px rgba(0,0,0,.32);
+  --sh-md: 0 8px 20px rgba(0,0,0,.38);
+  --sh-lg: 0 16px 40px rgba(0,0,0,.44);
+}
+html[data-theme="dark"][data-look="plain"] .btn,
+html[data-theme="dark"][data-look="plain"] .btn-sm,
+html[data-theme="dark"][data-look="plain"] .btn-outline,
+html[data-theme="dark"][data-look="plain"] .btn-ghost {
+  background: rgba(255,255,255,.08) !important;
+  color: var(--ink-1) !important;
+  border: 1px solid var(--line) !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"][data-look="plain"] .btn:hover,
+html[data-theme="dark"][data-look="plain"] .btn-sm:hover { background: rgba(255,255,255,.13) !important; }
+html[data-theme="dark"][data-look="plain"] .ai-fab { background: var(--brand) !important; color: #fff !important; box-shadow: 0 2px 10px rgba(0,0,0,.35) !important; }
+html[data-theme="dark"][data-look="plain"] .card,
+html[data-theme="dark"][data-look="plain"] .home-card,
+html[data-theme="dark"][data-look="plain"] .deck-item,
+html[data-theme="dark"][data-look="plain"] .overview-hero,
+html[data-theme="dark"][data-look="plain"] .notice-item,
+html[data-theme="dark"][data-look="plain"] .pk-hero {
+  background: var(--surface) !important;
+  background-image: none !important;
+  border: 1px solid var(--line) !important;
+  box-shadow: none !important;
+}
+
+/* 简报卡：去掉过强竖条，与其余卡片边一致 */
+html[data-look="plain"] .ai-brief { border-left-width: 1px !important; border-left-color: var(--line) !important; }
+html[data-theme="dark"][data-look="plain"] .ai-brief { background: var(--surface) !important; border-color: var(--line) !important; }

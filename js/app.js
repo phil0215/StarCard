@@ -226,7 +226,7 @@
     },
     applyTheme: function () {
       const s = this.state.settings || {};
-      const t = s.theme || 'light';
+      const t = s.theme || 'dark';
       let dark = t === 'dark';
       if (t === 'auto') {
         dark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
