@@ -76,7 +76,7 @@
 
   const App = {
     state: FC.defaultState(),
-    tab: 0,
+    tab: 1,
     seriesId: '',
     showRemovedSeries: false,
     cardManageDeckId: '',
@@ -2520,7 +2520,7 @@
       this.modal = null;
       this.noticePageOpen = false;
       this.backupPageOpen = false;
-      this.tab = isNaN(tab) ? 0 : tab;
+      this.tab = isNaN(tab) ? 1 : tab;
       this.accountOpen = false;
       this.seriesId = '';
       this.cardManageDeckId = '';
@@ -3750,7 +3750,7 @@
   // 多页面入口：各页 HTML 用 window.SC_PAGE 声明首屏显示哪一块，避免每次都从卡片页开始
   (function applyPageEntry() {
     var page = String((typeof window !== 'undefined' && window.SC_PAGE) || '').toLowerCase();
-    var TABS = { cards: 0, books: 1, 'class': 2, deskmate: 3, battle: 4, stats: 5, settings: 6, store: 7, community: 8 };
+    var TABS = { books: 1, 'class': 2, deskmate: 3, battle: 4, stats: 5, settings: 6, store: 7, community: 8 };
     if (Object.prototype.hasOwnProperty.call(TABS, page)) {
       App.tab = TABS[page];
       App.accountOpen = false;
