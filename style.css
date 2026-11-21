@@ -4765,3 +4765,113 @@ html[data-motion="off"] .hero-float { animation: none !important; }
   font-size: 11.8px;
 }
 
+/* ============================================================
+   21. 账户菜单浮层（点左下头像弹出 · 参照 WorkBuddy 账户面板）
+   ------------------------------------------------------------
+   高面板 + 账户卡 + 学习概览 + 功能入口 + 退出登录。
+   仅当 app.accountMenuOpen 时渲染，不影响其它页面。
+   ============================================================ */
+.acct-menu-mask {
+  position: fixed; inset: 0; z-index: 400;
+  background: rgba(12, 8, 32, .48);
+  backdrop-filter: blur(2px);
+  animation: am-fade .18s var(--ease-soft);
+}
+.acct-menu {
+  position: fixed; z-index: 401;
+  left: calc(var(--side-w) + 10px);
+  bottom: 12px;
+  width: 344px;
+  max-width: calc(100vw - 24px);
+  max-height: calc(100vh - 96px);
+  display: flex; flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-lg);
+  overflow: hidden;
+  animation: am-rise .22s var(--ease);
+}
+@keyframes am-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes am-rise {
+  from { opacity: 0; transform: translateY(16px) scale(.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.am-head {
+  position: relative;
+  padding: 20px 18px 16px;
+  background:
+    radial-gradient(160px 90px at 12% 0%, rgba(124, 92, 255, .22), transparent 70%),
+    radial-gradient(140px 90px at 100% 0%, rgba(255, 107, 157, .16), transparent 70%),
+    var(--surface-2);
+  border-bottom: 1px solid var(--line);
+}
+.am-head-acct {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; padding: 0; border: 0; background: none;
+  text-align: left; cursor: pointer; font: inherit;
+}
+.am-head-acct .ava-lg { width: 54px; height: 54px; border-radius: 16px; font-size: 21px; }
+.am-head-txt { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.am-head-txt b { font-size: 16px; font-weight: 750; color: var(--ink-1); letter-spacing: -.3px; }
+.am-head-txt small { font-size: 11.5px; color: var(--ink-3); }
+.am-stats {
+  display: flex; margin-top: 16px;
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--r-md); overflow: hidden;
+}
+.am-stats > div {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 10px 4px;
+}
+.am-stats > div + div { border-left: 1px solid var(--line); }
+.am-stats b { font-size: 17px; font-weight: 750; color: var(--brand); letter-spacing: -.5px; }
+.am-stats span { font-size: 10.5px; color: var(--ink-3); }
+.am-list {
+  padding: 10px; overflow-y: auto; flex: 1;
+}
+.am-item {
+  display: flex; align-items: center; gap: 11px;
+  width: 100%; padding: 11px 12px; margin: 2px 0;
+  border: 0; border-radius: var(--r-sm);
+  background: transparent; color: var(--ink-1);
+  font: inherit; text-align: left; cursor: pointer;
+  transition: background .15s var(--ease);
+}
+.am-item:hover { background: var(--surface-2); }
+.am-item:active { transform: scale(.985); }
+.am-ico {
+  flex: none; width: 34px; height: 34px; border-radius: 10px;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--brand-soft); color: var(--brand);
+}
+.am-txt { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.am-txt b { font-size: 13px; font-weight: 650; }
+.am-txt small { font-size: 10.5px; color: var(--ink-3); }
+.am-item > .ic:last-child { flex: none; color: var(--ink-4); opacity: .7; }
+.am-foot {
+  padding: 10px; border-top: 1px solid var(--line);
+  background: var(--surface-2);
+}
+.am-item-danger .am-ico { background: var(--red-soft); color: var(--red); }
+.am-item-danger .am-txt b { color: var(--red); }
+.am-item-primary {
+  background: linear-gradient(135deg, #8B6CFF, #7C5CFF);
+  justify-content: center; color: #fff;
+  box-shadow: 0 6px 16px -6px rgba(124, 92, 255, .6);
+}
+.am-item-primary .am-ico { background: rgba(255, 255, 255, .2); color: #fff; }
+.am-item-primary .am-txt b { color: #fff; }
+.am-item-primary > .ic:last-child { color: #fff; }
+[data-theme="dark"] .am-item-primary { color: #1A1233; }
+[data-theme="dark"] .am-item-primary .am-txt b { color: #1A1233; }
+[data-theme="dark"] .am-item-primary .am-ico { color: #1A1233; }
+.am-sign { text-align: center; font-size: 10.5px; color: var(--ink-4); margin-top: 8px; }
+
+@media (max-width: 600px) {
+  .acct-menu {
+    left: 10px; right: 10px; bottom: 10px;
+    width: auto; max-height: calc(100vh - 80px);
+  }
+}
+
