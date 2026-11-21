@@ -7925,3 +7925,13 @@ html[data-look="plain"] .tab:hover,
 html[data-look="plain"] .tab.active { background: var(--surface-2) !important; color: var(--ink-1) !important; }
 html[data-look="plain"] .side-account:hover { background: var(--surface-2) !important; }
 html[data-look="plain"] .streak-mini { background: transparent !important; border: none !important; }
+
+
+/* ============================================================
+   侧栏火苗：图标放大 + 「0 天/连续打卡」文字块与火苗间距拉开
+   ============================================================ */
+.streak-mini .sm-flame .ic { width: 24px; height: 24px; }
+.streak-mini .sm-top { gap: 14px; }
+@media (max-width: 600px) {
+  .streak-mini .sm-flame .ic { width: 22px; height: 22px; }
+}
