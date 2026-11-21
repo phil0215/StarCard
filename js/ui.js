@@ -961,6 +961,28 @@
       html += '</div>';
     }
 
+    // —— 我的文件夹：用户在工坊里自建的分类 ——
+    const folders = st.folders || [];
+    {
+      html += '<div class="section-title folder-title">' + icon('folder', 'i14') + '<span>我的文件夹</span>' +
+        '<button class="btn btn-sm folder-new-btn" data-act="folder-new">' + icon('plus', 'i14') + '新建文件夹</button></div>';
+      if (folders.length) {
+        html += '<div class="folder-grid">';
+        for (let fi = 0; fi < folders.length; fi++) {
+          const f = folders[fi];
+          const fdecks = FC.decksInFolder(st, f.id);
+          html += '<div class="folder-card" data-act="folder-open" data-id="' + esc(f.id) + '" title="' + esc(f.name) + '">' +
+            '<span class="fc-ico">' + icon('folder', 'i22') + '</span>' +
+            '<div class="fc-body"><div class="fc-name">' + esc(f.name) + '</div>' +
+            '<div class="fc-meta">' + fdecks.length + ' 个牌组</div></div>' +
+            icon('chevronRight', 'i16') + '</div>';
+        }
+        html += '</div>';
+      } else {
+        html += '<div class="card wide folder-empty">把零散牌组归类到文件夹，点右上「新建文件夹」开始。</div>';
+      }
+    }
+
     // —— 已移除的词书：默认折叠，可恢复重新显示（避免误删后无处找回）——
     const removedList = typeof FC.removedSeries === 'function' ? FC.removedSeries(st) : [];
     if (removedList.length) {
@@ -1131,6 +1153,28 @@
   }
 
   // 系列详情页：顶部概览 + 建议 + 分册网格
+  // 文件夹详情：列出该自定义文件夹下的牌组，点牌组进入卡片管理
+  function folderPage(app) {
+    const st = app.state;
+    const f = FC.folderById(st, app.folderId);
+    if (!f) { app.folderId = ''; return wordBookPage(app); }
+    const ds = FC.decksInFolder(st, f.id);
+    const s = new FC.Scheduler(st.settings);
+    const now = Date.now();
+    let html = titlebar(f.name, '文件夹 · ' + ds.length + ' 个牌组', {
+      back: { act: 'folder-back' },
+      actions: '<button class="btn btn-sm" data-act="folder-rename" data-id="' + esc(f.id) + '">' + icon('pencil', 'i14') + '重命名</button>' +
+        '<button class="btn btn-sm btn-danger" data-act="folder-delete" data-id="' + esc(f.id) + '">' + icon('trash', 'i14') + '删除</button>'
+    }) + '<div class="content">';
+    if (!ds.length) {
+      html += emptyBox('folder', '这个文件夹还是空的。回到工坊，在牌组的「更多」里选「移动到文件夹」即可。');
+    } else {
+      for (let i = 0; i < ds.length; i++) html += deckListItem(app, ds[i], s, now, false);
+    }
+    html += '</div>';
+    return html + tabbar(app.tab, app);
+  }
+
   function seriesPage(app) {
     const series = FC.seriesById ? FC.seriesById(app.seriesId, app.state) : null;
     if (!series) {
@@ -3069,10 +3113,28 @@
           '<button class="menu-item" data-act="deck-reset" data-id="' + esc(deck.id) + '">' + icon('rotate', 'i16') + '重置此牌组进度</button>' +
           '<button class="menu-item" data-act="deck-rename" data-id="' + esc(deck.id) + '">' + icon('pencil', 'i16') + '重命名</button>' +
           '<button class="menu-item" data-act="deck-export" data-id="' + esc(deck.id) + '">' + icon('upload', 'i16') + '导出此牌组</button>' +
+          '<button class="menu-item" data-act="deck-move-menu" data-id="' + esc(deck.id) + '">' + icon('folder', 'i16') + '移动到文件夹</button>' +
           '<button class="menu-item" data-act="deck-subdeck" data-id="' + esc(deck.id) + '">' + icon('plus', 'i16') + '新建子牌组</button>' +
           (deckSeries ? '<button class="menu-item danger" data-act="series-delete-by-deck" data-id="' + esc(deck.id) + '">' + icon('trash', 'i16') + '删除整个词库（' + esc(deckSeries.name) + '）</button>' : '') +
           '<button class="menu-item danger" data-act="deck-delete" data-id="' + esc(deck.id) + '">' + icon('trash', 'i16') + '删除牌组</button>' +
           '</div><div class="dialog-actions"><button class="btn" data-act="modal-cancel">关闭</button></div>';
+      } else {
+        inner = '<h3>牌组不存在</h3><div class="dialog-actions"><button class="btn" data-act="modal-cancel">关闭</button></div>';
+      }
+    } else if (m.type === 'folder-move') {
+      const deck = app.state.decks.find(function (x) { return x.id === m.deckId; });
+      if (deck) {
+        const folders = app.state.folders || [];
+        const cur = deck.folderId || '';
+        let opts = '<button class="menu-item' + (!cur ? ' active' : '') + '" data-act="deck-move" data-folder="" data-id="' + esc(deck.id) + '">' + icon('folder', 'i16') + '不归属任何文件夹</button>';
+        for (let i = 0; i < folders.length; i++) {
+          opts += '<button class="menu-item' + (cur === folders[i].id ? ' active' : '') + '" data-act="deck-move" data-folder="' + esc(folders[i].id) + '" data-id="' + esc(deck.id) + '">' + icon('folder', 'i16') + esc(folders[i].name) + '</button>';
+        }
+        inner = '<h3>移动到文件夹 · ' + esc(deck.name) + '</h3>' +
+          '<div class="subtle" style="margin-bottom:10px">选择目标文件夹，或新建一个。</div>' +
+          '<div class="menu-list">' + opts + '</div>' +
+          '<div class="dialog-actions"><button class="btn" data-act="folder-new-then-move" data-id="' + esc(deck.id) + '">' + icon('plus', 'i14') + '新建文件夹</button>' +
+          '<button class="btn" data-act="modal-cancel">关闭</button></div>';
       } else {
         inner = '<h3>牌组不存在</h3><div class="dialog-actions"><button class="btn" data-act="modal-cancel">关闭</button></div>';
       }
@@ -3624,8 +3686,12 @@
       if (bm) bh += bm;
       return htmlToNode(bh + overlays(app));
     }
+    // 文件夹详情 / 卡片管理 / 系列详情：走字符串渲染
+    if (app.folderId || app.cardManageDeckId || app.seriesId) {
+      return htmlToNode(FCUI.renderLegacy(app));
+    }
     // 首页用声明式渲染
-    if (app.tab === 0 && !app.cardManageDeckId && !app.seriesId && !app.accountOpen) {
+    if (app.tab === 0 && !app.accountOpen) {
       return renderDeclarative(DeckPage, app);
     }
     // 其余页面沿用字符串渲染（后续逐页迁移）
@@ -3662,7 +3728,8 @@
       let body = '';
       // 卡片管理页优先于页签渲染：从「词书」页进入制作 / 编辑时，底部高亮仍留在来源页签
       // 系列详情页同样优先于页签：它是从「词书」进入的文件夹式内容视图
-      if (app.cardManageDeckId) body = cardManagePage(app);
+      if (app.folderId) body = folderPage(app);
+      else if (app.cardManageDeckId) body = cardManagePage(app);
       else if (app.seriesId) body = seriesPage(app);
       else if (app.tab === 0) body = deckPage(app);
       else if (app.tab === 1) body = wordBookPage(app);
