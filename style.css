@@ -1663,8 +1663,8 @@ body.privacy-covered::after {
   .study-area { padding-left: 18px; }
   .dialog-actions .btn { flex: 1; }
 }
-/* 仅在真正窄屏（手机）才收起侧栏文字 */
-@media (max-width: 600px) {
+/* 仅在真正窄屏（手机/小屏平板）才收起侧栏文字 */
+@media (max-width: 760px) {
   :root { --side-w: 60px; }
   .tabbar { align-items: center; }
   .nav-label, .tab .lab, .sa-txt { display: none; }
@@ -5194,7 +5194,7 @@ html[data-motion="off"] .hero-float { animation: none !important; }
   gap: 6px;
 }
 .sk-spark { width: 100%; height: 46px; display: block; overflow: visible; }
-.sk-dots { display: flex; gap: 6px; }
+.sk-dots { display: flex; gap: 6px; margin-bottom: 4px; }
 .sk-dot { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
 .sk-dot i {
   display: block;
@@ -5204,10 +5204,10 @@ html[data-motion="off"] .hero-float { animation: none !important; }
   background: var(--line-2);
   transition: background .2s;
 }
-.sk-dot.on i { background: linear-gradient(90deg, #FF9A3D, #FFC94A); }
-.streak-card.done .sk-dot.on i { background: linear-gradient(90deg, #16A78E, #2ED3B7); }
-.sk-dot.today i { box-shadow: 0 0 0 3px rgba(255, 154, 61, .18); }
-.streak-card.done .sk-dot.today i { box-shadow: 0 0 0 3px rgba(22, 167, 142, .18); }
+.sk-dot.on i { background: var(--brand); }
+.streak-card.done .sk-dot.on i { background: var(--brand); }
+.sk-dot.today i { box-shadow: 0 0 0 3px var(--brand-ring); }
+
 .sk-dot small { font-size: 10px; color: var(--ink-4); }
 .sk-dot.on small { color: var(--ink-2); font-weight: 650; }
 .sk-axis { display: flex; justify-content: space-between; font-size: 10px; color: var(--ink-4); }
@@ -6389,16 +6389,15 @@ html[data-look="plain"] .streak-mini.lit .sm-txt b { color: var(--ink-2); }
   flex: 1 1 0;
   height: 5px;
   border-radius: 2px;
-  background: #1B1B1E;
+  background: var(--line-2);
   transition: background .2s ease, box-shadow .2s ease;
 }
 .streak-mini .sm-week i.on {
-  background: linear-gradient(90deg, #FF8A3D, #FF3B30);
+  background: var(--brand);
 }
 .streak-mini .sm-week i.today {
   box-shadow: 0 0 0 2px var(--brand-soft);
 }
-[data-theme="dark"] .streak-mini .sm-week i { background: #34343A; }
 
 /* 数据页打卡卡：右侧目标进度 / 本周 / 勋章 */
 .sk-side {
@@ -6428,20 +6427,20 @@ html[data-look="plain"] .streak-mini.lit .sm-txt b { color: var(--ink-2); }
   flex: 0 0 78px;
   height: 5px;
   border-radius: 3px;
-  background: #1B1B1E;
+  background: var(--line-2);
   overflow: hidden;
 }
 .sk-meter i {
   display: block;
   height: 100%;
   border-radius: 3px;
-  background: linear-gradient(90deg, #FF8A3D, #FF3B30);
+  background: var(--brand);
   transition: width .3s ease;
 }
-[data-theme="dark"] .sk-meter { background: #34343A; }
 
-.sk-dot.on i { background: linear-gradient(90deg, #FF8A3D, #FF3B30); }
-.streak-card.done .sk-dot.on i { background: linear-gradient(90deg, #FF8A3D, #FF3B30); }
+
+.sk-dot.on i { background: var(--brand); }
+.streak-card.done .sk-dot.on i { background: var(--brand); }
 
 .sk-foot {
   display: flex;
@@ -6497,10 +6496,6 @@ html[data-look="plain"] .streak-card.done .sk-badge {
   color: #FF7A1A !important;
   border: 1px solid var(--line) !important;
   box-shadow: none !important;
-}
-html[data-look="plain"] .sk-dot.on i,
-html[data-look="plain"] .streak-card.done .sk-dot.on i {
-  background: linear-gradient(90deg, #FF8A3D, #FF3B30) !important;
 }
 
 @media (max-width: 600px) {
@@ -6764,7 +6759,7 @@ html[data-theme="dark"][data-look="plain"] .streak-mini .sm-week {
   height: 5px;
   margin-left: auto;
   border-radius: 3px;
-  background: #1B1B1E;
+  background: var(--line-2);
   overflow: hidden;
   box-shadow: none;
 }
@@ -6777,12 +6772,8 @@ html[data-theme="dark"][data-look="plain"] .streak-mini .sm-week {
   height: 100%;
   width: 0;
   border-radius: 3px;
-  background: linear-gradient(90deg, #FF8A3D, #FF3B30);
+  background: var(--brand);
   transition: width .5s cubic-bezier(.22, .61, .36, 1);
-}
-html[data-look="plain"] .streak-mini .sm-week .sm-fill {
-  background: #D98A4E;
-  background-image: none;
 }
 /* 旧的 7 格规则彻底失效（若还残留 <i> 也不显示） */
 .streak-mini .sm-week i { display: none !important; }
@@ -7021,7 +7012,7 @@ html[data-theme="light"] .shop-tab:hover { background: #F0F0F2; }
   width: 100%;
   height: 5px;
   border-radius: 3px;
-  background: #1B1B1E;
+  background: var(--line-2);
   overflow: hidden;
 }
 html[data-theme="light"] .streak-mini .sm-week { background: #E8E8EB; }
@@ -7412,37 +7403,46 @@ html[data-theme="light"] .ss-item.on { background: #EFEFF1; }
   box-shadow: var(--sh-xs);
   transition: transform .2s var(--ease-soft), box-shadow .2s, border-color .2s;
 }
-.shp-card:hover { transform: translateY(-2px); box-shadow: var(--sh-sm); border-color: var(--line-2); }
+.shp-card:hover { box-shadow: var(--sh-sm); border-color: var(--line-2); }
 .shp-card:active { transform: scale(.985); }
 
 .shp-cover {
   position: relative;
   height: 96px; display: flex; align-items: center; justify-content: center;
-  color: #fff;
+  color: var(--brand);
+  background: var(--surface-2);
 }
-.shp-cover .ic { opacity: .95; }
+.shp-cover .ic { opacity: 1; }
 .shp-cover.big { width: 64px; height: 64px; border-radius: 16px; flex: 0 0 64px; }
 .shp-cover.big .ic { width: 26px; height: 26px; }
-.shp-cover.t-blue   { background: linear-gradient(135deg, #5B8CFF, #4D6BFE); }
-.shp-cover.t-purple { background: linear-gradient(135deg, #4E7BF5, #9DBEFF); }
-.shp-cover.t-amber  { background: linear-gradient(135deg, #FFB547, #FF8A5B); }
-.shp-cover.t-cyan   { background: linear-gradient(135deg, #2ED3B7, #38BDF8); }
-.shp-cover.t-pink   { background: linear-gradient(135deg, #FF6B9D, #F472B6); }
-.shp-cover.t-green  { background: linear-gradient(135deg, #34D399, #10B981); }
+.shp-cover.t-blue   { background: #EDF2FF; color: #3D5BE8; }
+.shp-cover.t-purple { background: #EFF0FF; color: #5B6FE0; }
+.shp-cover.t-amber  { background: #FFF3E0; color: #C97A00; }
+.shp-cover.t-cyan   { background: #E4F7F4; color: #0B8A7E; }
+.shp-cover.t-pink   { background: #FDECF3; color: #C4317A; }
+.shp-cover.t-green  { background: #E7F7EE; color: #0B8A5F; }
+html[data-theme="dark"] .shp-cover.t-blue   { background: rgba(77,107,254,.28);  color: #9DB8FF; }
+html[data-theme="dark"] .shp-cover.t-purple { background: rgba(110,120,255,.26); color: #AEB9FF; }
+html[data-theme="dark"] .shp-cover.t-amber  { background: rgba(255,160,60,.16);  color: #FFC178; }
+html[data-theme="dark"] .shp-cover.t-cyan   { background: rgba(46,211,183,.22);  color: #77E3D3; }
+html[data-theme="dark"] .shp-cover.t-pink   { background: rgba(255,107,157,.24); color: #FFA8C4; }
+html[data-theme="dark"] .shp-cover.t-green  { background: rgba(52,211,153,.16);  color: #85E9C0; }
 
 .shp-mark {
   position: absolute; top: 8px; left: 8px;
   width: 20px; height: 20px; border-radius: 7px;
   display: flex; align-items: center; justify-content: center;
   font-size: 10px; font-weight: 700;
-  background: rgba(255,255,255,.22); color: #fff;
+  background: rgba(255,255,255,.66); color: var(--ink-2);
   -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
 }
+html[data-theme="dark"] .shp-mark { background: rgba(255,255,255,.14); color: var(--ink-1); }
 .shp-card .ic.i13 {
   position: absolute; top: 8px; right: 8px;
-  color: rgba(255,255,255,.72);
+  color: var(--ink-4);
 }
-.shp-card .ic.i13.on { color: #fff; }
+.shp-card .ic.i13.on { color: var(--red); }
+html[data-theme="dark"] .shp-card .ic.i13 { color: var(--ink-3); }
 
 .shp-cbody { padding: 10px 12px 12px; }
 .shp-ctitle {
@@ -7884,7 +7884,7 @@ html[data-look="plain"] .am-item-danger .am-txt b {
 /* ============================================================
    侧栏收紧：232 → 186，项内边距与字号同步压缩（内容宽 170）
    ============================================================ */
-:root { --side-w: 186px; }
+@media (min-width: 761px) { :root { --side-w: 186px; } }
 .tabbar { padding: 14px 8px 10px; }
 .tab { height: 32px; padding: 0 9px; gap: 9px; font-size: 13px; border-radius: 8px; }
 .tab .ico { flex: 0 0 18px; display: flex; justify-content: center; }
@@ -7893,10 +7893,10 @@ html[data-look="plain"] .am-item-danger .am-txt b {
 .nav-label { margin-top: 16px; margin-bottom: 6px; font-size: 12px; }
 .side-account { width: 100%; padding: 7px 8px; gap: 8px; }
 .side-account .sa-txt { min-width: 0; }
-@media (max-width: 1100px) { :root { --side-w: 178px; } }
+@media (min-width: 761px) and (max-width: 1100px) { :root { --side-w: 178px; } }
 
 /* 设置页左栏跟着收，避免两层 186 叠加显得笨重 */
-.set-layout { grid-template-columns: 170px minmax(0, 1fr); }
+@media (min-width: 761px) { .set-layout { grid-template-columns: 170px minmax(0, 1fr); } }
 
 /* ============================================================
    边栏 v2 · 豆包同款（平铺无边界、素色行、灰胶囊选中、小灰分类标）
@@ -7956,6 +7956,8 @@ html[data-look="plain"] .streak-mini { background: transparent !important; borde
   gap: 8px;
 }
 .section-title.folder-title .ic { color: var(--ink-3); flex: none; }
+/* 「新建文件夹」已靠右撑开，标题尾部的渐变横线会变成一截断线，去掉 */
+.section-title.folder-title::after { display: none; }
 .folder-new-btn { margin-left: auto; }
 .folder-grid {
   display: grid;
@@ -7988,3 +7990,44 @@ html[data-look="plain"] .streak-mini { background: transparent !important; borde
 .folder-empty { padding: 14px 16px; color: var(--ink-3); font-size: 13px; }
 html[data-look="plain"] .folder-card { background: var(--surface); }
 html[data-theme="dark"] .folder-card { background: var(--surface-2); }
+
+
+/* ============================================================
+   移动端修正（≤760px）
+   之前桌面侧栏规则写在文件末尾且没有宽度下限，手机上 --side-w 仍是
+   178px，内容区只剩 197px；设置页再叠一个 170px 左栏 → 右栏直接被挤没。
+   ============================================================ */
+@media (max-width: 760px) {
+  .set-layout { display: block !important; }
+  .set-side {
+    position: sticky !important; top: 0; z-index: 6;
+    width: auto !important; display: flex !important; flex-direction: row !important;
+    flex-wrap: nowrap !important; align-items: center; gap: 6px !important;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    padding: 10px 12px 8px !important; margin: 0 !important;
+    border: 0 !important; background: transparent !important;
+  }
+  .set-side::-webkit-scrollbar { display: none; }
+  .set-side .ss-search, .set-side .ss-grp, .set-side .ss-foot { display: none !important; }
+  .ss-item {
+    flex: 0 0 auto !important; width: auto !important;
+    white-space: nowrap; font-size: 12.5px !important;
+    padding: 7px 12px !important; border-radius: 999px !important;
+    background: var(--surface-2) !important;
+  }
+  .ss-item.on { background: var(--brand-soft) !important; color: var(--brand-strong) !important; }
+  .set-main { padding: 0 12px 14px !important; }
+  .set-main-head { margin: 4px 2px 12px; }
+  .content { padding: 4px 12px 16px !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 10px; }
+  .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+  .studio-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .shp-card { flex-basis: 168px; }
+  .shp-cover { height: 84px; }
+  .topbar { padding: 14px 14px 8px; }
+  /* 侧栏顶部打卡条：只留火苗，文字收起 */
+  .streak-mini { margin: 0 3px 14px; padding: 8px 0; justify-content: center; border: 0; background: transparent; }
+  .streak-mini .sm-txt { display: none; }
+  /* 验证码行在窄屏改为上下两行 */
+  .otp-row { flex-direction: column; align-items: stretch; }
+  .otp-row .btn { width: 100%; }
+}
