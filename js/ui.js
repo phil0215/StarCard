@@ -111,6 +111,9 @@
     const klass = 'ava ava-c' + c + (cls ? ' ' + cls : '');
     const imgOk = typeof a.avatarData === 'string' &&
       /^data:image\/(png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(a.avatarData);
+    if (!a.loggedIn && !imgOk) {
+      return new A.El('span').cls(klass + ' ava-anon');
+    }
     if (imgOk) {
       return new A.El('span').cls(klass + ' ava-img').child(new A.El('img').src(a.avatarData).alt('头像'));
     }
@@ -239,8 +242,8 @@
     children.push(new A.El('div').cls('side-account' + (on ? ' on' : '')).attr('act', 'account-menu').title('账户菜单').children([
       avatarEl(acc, 'ava-sm'),
       new A.El('span').cls('sa-txt').children([
-        new A.El('span', on ? name : '登录 / 注册').cls('sa-name'),
-        new A.El('span', on ? '查看个人中心' : '个人中心 · 未登录').cls('sa-sub')
+        new A.El('span', on ? name : '匿名用户').cls('sa-name'),
+        new A.El('span', on ? '查看个人中心' : '点击登录').cls('sa-sub')
       ]),
       new A.El('span').cls('chev').child(iconEl('chevronRight', 'i14'))
     ]));
@@ -256,6 +259,9 @@
     const klass = 'ava ava-c' + c + (cls ? ' ' + cls : '');
     const imgOk = typeof a.avatarData === 'string' &&
       /^data:image\/(png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(a.avatarData);
+    if (!a.loggedIn && !imgOk) {
+      return '<span class="' + klass + ' ava-anon"></span>';
+    }
     if (imgOk) {
       return '<span class="' + klass + ' ava-img"><img src="' + esc(a.avatarData) + '" alt="头像" /></span>';
     }
@@ -430,8 +436,8 @@
     }
     html += '<div class="side-account' + (on ? ' on' : '') + '" data-act="account-menu" title="账户菜单">' +
       avatarFace(acc, 'ava-sm') +
-      '<span class="sa-txt"><span class="sa-name">' + esc(on ? name : '登录 / 注册') + '</span>' +
-      '<span class="sa-sub">' + (on ? '查看个人中心' : '个人中心 · 未登录') + '</span></span>' +
+      '<span class="sa-txt"><span class="sa-name">' + esc(on ? name : '匿名用户') + '</span>' +
+      '<span class="sa-sub">' + (on ? '查看个人中心' : '点击登录') + '</span></span>' +
       '<span class="chev">' + icon('chevronRight', 'i14') + '</span>' +
       '</div>' +
       '<div class="side-by" title="小李工作室 XiaoLi Studio">小李工作室</div></nav>';
@@ -1798,7 +1804,7 @@
       const s = app.state.settings;
       const a = app.account || {};
       const on = !!a.loggedIn;
-      const name = app.accountDisplayName ? app.accountDisplayName() : (a.nickname || '未登录');
+      const name = app.accountDisplayName ? app.accountDisplayName() : (a.nickname || '匿名用户');
       const idt = accountIdentity(app);
       const pane = app.settingsPane || 'root';
   
@@ -1846,7 +1852,7 @@
       })();
       const lvNow = levelInfo(app);
       const CATS = [
-        { k: 'account', t: '账户与身份', d: '昵称、头像与账户 ID', ico: 'user', tone: 'blue', g: '账户', val: (on ? name : '未登录') },
+        { k: 'account', t: '账户与身份', d: '昵称、头像与账户 ID', ico: 'user', tone: 'blue', g: '账户', val: (on ? name : '匿名用户') },
         { k: 'level', t: '等级', d: '学习天数换来的成长进度', ico: 'trophy', tone: 'amber', g: '账户', val: 'Lv.' + lvNow.level },
         { k: 'plan', t: '学习计划', d: '每日新卡与复习上限', ico: 'target', tone: 'blue', g: '学习', val: s.newCardsPerDay + ' / ' + s.reviewCardsPerDay },
         { k: 'fsrs', t: '记忆算法', d: 'FSRS-5 留存率与间隔', ico: 'zap', tone: 'purple', g: '学习', val: '' },
@@ -1870,7 +1876,7 @@
       let root = '';
       root += '<div class="set-acct">' +
         '<div class="set-acct-ava">' + avatarFace(a, 'ava-lg') + '</div>' +
-        '<div class="set-acct-name">' + esc(on ? name : '未登录') + '</div>' +
+        '<div class="set-acct-name">' + esc(on ? name : '匿名用户') + '</div>' +
         '<div class="set-acct-id' + (idt.ready ? '' : ' is-empty') + '" title="账户 ID">' + esc(idt.code || '待填手机尾号') + '</div>' +
         '<button class="set-acct-btn" data-act="account-open">' + icon('user', 'i15') + (on ? '账户管理' : '登录 / 注册') + '</button>' +
         '</div>';
@@ -1899,7 +1905,7 @@
       html += paneBox('account',
         '<div class="set-card">' +
         row('user', 'blue', '昵称与头像',
-          '<button class="set-link" data-act="' + (on ? 'profile-open' : 'account-open') + '">' + esc(on ? name : '登录 / 注册') + icon('chevronRight', 'i12') + '</button>',
+          '<button class="set-link" data-act="' + (on ? 'profile-open' : 'account-open') + '">' + esc(on ? name : '匿名用户') + icon('chevronRight', 'i12') + '</button>',
           '点击修改') +
         row('phone', 'blue', '手机尾号',
           '<input class="set-num" id="setPhoneTail" value="' + esc(accountPhoneTail(app)) + '" placeholder="5186" maxlength="4" inputmode="numeric" />',
@@ -2241,7 +2247,7 @@
   function accountPage(app) {
     const a = app.account || {};
     const on = !!a.loggedIn;
-    const name = app.accountDisplayName ? app.accountDisplayName() : (a.nickname || '未登录');
+    const name = app.accountDisplayName ? app.accountDisplayName() : (a.nickname || '匿名用户');
     const idt = accountIdentity(app);
     const p = a.privacy || { rememberLogin: true, showNickname: true, privacyBlur: false };
     const draft = app._loginDraft || {};
@@ -2653,7 +2659,7 @@
       '<div class="acct-menu" role="dialog" aria-label="账户菜单">' +
       '<div class="am-head">' +
       '<button class="am-head-acct" data-act="account-open">' + avatarFace(acc, 'ava-lg') +
-      '<span class="am-head-txt"><b>' + esc(on ? name : '登录 / 注册') + '</b>' +
+      '<span class="am-head-txt"><b>' + esc(on ? name : '匿名用户') + '</b>' +
       '<small class="am-head-id">' + esc(on ? (idt.ready ? idt.code : 'ID 待填手机尾号') : '登录后生成账户 ID') + '</small></span>' +
       icon('chevronRight', 'i14') + '</button>' +
       '<div class="am-head-meta">' + decks + ' 牌组 · ' + cards + ' 卡片 · 已掌握 ' + mastered + '</div>' +

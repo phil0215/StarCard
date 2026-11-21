@@ -6578,3 +6578,33 @@ html[data-theme="dark"][data-look="plain"] .set-pane .set-card.set-nav:first-of-
 html[data-theme="dark"][data-look="plain"] .set-pane .set-card.set-nav:last-of-type {
   border-radius: 0 0 12px 12px;
 }
+
+/* 未登录：灰色圆形 + 白人形剪影（与豆包一致的默认头像） */
+.ava-anon {
+  background: linear-gradient(180deg, #DDDDDD, #ADADAD) !important;
+  color: transparent !important;
+  box-shadow: none !important;
+  position: relative;
+  overflow: hidden;
+}
+.ava-anon::before {
+  content: '';
+  position: absolute;
+  left: 33%; top: 15%;
+  width: 34%;
+  height: 34%;
+  border-radius: 50%;
+  background: #FFFFFF;
+}
+.ava-anon::after {
+  content: '';
+  position: absolute;
+  left: 19%; bottom: -8%;
+  width: 62%;
+  height: 40%;
+  border-radius: 46% 46% 30% 30% / 60% 60% 30% 30%;
+  background: #FFFFFF;
+}
+html[data-theme="dark"][data-look="plain"] .ava-anon {
+  background: linear-gradient(180deg, #C6C6C6, #9A9A9A) !important;
+}
