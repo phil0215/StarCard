@@ -317,7 +317,7 @@
     if (at >= 0) return cur.slice(0, at + mark.length);
     const seg = cur.split('/').filter(function (x) { return !!x; });
     const known = { books: 1, 'class': 1, deskmate: 1, battle: 1, stats: 1, settings: 1, browse: 1 };
-    if (seg.length && (known[seg[seg.length - 1]] || /\.[a-z0-9]+$/i.test(seg[seg.length - 1]))) seg.pop();
+    while (seg.length && (known[seg[seg.length - 1]] || /\.[a-z0-9]+$/i.test(seg[seg.length - 1]))) seg.pop();
     return '/' + seg.join('/') + (seg.length ? '/' : '');
   }
   // 生成某页签的地址；tab 6（设置）也在其中，但没有侧栏高亮

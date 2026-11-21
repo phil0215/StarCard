@@ -6190,3 +6190,56 @@ html[data-theme="dark"][data-look="plain"] .pk-hero {
 /* 简报卡：去掉过强竖条，与其余卡片边一致 */
 html[data-look="plain"] .ai-brief { border-left-width: 1px !important; border-left-color: var(--line) !important; }
 html[data-theme="dark"][data-look="plain"] .ai-brief { background: var(--surface) !important; border-color: var(--line) !important; }
+
+/* 词书页入口按钮：去紫边、去淡紫底，改豆包式中性卡片按钮 */
+html[data-theme="dark"][data-look="plain"] .studio-act,
+html[data-theme="dark"][data-look="plain"] .studio-act.primary,
+html[data-look="plain"] .studio-act,
+html[data-look="plain"] .studio-act.primary {
+  border-color: var(--line) !important;
+  background: var(--surface-2) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+html[data-theme="dark"][data-look="plain"] .studio-act > svg { color: var(--ink-2) !important; }
+html[data-theme="dark"][data-look="plain"] .studio-act:hover { background: rgba(255,255,255,.08) !important; border-color: rgba(255,255,255,.18) !important; transform: none !important; }
+html[data-theme="dark"][data-look="plain"] .studio-note { background: rgba(255,255,255,.04) !important; color: var(--ink-3) !important; }
+html[data-theme="dark"][data-look="plain"] .btn-primary,
+html[data-theme="dark"][data-look="plain"] .btn-primary:hover,
+html[data-theme="dark"][data-look="plain"] .pk-start,
+html[data-theme="dark"][data-look="plain"] .pk-start:hover {
+  background: var(--brand) !important;
+  background-image: none !important;
+  color: #fff !important;
+  border-color: var(--brand) !important;
+  box-shadow: none !important;
+}
+
+/* 数据页打卡卡：去橙紫光晕、去渐变、去投影，统一中性卡 + 品牌紫细条 */
+html[data-look="plain"] .streak-card,
+html[data-look="plain"] .streak-card.done {
+  background: var(--surface) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  border-color: var(--line) !important;
+}
+html[data-look="plain"] .sk-badge,
+html[data-look="plain"] .streak-card.done .sk-badge {
+  background: var(--brand-soft) !important;
+  background-image: none !important;
+  color: var(--brand-strong) !important;
+  box-shadow: none !important;
+}
+html[data-look="plain"] .sk-dot.on i,
+html[data-look="plain"] .streak-card.done .sk-dot.on i {
+  background: var(--brand) !important;
+  background-image: none !important;
+}
+html[data-look="plain"] .sk-dot.today i,
+html[data-look="plain"] .streak-card.done .sk-dot.today i { box-shadow: none !important; }
+html[data-look="plain"] .sk-spark path,
+html[data-look="plain"] .sk-spark line,
+html[data-look="plain"] .sk-spark polyline { stroke: var(--brand) !important; }
+html[data-look="plain"] .sk-spark path,
+html[data-look="plain"] .sk-spark line,
+html[data-look="plain"] .sk-spark polyline { stroke: var(--line-2) !important; }
