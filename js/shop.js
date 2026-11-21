@@ -329,11 +329,11 @@
   }
 
   function switchHtml(tab) {
-    var t = tab === 'mine' ? 'mine' : 'store';
+    var t = (tab === 'mine' || tab === 'ledger') ? tab : 'store';
     return '<div class="shp-switch">' +
       '<button class="shp-tab' + (t === 'store' ? ' on' : '') + '" data-act="shop-goto" data-tab="store">商城</button>' +
       '<button class="shp-tab' + (t === 'mine' ? ' on' : '') + '" data-act="shop-goto" data-tab="mine">我的</button>' +
-      '<button class="shp-ledger-link' + (tab === 'ledger' ? ' on' : '') + '" data-act="shop-goto" data-tab="ledger">积分明细</button>' +
+      '<button class="shp-tab' + (t === 'ledger' ? ' on' : '') + '" data-act="shop-goto" data-tab="ledger">积分明细</button>' +
       '</div>';
   }
 
