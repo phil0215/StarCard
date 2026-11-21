@@ -3,7 +3,7 @@
     // 背景：GitHub Pages 边缘节点会间歇性返回 503，某个 js 没加载成功时整页会报
     // "FC.xxx is not a function" 并白屏。这里捕获资源错误后自动整页重拉一次（防循环）。
     (function () {
-      var RETRY_KEY = 'sc_boot_retry';
+      var RETRY_KEY = 'sc_brt';
 
       function canRetry() {
         try { return !sessionStorage.getItem(RETRY_KEY); } catch (e) { return false; }
