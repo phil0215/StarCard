@@ -1,0 +1,41 @@
+# StarCard 仓库协作约定
+
+> 这个仓库有多人 / 多个 agent 并发改动。以下规则是为了避免「改了没生效」「互相覆盖」「版本号错位」。
+
+## 结构
+
+- 页面：`/`（卡片）、`books/`、`class/`、`deskmate/`、`battle/`、`stats/`、`settings/`、`browse/`、`store/`
+- 应用代码全部在 `js/`。仓库根目录曾有同名单文件版（`app.js` 11919 行），已删除；不要再往根目录写应用代码。
+- 9 个页面共用一套基础脚本（17 个，顺序固定）；页面专属模块额外叠加，例如 `class/` 额外加载 `js/classroom.js`。新增公共模块必须同步加到全部 9 个页面（`store/index.html` 最容易漏）。
+- 词库 `.srcd` 放在根目录，由 `js/shop.js` 的官方商品和 `js/app.js` 的 autoLoad 按文件名引用。
+
+## 发布
+
+1. 所有资源引用形如 `?v=20261121h`。每次发布把**全部 9 个页面**的版本号统一提升一个字母，禁止只改一部分（否则会出现一半新一半旧的混合态）。
+2. 发布前至少跑：
+   - `node --check js/*.js`
+   - 本地 `python3 -m http.server 8767`，逐页打开确认无报错、关键元素在（卡片/词书/班级/同桌/比赛/数据/设置/浏览/商铺）
+3. push 必须带 token：`TOKEN=$(grep -oP 'oauth_token:\s*\K\S+' ~/.config/gh/hosts.yml)`，push 到 `https://phil0215:${TOKEN}@github.com/phil0215/StarCard.git`。
+4. push 后用 `pages/builds/latest` 确认 `status=built` 且 commit 匹配；GitHub Pages 偶发 503，验证失败先重试再判定。
+
+## 并发约定
+
+- push 前必须 `git pull --rebase --autostash`。
+- rebase 之后必须 grep 复查自己的改动是否还在：`匿名用户`、`ava-anon`、`set-nav-s`、`ach-`、`shop-`、`sm-fill`。
+- 加功能前先 grep 是否已有实现，同一功能只保留一套。
+- CSS 只在文件末尾追加覆盖段；`html[data-theme="dark"] .x` 这类单属性选择器压不过 `html[data-theme][data-look="plain"] .x`，覆盖时必须写成双属性同样 specificity。
+- 冲突解决时注意 rebase 的 ours/theirs 是反的：`--ours` 是上游，`--theirs` 是本地提交。
+
+## 关键位置
+
+- 路由：`js/ui.js` 的 `PAGE_DIRS` / `NAV` / `renderLegacy`；`js/app.js` 的 `applyPageEntry` 里 `TABS`。
+- 设置页与成就：`js/ui.js` 的 `settingsPage()`、`achievementPane()`。
+- 商铺与积分：`js/shop.js`（`SCShop` 数据层 + `SCShopUI` 页面）。
+- 云服务：`js/cloud-config.js`（WorkBuddy Cloud 登录/AI）、`cloudsync-config.js` + `cloudsync.js`（Supabase：`user_state` / `study_daily` / `study_summary` / `user_profile`，RPC `public_id_taken(p_id)`）。
+- localStorage 键：`starcard-state-v1`、`starcard-account-v1`、`starcard-points-v1`、`starcard-shop-v1`。
+
+## 已知坑
+
+- 子目录站点的资源根路径有两处实现，改动要同步：`js/ui.js` 的 `siteRootPath()` 与 `js/cloud-config.js` 的 `FC.siteRoot()`，两边的 `known` 目录表都要包含新增子目录（如 `store`）。
+- `.content` 是 grid 多列容器，需要单列块布局的页面用 `display:block` 覆盖（设置页、商铺页）。
+- 侧栏 `.streak-mini` 是 flex column 容器，里面用 `flex: 0 0 Npx` 会变成高度，细条要用 `flex: 0 0 5px` + `height:5px`。
