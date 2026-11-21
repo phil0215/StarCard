@@ -267,7 +267,6 @@
       ]),
       new A.El('span').cls('chev').child(iconEl('chevronRight', 'i14'))
     ]));
-    children.push(new A.El('div', '小李工作室').cls('side-by').title('小李工作室 XiaoLi Studio'));
     return new A.El('nav').cls('tabbar').children(children);
   }
 
@@ -453,7 +452,7 @@
       '<span class="sa-sub">' + (on ? '打开账户菜单' : '点击登录') + '</span></span>' +
       '<span class="chev">' + icon('chevronRight', 'i14') + '</span>' +
       '</div>' +
-      '<div class="side-by" title="小李工作室 XiaoLi Studio">小李工作室</div></nav>';
+      '</nav>';
     return html;
   }
 
@@ -2971,21 +2970,6 @@
     const on = !!acc.loggedIn;
     const name = app.accountDisplayName ? app.accountDisplayName() : (acc.nickname || '学习者');
     const idt = accountIdentity(app);
-    // 学习概览统计
-    let decks = 0, cards = 0, mastered = 0;
-    const st = app.state || {};
-    if (Array.isArray(st.decks)) {
-      decks = st.decks.length;
-      for (let i = 0; i < st.decks.length; i++) {
-        const cs = st.decks[i].cards;
-        if (!Array.isArray(cs)) continue;
-        cards += cs.length;
-        for (let j = 0; j < cs.length; j++) {
-          const sc = cs[j] && cs[j].scheduling;
-          if (sc && ((Number(sc.stability) || 0) >= 21 || sc.state === 2)) mastered++;
-        }
-      }
-    }
     // 豆包风菜单行：线性图标 + 文字 + 右侧数值/箭头
     const item = function (ico, act, label, val, cls) {
       return '<button class="am-item' + (cls ? ' ' + cls : '') + '" data-act="' + act + '">' +
@@ -3002,7 +2986,6 @@
       '<span class="am-head-txt"><b>' + esc(on ? name : '匿名用户') + '</b>' +
       '<small class="am-head-id">' + esc(on ? (idt.ready ? idt.code : 'ID 待填手机尾号') : '登录后生成账户 ID') + '</small></span>' +
       icon('chevronRight', 'i14') + '</button>' +
-      '<div class="am-head-meta">' + decks + ' 牌组 · ' + cards + ' 卡片 · 已掌握 ' + mastered + '</div>' +
       '</div>' +
       '<div class="am-list">' +
       '<div class="am-group">' +
@@ -3019,7 +3002,6 @@
         : '<button class="am-item am-item-primary" data-act="account-open">' +
           '<span class="am-ico">' + icon('lock', 'i20') + '</span>' +
           '<span class="am-txt"><b>登录 / 注册</b></span></button>') +
-      '<div class="am-sign">闪星卡 StarCard · 小李工作室</div>' +
       '</div></div>';
   }
 
