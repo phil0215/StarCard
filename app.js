@@ -5189,7 +5189,7 @@
   ];
 
   function logo() {
-    // 闪星卡：直接显示应用图标（与 favicon 同源，原样呈现）
+    // 闪星卡：直接显示应用图标（与 favicon 同源，原样呈现，无动画）
     return '<span class="logo"><img src="icon-192.png" alt="" /></span>';
   }
 
