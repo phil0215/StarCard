@@ -111,9 +111,6 @@
     const klass = 'ava ava-c' + c + (cls ? ' ' + cls : '');
     const imgOk = typeof a.avatarData === 'string' &&
       /^data:image\/(png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(a.avatarData);
-    if (!a.loggedIn && !imgOk) {
-      return new A.El('span').cls(klass + ' ava-anon');
-    }
     if (imgOk) {
       return new A.El('span').cls(klass + ' ava-img').child(new A.El('img').src(a.avatarData).alt('头像'));
     }
@@ -188,9 +185,7 @@
     // 浮层页面（小星/面板/通知/备份）与页签互斥：打开浮层时不高亮任何页签
     let pageActive = '';
     if (app) {
-      if (app.aiOpen) pageActive = 'ai-toggle';
-      else if (app.cmdOpen) pageActive = 'cmd-open';
-      else if (app.noticePageOpen || app.backupPageOpen) pageActive = 'notice-open';
+      if (app.noticePageOpen || app.backupPageOpen) pageActive = 'notice-open';
     }
     const tabActive = pageActive ? -999 : active;
     const name = (app && app.accountDisplayName) ? app.accountDisplayName() : (acc.nickname || '学习者');
@@ -242,8 +237,8 @@
     children.push(new A.El('div').cls('side-account' + (on ? ' on' : '')).attr('act', 'account-menu').title('账户菜单').children([
       avatarEl(acc, 'ava-sm'),
       new A.El('span').cls('sa-txt').children([
-        new A.El('span', on ? name : '匿名用户').cls('sa-name'),
-        new A.El('span', on ? '查看个人中心' : '点击登录').cls('sa-sub')
+        new A.El('span', on ? name : '登录 / 注册').cls('sa-name'),
+        new A.El('span', on ? '查看个人中心' : '个人中心 · 未登录').cls('sa-sub')
       ]),
       new A.El('span').cls('chev').child(iconEl('chevronRight', 'i14'))
     ]));
@@ -259,9 +254,6 @@
     const klass = 'ava ava-c' + c + (cls ? ' ' + cls : '');
     const imgOk = typeof a.avatarData === 'string' &&
       /^data:image\/(png|jpeg|jpg|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(a.avatarData);
-    if (!a.loggedIn && !imgOk) {
-      return '<span class="' + klass + ' ava-anon"></span>';
-    }
     if (imgOk) {
       return '<span class="' + klass + ' ava-img"><img src="' + esc(a.avatarData) + '" alt="头像" /></span>';
     }
@@ -353,8 +345,6 @@
     { kind: 'tab', tab: 3, label: '同桌', ico: 'link', group: '一起学' },
     { kind: 'tab', tab: 4, label: '比赛', ico: 'zap', group: '一起学' },
     { kind: 'tab', tab: 5, label: '数据', ico: 'chart', group: '工具' },
-    { kind: 'page', act: 'ai-toggle', label: '小星', ico: 'sparkles', group: '工具' },
-    { kind: 'page', act: 'cmd-open', label: '面板', ico: 'cmd', group: '工具' },
     { kind: 'page', act: 'notice-open', label: '通知', ico: 'bell', group: '工具', badge: true }
     // 「设置」已移入左下角头像弹出的账户菜单（见 accountMenuLayer）
   ];
@@ -407,9 +397,7 @@
     // 浮层页面与页签互斥：打开浮层时不高亮任何页签
     let pageActive = '';
     if (app) {
-      if (app.aiOpen) pageActive = 'ai-toggle';
-      else if (app.cmdOpen) pageActive = 'cmd-open';
-      else if (app.noticePageOpen || app.backupPageOpen) pageActive = 'notice-open';
+      if (app.noticePageOpen || app.backupPageOpen) pageActive = 'notice-open';
     }
     const tabActive = pageActive ? -999 : active;
     const name = (app && app.accountDisplayName) ? app.accountDisplayName() : (acc.nickname || '学习者');
@@ -436,8 +424,8 @@
     }
     html += '<div class="side-account' + (on ? ' on' : '') + '" data-act="account-menu" title="账户菜单">' +
       avatarFace(acc, 'ava-sm') +
-      '<span class="sa-txt"><span class="sa-name">' + esc(on ? name : '匿名用户') + '</span>' +
-      '<span class="sa-sub">' + (on ? '查看个人中心' : '点击登录') + '</span></span>' +
+      '<span class="sa-txt"><span class="sa-name">' + esc(on ? name : '登录 / 注册') + '</span>' +
+      '<span class="sa-sub">' + (on ? '查看个人中心' : '个人中心 · 未登录') + '</span></span>' +
       '<span class="chev">' + icon('chevronRight', 'i14') + '</span>' +
       '</div>' +
       '<div class="side-by" title="小李工作室 XiaoLi Studio">小李工作室</div></nav>';
@@ -598,7 +586,6 @@
           '<div class="hf-nums"><span><b>' + esc(a.dueCnt) + '</b>张到期</span>' +
           '<span><b>' + esc(a.lowRCnt) + '</b>张记忆偏低</span></div>' +
           (words || '<div class="hc-foot">暂无低留存卡片</div>') +
-          '<button class="hc-cta" data-act="ai-prompt" data-q="哪些词要抓紧复习？要学多久？">让小星分析' + icon('chevronRight', 'i14') + '</button>' +
           '</div>';
         }
       }
@@ -606,7 +593,7 @@
     if (!focusCard) {
       focusCard = '<div class="home-card focus-card">' +
         '<div class="hc-head">' + icon('target', 'i18') + '<span>重点复习</span></div>' +
-        '<div class="hc-empty">学几张卡后，小星会在这里算出最该多复习的词和所需时间。</div>' +
+        '<div class="hc-empty">学几张卡后，这里会算出最该多复习的词和所需时间。</div>' +
         '</div>';
     }
 
@@ -623,7 +610,7 @@
             '<div><b>' + esc(it.title) + '</b><span>' + esc(it.desc) + '</span></div></div>';
         }
         diagCard = '<div class="home-card diag-card">' +
-          '<div class="hc-head">' + icon('sparkles', 'i18') + '<span>智能诊断 · 小星</span></div>' +
+          '<div class="hc-head">' + icon('sparkles', 'i18') + '<span>智能诊断</span></div>' +
           rows + '</div>';
       }
     } catch (e) { diagCard = ''; }
@@ -810,7 +797,6 @@
       ' · 本次 ' + graded + ' 次评分 / ' + dur +
       ((sess.requeued) ? ' · 重来 ' + sess.requeued + ' 次' : '') + '</div></div>' +
       '<div style="display:flex;gap:8px;align-items:center">' +
-      '<button class="btn btn-sm ai-ask-btn" data-act="ai-ask-study">' + icon('sparkles', 'i14') + '问小星</button>' +
       '<button class="btn btn-sm" data-act="study-stop">退出</button></div></div>' +
       '<div class="progress"><span style="width:' +
       Math.round(sess.total ? Math.min(mastered / sess.total, 1) * 100 : 0) + '%"></span></div>' +
@@ -1804,7 +1790,7 @@
       const s = app.state.settings;
       const a = app.account || {};
       const on = !!a.loggedIn;
-      const name = app.accountDisplayName ? app.accountDisplayName() : (a.nickname || '匿名用户');
+      const name = app.accountDisplayName ? app.accountDisplayName() : (a.nickname || '未登录');
       const idt = accountIdentity(app);
       const pane = app.settingsPane || 'root';
   
@@ -1852,7 +1838,7 @@
       })();
       const lvNow = levelInfo(app);
       const CATS = [
-        { k: 'account', t: '账户与身份', d: '昵称、头像与账户 ID', ico: 'user', tone: 'blue', g: '账户', val: (on ? name : '匿名用户') },
+        { k: 'account', t: '账户与身份', d: '昵称、头像与账户 ID', ico: 'user', tone: 'blue', g: '账户', val: (on ? name : '未登录') },
         { k: 'level', t: '等级', d: '学习天数换来的成长进度', ico: 'trophy', tone: 'amber', g: '账户', val: 'Lv.' + lvNow.level },
         { k: 'plan', t: '学习计划', d: '每日新卡与复习上限', ico: 'target', tone: 'blue', g: '学习', val: s.newCardsPerDay + ' / ' + s.reviewCardsPerDay },
         { k: 'fsrs', t: '记忆算法', d: 'FSRS-5 留存率与间隔', ico: 'zap', tone: 'purple', g: '学习', val: '' },
@@ -1876,7 +1862,7 @@
       let root = '';
       root += '<div class="set-acct">' +
         '<div class="set-acct-ava">' + avatarFace(a, 'ava-lg') + '</div>' +
-        '<div class="set-acct-name">' + esc(on ? name : '匿名用户') + '</div>' +
+        '<div class="set-acct-name">' + esc(on ? name : '未登录') + '</div>' +
         '<div class="set-acct-id' + (idt.ready ? '' : ' is-empty') + '" title="账户 ID">' + esc(idt.code || '待填手机尾号') + '</div>' +
         '<button class="set-acct-btn" data-act="account-open">' + icon('user', 'i15') + (on ? '账户管理' : '登录 / 注册') + '</button>' +
         '</div>';
@@ -1905,7 +1891,7 @@
       html += paneBox('account',
         '<div class="set-card">' +
         row('user', 'blue', '昵称与头像',
-          '<button class="set-link" data-act="' + (on ? 'profile-open' : 'account-open') + '">' + esc(on ? name : '匿名用户') + icon('chevronRight', 'i12') + '</button>',
+          '<button class="set-link" data-act="' + (on ? 'profile-open' : 'account-open') + '">' + esc(on ? name : '登录 / 注册') + icon('chevronRight', 'i12') + '</button>',
           '点击修改') +
         row('phone', 'blue', '手机尾号',
           '<input class="set-num" id="setPhoneTail" value="' + esc(accountPhoneTail(app)) + '" placeholder="5186" maxlength="4" inputmode="numeric" />',
@@ -2081,7 +2067,7 @@
         '<div class="set-card"><div class="set-block set-about">' +
         '<div class="set-about-t">闪星卡 · StarCard</div>' +
         '<div class="set-about-s">网页版 1.6.0 · 开发人 小李同学 · 小李工作室</div>' +
-        '<div class="set-about-d">一款比 Anki 更全面、更智能的间隔重复卡片学习软件。内置离线 AI 助手「小星」，基于 FSRS-5 科学记忆算法，数据与 .srcd 都在本机处理。</div>' +
+        '<div class="set-about-d">一款比 Anki 更全面、更智能的间隔重复卡片学习软件。基于 FSRS-5 科学记忆算法，数据与 .srcd 都在本机处理。</div>' +
         '</div></div>'
       );
   
@@ -2247,7 +2233,7 @@
   function accountPage(app) {
     const a = app.account || {};
     const on = !!a.loggedIn;
-    const name = app.accountDisplayName ? app.accountDisplayName() : (a.nickname || '匿名用户');
+    const name = app.accountDisplayName ? app.accountDisplayName() : (a.nickname || '未登录');
     const idt = accountIdentity(app);
     const p = a.privacy || { rememberLogin: true, showNickname: true, privacyBlur: false };
     const draft = app._loginDraft || {};
@@ -2448,7 +2434,7 @@
         '<div class="privacy-doc">' +
         '<p><strong>1. 学习数据都在这台设备上</strong><br/>牌组、卡片、复习记录、词书进度、班级、同桌、比赛战绩，以及昵称、头像和隐私偏好，全部保存在本浏览器的 localStorage 中，不会上传到任何服务器。</p>' +
         '<p><strong>2. 登录只用于身份校验</strong><br/>邮箱 / 手机号通过云端验证码登录，验证码由云服务发送，仅用于确认身份。云端不保存你的牌组与学习记录；退出登录可随时清除本机登录状态。</p>' +
-        '<p><strong>3. 小星 AI 问答</strong><br/>联网时，小星会把你的学习概况摘要交给云端大模型以生成更贴切的回答；不会上传完整词库、卡片原文或个人身份信息。离线或本地打开时，小星自动使用本地规则引擎，功能照常可用。</p>' +
+        '<p><strong>3. 所有内容都在本机处理</strong><br/>牌组解析、复习调度、智能诊断均由本机脚本完成，不会把词库、卡片原文或个人身份信息传给第三方。</p>' +
         '<p><strong>4. 导出文件不含个人资料</strong><br/>导出的 .SRCD 只包含牌组、卡片与 FSRS 参数；昵称、邮箱、头像与隐私偏好都不会写入文件，可以放心分享。</p>' +
         '<p><strong>5. 你随时可以删除</strong><br/>「清除账户数据」会删除账户资料、头像与隐私偏好；「设置 → 清空数据」会删除全部牌组与学习记录。两者都不可恢复，建议先导出 .srcd 备份。</p>' +
         '<p><strong>5. 隐私开关</strong><br/>「记住登录状态」控制刷新后是否自动登录；「显示我的昵称」控制界面是否展示昵称；「离开窗口时隐藏内容」在切到其他窗口时遮盖页面。所有开关只影响本机显示。</p>' +
@@ -2601,7 +2587,6 @@
           kr(k('1') + ' ' + k('2') + ' ' + k('3'), '不认识 / 模糊 / 认识') +
         '</div>' +
         '<div class="shortcut-group"><div class="shortcut-gt">全局</div>' +
-          kr(k('Ctrl') + ' + ' + k('K'), '打开智能命令面板') +
           kr(k('?'), '打开本快捷键面板') +
           kr(k('B'), '打开卡片浏览器') +
           kr(k('Ctrl') + ' + ' + k('Z'), '撤销上一步') +
@@ -2615,14 +2600,7 @@
 
   // ---------------------------------------------------------------- 智能助手 · 小星
   // 悬浮入口按钮：学习会话中隐藏，避免挡住评分条；打开后进入完整页面 AiPage
-  function aiLayer(app) {
-    if (!FC.AI) return '';
-    const inSession = !!((app.study && app.studyActive !== false) || app.wb || app.battle);
-    if (inSession) return '';
-    return '<button class="ai-fab' + (app.aiOpen ? ' hidden' : '') + '" data-act="ai-toggle" ' +
-      'title="小星 · 离线智能助手" aria-label="打开小星助手">' + icon('sparkles', 'i22') +
-      (app.aiUnread ? '<span class="ai-fab-dot"></span>' : '') + '</button>';
-  }
+  function aiLayer(app) { return ''; }  // AI 助手已移除
 
   // 账户菜单：点头像弹出，参照 WorkBuddy 的账户面板（高面板 + 账户卡 + 功能入口）
   function accountMenuLayer(app) {
@@ -2659,7 +2637,7 @@
       '<div class="acct-menu" role="dialog" aria-label="账户菜单">' +
       '<div class="am-head">' +
       '<button class="am-head-acct" data-act="account-open">' + avatarFace(acc, 'ava-lg') +
-      '<span class="am-head-txt"><b>' + esc(on ? name : '匿名用户') + '</b>' +
+      '<span class="am-head-txt"><b>' + esc(on ? name : '登录 / 注册') + '</b>' +
       '<small class="am-head-id">' + esc(on ? (idt.ready ? idt.code : 'ID 待填手机尾号') : '登录后生成账户 ID') + '</small></span>' +
       icon('chevronRight', 'i14') + '</button>' +
       '<div class="am-head-meta">' + decks + ' 牌组 · ' + cards + ' 卡片 · 已掌握 ' + mastered + '</div>' +
@@ -2672,7 +2650,6 @@
       '<div class="am-group">' +
       item('shield', 'privacy-info', '隐私说明') +
       (cloudCfg ? item('cloud', 'account-open', '云同步', '已开启') : '') +
-      item('sparkles', 'ai-toggle', '小星助手') +
       '</div>' +
       '</div>' +
       '<div class="am-foot">' +
@@ -2707,9 +2684,8 @@
     const txt = FC.AI.BRIEFING(app);
     return '<div class="ai-brief">' +
       '<span class="ai-brief-ico">' + icon('sparkles', 'i18') + '</span>' +
-      '<div class="ai-brief-txt"><b>小星今日简报</b><span>' + esc(txt) + '</span></div>' +
-      '<button class="ai-brief-cta" data-act="ai-prompt" data-q="帮我安排今天的学习计划">' +
-      '让小星安排' + icon('chevronRight', 'i14') + '</button></div>';
+      '<div class="ai-brief-txt"><b>今日简报</b><span>' + esc(txt) + '</span></div>' +
+      '</div>';
   }
 
   function aiDiagnosis(app) {
@@ -2722,9 +2698,7 @@
         '<span class="ai-diag-ico">' + icon(it.icon, 'i18') + '</span>' +
         '<div><b>' + esc(it.title) + '</b><span>' + esc(it.desc) + '</span></div></div>';
     }
-    return '<div class="section-title">智能诊断 · 小星</div><div class="card wide ai-diag">' + rows +
-      '<button class="btn btn-sm" style="margin-top:12px" data-act="ai-prompt" data-q="帮我安排今天的学习计划">' +
-      icon('sparkles', 'i14') + '让小星帮我规划</button></div>';
+    return '<div class="section-title">智能诊断</div><div class="card wide ai-diag">' + rows + '</div>';
   }
 
   // 覆盖层：悬浮入口（小星按钮等），附加到所有页面根节点之后
@@ -3098,8 +3072,6 @@
 
   // 渲染分派：声明式页面优先，其余页面回退到字符串渲染
   function renderArk(app) {
-    if (app.aiOpen) return renderDeclarative(AiPage, app);
-    if (app.cmdOpen) return renderDeclarative(CmdPage, app);
     if (app.noticePageOpen) return renderDeclarative(NoticePage, app);
     if (app.backupPageOpen) return renderDeclarative(BackupPage, app);
     if (app.study && app.studyActive !== false) { let h = '<div id="root">' + studySession(app) + '</div>'; const m = modal(app); if (m) h += m; return htmlToNode(h + overlays(app)); }
