@@ -2507,25 +2507,16 @@
       html += paneBox('appearance',
         '<div class="set-card">' +
         block('明暗模式', themeModeBtns(s.theme || 'light'), '独立于主题配色，切到任何主题都会生效。') +
-        block('动效', fxBtns(s.motion || 'calm'), '「轻」只保留翻页、弹窗这类必要过渡；「完整」保留彩色流动；「关闭」全部静止。') +
-        block('主题预设', presetGrid(s.preset || 'default'), '一套「配色 + 背景」的组合，点选立即生效。') +
+        block('主题配色', presetGrid(s.preset || 'default'), '每套配色自带强调色与背景底纹，点选立即生效。') +
         block('强调色', '<div class="swatch-row" id="setAccent">' +
-          swatch('brand', '星空紫', s.accent, 'accent') +
+          swatch('brand', '星蓝', s.accent, 'accent') +
           swatch('green', '青绿', s.accent, 'accent') +
           swatch('teal', '湖蓝', s.accent, 'accent') +
           swatch('amber', '琥珀', s.accent, 'accent') +
           swatch('red', '绯红', s.accent, 'accent') +
           swatch('rose', '玫瑰', s.accent, 'accent') +
-          '</div>', '用于按钮、进度与选中态。') +
-        block('背景', '<div class="swatch-row" id="setBg">' +
-          swatch('default', '纯色', s.bg, 'bg') +
-          swatch('grid', '细网格', s.bg, 'bg') +
-          swatch('dots', '点阵', s.bg, 'bg') +
-          swatch('mist', '柔雾', s.bg, 'bg') +
-          swatch('paper', '纸感', s.bg, 'bg') +
-          swatch('aurora', '晕染', s.bg, 'bg') +
-          '</div>', '只改变底纹，不影响阅读。') +
-        '</div>' + saveBar
+          '</div>', '只改按钮、进度与选中态的颜色，不动背景。') +
+        '</div>'
       );
   
       // 数据与备份
@@ -2597,12 +2588,11 @@
   // 主题预设：一套「配色 + 背景」的组合，一键应用；明暗模式（跟随系统/浅色/深色）独立切换，应用到所有主题
   const THEME_PRESETS = [
     { id: 'default', name: '素白', desc: '黑白 · 无装饰', accent: 'brand', bg: 'default' },
-    { id: 'vivid', name: '流光', desc: '紫粉 · 缓慢流动', accent: 'brand', bg: 'default' },
     { id: 'paper', name: '暖纸', desc: '纸感 · 琥珀', accent: 'amber', bg: 'paper' },
     { id: 'forest', name: '林间', desc: '柔雾 · 青绿', accent: 'green', bg: 'mist' },
     { id: 'ocean', name: '海雾', desc: '点阵 · 湖蓝', accent: 'teal', bg: 'dots' },
     { id: 'rose', name: '暮粉', desc: '晕染 · 玫瑰', accent: 'rose', bg: 'aurora' },
-    { id: 'night', name: '夜航', desc: '网格 · 星空紫', accent: 'brand', bg: 'grid' }
+    { id: 'night', name: '夜航', desc: '网格 · 星蓝', accent: 'brand', bg: 'grid' }
   ];
 
   function presetGrid(current) {
@@ -2616,7 +2606,9 @@
         '<span class="pc-desc">' + esc(p.desc) + '</span>' +
         '</button>';
     }
-    return out + '</div>';
+    let custom = true;
+    for (let i = 0; i < THEME_PRESETS.length; i++) if (THEME_PRESETS[i].id === current) custom = false;
+    return out + '</div>' + (custom ? '<div class="preset-note">当前是自定义配色：调过强调色，可点上面任意一套恢复</div>' : '');
   }
 
   // 个性化选项：单选色块 / 背景样片。name 用于分组，checked 表示当前选中。
@@ -2655,7 +2647,7 @@
     for (let i = 0; i < modes.length; i++) {
       const m = modes[i];
       const on = String(current) === m.v;
-      out += '<button class="mode-btn' + (on ? ' on' : '') + '" data-act="theme-mode" data-theme="' + m.v + '">' +
+      out += '<button class="mode-btn' + (on ? ' on' : '') + '" data-act="theme-mode" data-mode="' + m.v + '">' +
         icon(m.ico, 'i16') + '<span>' + m.label + '</span></button>';
     }
     return out + '</div>';

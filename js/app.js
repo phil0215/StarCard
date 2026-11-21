@@ -266,8 +266,9 @@
       // 主题预设：整套底色 / 卡片 / 侧栏配色，不只是强调色
       root.setAttribute('data-preset', s.preset || 'default');
       // 素白（默认）走极简黑白；其余彩色主题保留流动装饰
-      const pre = s.preset || 'default';
-      root.setAttribute('data-look', (pre === 'default' || pre === 'custom' || pre === '') ? 'plain' : 'vivid');
+      // 素白只看「强调色 + 背景」实际取值：改强调色后仍保留彩色装饰，不会被整页降级成黑白
+      const plainLook = (s.bg || 'default') === 'default';
+      root.setAttribute('data-look', plainLook ? 'plain' : 'vivid');
       // 学习卡字号：小 / 标准 / 大 —— 用 CSS 变量统一缩放正面词、背面释义与结构化释文
       const scale = s.studyFont === 's' ? 0.86 : (s.studyFont === 'l' ? 1.18 : 1);
       root.style.setProperty('--sf', String(scale));
@@ -2912,6 +2913,22 @@
         const lab = r.closest('.swatch');
         if (lab) lab.classList.add('on');
       }
+      // 点选即时生效：写回设置 → 反推匹配到哪套预设 → 重画属性，无需再点保存
+      const st = App.state.settings;
+      if (r.name === 'accentR') st.accent = r.value; else st.bg = r.value;
+      const plist = (typeof FCUI !== 'undefined' && FCUI.THEME_PRESETS) || [];
+      let matched = '';
+      for (let i = 0; i < plist.length; i++) {
+        if (plist[i].accent === (st.accent || 'brand') && plist[i].bg === (st.bg || 'default')) { matched = plist[i].id; break; }
+      }
+      st.preset = matched || 'custom';
+      App.applyTheme();
+      App.save();
+      const grid = document.querySelector('.preset-grid');
+      if (grid) {
+        const cards = grid.querySelectorAll('.preset-card');
+        for (let i = 0; i < cards.length; i++) cards[i].classList.toggle('on', cards[i].getAttribute('data-id') === st.preset);
+      }
     }
   });
 
@@ -3458,7 +3475,7 @@
       case 'notice-read': App.markNoticesRead(); break;
       case 'notice-go': if (d.page === 'backup') { App.openBackupPage(); } else { App.noticesGo(parseInt(d.tab, 10)); } break;
       case 'theme-preset': App.applyPreset(d.id); break;
-      case 'theme-mode': App.setThemeMode(d.theme); break;
+      case 'theme-mode': App.setThemeMode(d.mode); break;
       case 'set-fx': App.setFx(d.fx); break;
     }
   });
