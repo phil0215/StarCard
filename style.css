@@ -6487,3 +6487,77 @@ html[data-look="plain"] .streak-card.done .sk-dot.on i {
   .sk-side { min-width: 0; }
   .sk-makeup { margin-left: 0; }
 }
+
+/* ===== 设置页对齐豆包：无外层卡 / 大圆头像 / 56px 行 / 高饱和图标 / 中性选中 ===== */
+html[data-look="plain"] .set-win {
+  background: transparent; border: 0; box-shadow: none;
+  max-width: 680px;
+}
+html[data-theme="dark"][data-look="plain"] .set-win { background: transparent; border: 0; box-shadow: none; }
+html[data-look="plain"] .set-acct { background: none; border: 0; padding: 30px 20px 22px; }
+html[data-theme="dark"][data-look="plain"] .set-acct { background: none; border: 0; }
+html[data-look="plain"] .set-acct-ava {
+  width: 96px; height: 96px;
+  padding: 0; margin: 0 auto 14px;
+  background: none; box-shadow: none;
+  border-radius: 50%;
+}
+html[data-look="plain"] .set-acct-name { font-size: 22px; font-weight: 700; letter-spacing: -.2px; }
+html[data-look="plain"] .set-acct-id { font-size: 13px; margin-top: 6px; color: var(--ink-3); }
+html[data-look="plain"] .set-acct-btn { height: 38px; padding: 0 18px; border-radius: 10px; font-size: 13.5px; font-weight: 500; }
+html[data-theme="dark"][data-look="plain"] .set-acct-btn {
+  background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.10); color: var(--ink-1);
+}
+html[data-look="plain"] .set-acct-btn:hover { transform: none; color: var(--ink-1); }
+html[data-theme="dark"][data-look="plain"] .set-acct-btn:hover { background: rgba(255,255,255,.13); border-color: rgba(255,255,255,.14); }
+html[data-look="plain"] .set-grp-title { margin: 26px 4px 8px; font-size: 13px; font-weight: 500; letter-spacing: 0; color: var(--ink-4); }
+html[data-look="plain"] .set-card { border-radius: 12px; box-shadow: none; margin-bottom: 2px; }
+html[data-theme="dark"][data-look="plain"] .set-card { background: #232323; border-color: transparent; }
+html[data-look="plain"] .set-nav-row { min-height: 56px; padding: 14px; gap: 14px; }
+html[data-look="plain"] .set-nav-t { font-size: 14.5px; font-weight: 500; }
+html[data-look="plain"] .set-nav-s { font-size: 13px; }
+html[data-look="plain"] .set-nav-val { font-size: 13px; }
+html[data-theme="dark"][data-look="plain"] .set-nav-row + .set-nav-row { border-top-color: rgba(255,255,255,.055); }
+html[data-theme="dark"][data-look="plain"] .set-nav-row:hover { background: rgba(255,255,255,.04); }
+html[data-theme="dark"][data-look="plain"] .set-nav-row:active { background: rgba(255,255,255,.06); }
+
+/* 图标：豆包式高饱和实底 + 白线图标 */
+html[data-theme="dark"][data-look="plain"] .set-ico.t-blue { background: #3D7EFF !important; color: #fff !important; }
+html[data-theme="dark"][data-look="plain"] .set-ico.t-indigo,
+html[data-theme="dark"][data-look="plain"] .set-ico.t-purple { background: #8B5CF6 !important; color: #fff !important; }
+html[data-theme="dark"][data-look="plain"] .set-ico.t-green { background: #2FBF6B !important; color: #fff !important; }
+html[data-theme="dark"][data-look="plain"] .set-ico.t-orange,
+html[data-theme="dark"][data-look="plain"] .set-ico.t-amber { background: #FF9F0A !important; color: #fff !important; }
+html[data-theme="dark"][data-look="plain"] .set-ico.t-cyan { background: #22C3D6 !important; color: #fff !important; }
+html[data-theme="dark"][data-look="plain"] .set-ico.t-pink { background: #FF5A7E !important; color: #fff !important; }
+html[data-theme="dark"][data-look="plain"] .set-ico.t-slate,
+html[data-theme="dark"][data-look="plain"] .set-ico.t-gray { background: #6B7280 !important; color: #fff !important; }
+
+/* 二级页：外层透明，每段自成卡片 */
+html[data-look="plain"] .set-pane .set-card { background: transparent; border: 0; box-shadow: none; overflow: visible; }
+html[data-theme="dark"][data-look="plain"] .set-pane .set-block {
+  background: #232323; border-bottom: 0; border-radius: 12px; padding: 16px 14px; margin-bottom: 14px;
+}
+html[data-look="plain"] .set-block-h { font-size: 13px; font-weight: 500; color: var(--ink-3); margin-bottom: 12px; }
+html[data-look="plain"] .set-block-sub { font-size: 12.5px; }
+
+/* 选中态：中性填充，不用紫底 */
+html[data-theme="dark"][data-look="plain"] .mode-btn.on,
+html[data-theme="dark"][data-look="plain"] .mode-btn:hover {
+  border-color: rgba(255,255,255,.16); background: rgba(255,255,255,.10); color: var(--ink-1);
+}
+html[data-theme="dark"][data-look="plain"] .preset-card.on {
+  border-color: rgba(255,255,255,.22); background: rgba(255,255,255,.06); box-shadow: none;
+}
+html[data-theme="dark"][data-look="plain"] .preset-card:hover { transform: none; border-color: rgba(255,255,255,.16); }
+/* 强制：分组卡必须成形，外层与账户区必须无框 */
+html[data-look="plain"] .set-win { background: transparent !important; border: 0 !important; box-shadow: none !important; }
+html[data-theme="dark"][data-look="plain"] .set-card { background: #232323 !important; border-color: transparent !important; box-shadow: none !important; }
+html[data-theme="dark"][data-look="plain"] .set-acct { border: 0 !important; background: none !important; }
+html[data-theme="dark"][data-look="plain"] .set-pane .set-block { background: #232323 !important; }
+html[data-look="plain"] .set-pane .set-card { background: transparent !important; border: 0 !important; }
+/* 一级目录的分组卡不能被二级页的「外层透明」规则误伤 */
+html[data-theme="dark"][data-look="plain"] .set-pane .set-card.set-nav {
+  background: #232323 !important;
+  border: 0 !important;
+}
