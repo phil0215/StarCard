@@ -159,8 +159,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  background: none;
+  box-shadow: none;
 }
 .logo img { width: 100%; height: 100%; display: block; object-fit: contain; }
+.logo svg { width: 17px; height: 17px; display: block; }
 .brand-txt { min-width: 0; }
 .brand-cn {
   display: block;
@@ -2101,6 +2104,7 @@ body.privacy-covered::after {
 [data-theme="dark"] .rating-bar.r2 { background: #FFD35F; }
 [data-theme="dark"] .rating-bar.r3 { background: #A78BFF; }
 [data-theme="dark"] .rating-bar.r4 { background: #3DD9BC; }
+[data-theme="dark"] .logo { background: none; }
 
 @media (max-width: 1080px) {
   .browser-body { grid-template-columns: minmax(0, 1fr) 280px; }
@@ -3303,6 +3307,13 @@ html[data-motion="off"] .toast-ai .ic { animation: none; }
 .tab.active .ico { color: var(--brand); animation: xlPop .45s var(--ease) both; }
 @keyframes xlPop { 0% { transform: scale(.8); } 60% { transform: scale(1.18); } 100% { transform: scale(1); } }
 
+/* 品牌 Logo 轻微浮动（作品集 device-card 的灵动感） */
+.brand .logo { animation: none; }
+@keyframes xlFloat {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-3px) rotate(-4deg); }
+}
+
 /* 微章 / 胶囊 hover 轻浮 */
 .chip { transition: transform .2s var(--ease-soft), box-shadow .2s var(--ease-soft); }
 .chip:hover { transform: translateY(-2px); box-shadow: var(--sh-xs); }
@@ -3846,6 +3857,7 @@ html[data-motion="off"] .tab.active .ico { animation: none !important; }
 .empty-ico { animation: bobY 4.4s ease-in-out infinite; }
 .sf-badge, .dchip, .acct-badge { transition: transform var(--dur-2) var(--spring); }
 .series-folder:hover .sf-badge { transform: translateY(-1px) scale(1.04); }
+.brand .logo { will-change: transform; }
 .resume-study-banner { overflow: hidden; }
 .resume-study-banner .rsb-ico { animation: bobY 3.6s ease-in-out infinite; }
 .sg-toggle { transition: background var(--dur-2) var(--ease-soft), opacity var(--dur-2), transform var(--dur-2) var(--spring); }
@@ -4671,8 +4683,11 @@ html[data-motion="off"] .hero-float { animation: none !important; }
 .login-head .logo {
   width: 46px; height: 46px; flex: none;
   display: inline-flex; align-items: center; justify-content: center;
+  background: none;
+  box-shadow: none;
 }
 .login-head .logo img { width: 100%; height: 100%; display: block; object-fit: contain; }
+.login-head .logo svg { width: 26px; height: 26px; }
 .login-title { font-size: 18px; font-weight: 750; letter-spacing: -.4px; }
 .login-sub { font-size: 12px; color: var(--ink-3); margin-top: 4px; }
 
@@ -5560,3 +5575,375 @@ html[data-motion="off"] .hero-float { animation: none !important; }
 .set-acct-id { font-size: 11.5px; letter-spacing: .05em; }
 .acct-idline { letter-spacing: .05em; }
 .am-head-id { letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ============================================================
+   外观 · 素白（极简黑白，默认） / 流光（原彩色） / 动效档位
+   ------------------------------------------------------------
+   data-look="plain"   素白：纯白底 + 近黑主色，去掉彩色装饰
+   data-look="vivid"   流光及其它彩色预设：保留原来的流动装饰
+   data-motion="calm"  轻：停掉持续的流动，只留界面过渡
+   data-motion="off"   关：全部静止
+   ============================================================ */
+
+/* ---------- 1. 素白 · 日间配色 ---------- */
+html[data-look="plain"] {
+  --bg: #FFFFFF;
+  --bg-side: #FAFAFA;
+  --surface: #FFFFFF;
+  --surface-2: #F4F4F5;
+
+  --ink-1: #141416;
+  --ink-2: #3A3A40;
+  --ink-3: #6B6B73;
+  --ink-4: #9B9BA3;
+
+  --line: #ECECEE;
+  --line-2: #E1E1E4;
+
+  --brand: #17171A;
+  --brand-strong: #000000;
+  --brand-soft: #F0F0F2;
+  --brand-ring: rgba(20, 20, 22, .12);
+  --brand-ink: #FFFFFF;
+
+  --green: #2F7A5E;  --green-soft: #EAF5EF;
+  --amber: #8A6A16;  --amber-soft: #FBF3DE;
+  --red: #B8434F;    --red-soft: #FBECEE;
+  --gold: #C9A227;
+
+  --pink: #8E8E96;   --pink-soft: #F2F2F4;
+  --yellow: #A5A5AC; --yellow-soft: #F4F4F5;
+  --teal: #5F6B69;   --teal-soft: #EEF3F2;
+  --orange: #8B8B93; --orange-soft: #F4F4F5;
+  --blue: #5C6470;   --blue-soft: #F0F2F5;
+
+  --r-xs: 6px; --r-sm: 8px; --r-md: 11px; --r-lg: 14px; --r-xl: 18px;
+
+  --sh-xs: 0 1px 2px rgba(17, 17, 20, .04);
+  --sh-sm: 0 2px 6px rgba(17, 17, 20, .05);
+  --sh-md: 0 6px 18px rgba(17, 17, 20, .06);
+  --sh-lg: 0 14px 34px rgba(17, 17, 20, .08);
+
+  --solid-bg: #1B1B1E;
+  --solid-ink: #FFFFFF;
+}
+
+/* ---------- 2. 素白 · 夜间配色 ---------- */
+html[data-theme="dark"][data-look="plain"] {
+  --bg: #0F0F10;
+  --bg-side: #121213;
+  --surface: #171718;
+  --surface-2: #1F1F21;
+
+  --ink-1: #F4F4F5;
+  --ink-2: #C9C9CE;
+  --ink-3: #9A9AA2;
+  --ink-4: #6E6E76;
+
+  --line: rgba(255, 255, 255, .08);
+  --line-2: rgba(255, 255, 255, .14);
+
+  --brand: #F2F2F3;
+  --brand-strong: #FFFFFF;
+  --brand-soft: rgba(255, 255, 255, .10);
+  --brand-ring: rgba(255, 255, 255, .18);
+  --brand-ink: #141416;
+
+  --green: #4FA985;  --green-soft: rgba(79, 169, 133, .15);
+  --amber: #C9A34A;  --amber-soft: rgba(201, 163, 74, .15);
+  --red: #E0707C;    --red-soft: rgba(224, 112, 124, .15);
+  --gold: #C9A227;
+
+  --pink: #A7A7AF;   --pink-soft: rgba(255, 255, 255, .07);
+  --yellow: #A7A7AF; --yellow-soft: rgba(255, 255, 255, .07);
+  --teal: #8FA3A0;   --teal-soft: rgba(143, 163, 160, .14);
+  --orange: #A0A0A8; --orange-soft: rgba(255, 255, 255, .07);
+  --blue: #96A0B0;   --blue-soft: rgba(255, 255, 255, .07);
+
+  --sh-xs: 0 1px 2px rgba(0, 0, 0, .30);
+  --sh-sm: 0 2px 8px rgba(0, 0, 0, .34);
+  --sh-md: 0 8px 22px rgba(0, 0, 0, .40);
+  --sh-lg: 0 18px 42px rgba(0, 0, 0, .48);
+
+  --solid-bg: #26262A;
+  --solid-ink: #FFFFFF;
+}
+
+html[data-look="plain"] body { background: var(--bg); }
+
+/* ---------- 3. 素白：去掉彩色环境光 / 彩虹线 ---------- */
+html[data-look="plain"] #app::before,
+html[data-look="plain"] #app::after,
+html[data-look="plain"] #root::after { display: none !important; }
+
+/* ---------- 4. 素白：首页概览卡改为中性卡片 ---------- */
+html[data-look="plain"] .overview-hero {
+  background: var(--surface) !important;
+  background-image: none !important;
+  border: 1px solid var(--line) !important;
+  color: var(--ink-1) !important;
+  box-shadow: var(--sh-xs) !important;
+}
+html[data-look="plain"] .overview-hero::before,
+html[data-look="plain"] .overview-hero::after { display: none !important; }
+html[data-look="plain"] .overview-hero .ov-date,
+html[data-look="plain"] .overview-hero .ov-caption { color: var(--ink-3) !important; }
+html[data-look="plain"] .overview-hero .ov-hello {
+  color: var(--ink-1) !important;
+  background-image: none !important;
+  padding: 0;
+}
+html[data-look="plain"] .overview-hero .ov-fig b { color: var(--ink-1) !important; }
+html[data-look="plain"] .overview-hero .ov-fig span { color: var(--ink-3) !important; }
+html[data-look="plain"] .overview-hero .ov-fig.tone-brand b,
+html[data-look="plain"] .overview-hero .ov-fig.tone-amber b { color: var(--ink-1) !important; }
+html[data-look="plain"] .overview-hero .ov-ring {
+  background: conic-gradient(from -90deg,
+    var(--ink-1) 0 calc(var(--pct, 0) * 3.6deg),
+    var(--line-2) 0) !important;
+  box-shadow: none !important;
+}
+html[data-look="plain"] .overview-hero .ov-ring-in { background: var(--surface) !important; }
+html[data-look="plain"] .overview-hero .ov-ring-in b,
+html[data-look="plain"] .overview-hero .ov-ring-in span { color: var(--ink-1) !important; }
+html[data-look="plain"] .overview-hero .ov-ring-in span { color: var(--ink-3) !important; }
+html[data-look="plain"] .overview-hero .ov-advice {
+  background: var(--surface-2) !important;
+  border: 1px solid var(--line) !important;
+}
+html[data-look="plain"] .overview-hero .ov-adv-ico,
+html[data-look="plain"] .overview-hero .ov-advice.tone-red .ov-adv-ico,
+html[data-look="plain"] .overview-hero .ov-advice.tone-green .ov-adv-ico,
+html[data-look="plain"] .overview-hero .ov-advice.tone-amber .ov-adv-ico {
+  background: var(--surface) !important;
+  color: var(--ink-2) !important;
+  box-shadow: inset 0 0 0 1px var(--line-2);
+}
+html[data-look="plain"] .overview-hero .ov-adv-title { color: var(--ink-1) !important; }
+html[data-look="plain"] .overview-hero .ov-adv-desc { color: var(--ink-3) !important; }
+html[data-look="plain"] .overview-hero .ov-advice .btn {
+  background: var(--brand) !important;
+  color: var(--brand-ink) !important;
+  box-shadow: none !important;
+}
+html[data-look="plain"] .hero-float { display: none !important; }
+
+/* ---------- 5. 素白：彩色渐变全部换成中性 ---------- */
+html[data-look="plain"] .btn-primary,
+html[data-look="plain"] .btn-primary:hover,
+html[data-theme="dark"][data-look="plain"] .btn-primary,
+html[data-theme="dark"][data-look="plain"] .btn-primary:hover {
+  background: var(--brand) !important;
+  background-image: none !important;
+  border-color: var(--brand) !important;
+  color: var(--brand-ink) !important;
+  box-shadow: none !important;
+  animation: none !important;
+}
+
+html[data-look="plain"] .ai-fab,
+html[data-theme="dark"][data-look="plain"] .ai-fab {
+  background: var(--brand) !important;
+  background-image: none !important;
+  color: var(--brand-ink) !important;
+  animation: none !important;
+}
+
+html[data-look="plain"] .progress > span,
+html[data-look="plain"] .deck-prog > span,
+html[data-look="plain"] .sf-prog > span,
+html[data-look="plain"] .vol-prog > span,
+html[data-look="plain"] .rsb-progress i {
+  background: var(--ink-2) !important;
+  background-image: none !important;
+  animation: none !important;
+}
+
+html[data-look="plain"] .resume-study-banner {
+  background: var(--solid-bg) !important;
+  background-image: none !important;
+  color: var(--solid-ink) !important;
+  animation: none !important;
+  box-shadow: var(--sh-sm) !important;
+}
+
+/* 侧栏选中态：浅灰底 + 中性竖条 */
+html[data-look="plain"] .tab.active {
+  background-image: none !important;
+  background: var(--surface-2) !important;
+}
+html[data-look="plain"] .tab.active::before {
+  background: var(--ink-1) !important;
+}
+html[data-look="plain"] .tab:hover { background-image: none !important; background: var(--surface-2); }
+
+/* 分区标题 / 统计卡 / 牌组 / 分册：彩色点缀改灰 */
+html[data-look="plain"] .section-title::before {
+  background: var(--ink-4) !important;
+  box-shadow: none !important;
+}
+html[data-look="plain"] .stat-box::after {
+  background: var(--line) !important;
+  opacity: 1 !important;
+}
+html[data-look="plain"] .stat-box:nth-child(n) { --sb: var(--ink-3); }
+html[data-look="plain"] .stat-ico,
+html[data-look="plain"] .stat-ico[class*="ico-"] { color: var(--ink-3) !important; opacity: 1; }
+
+html[data-look="plain"] .deck-item[class*="dt-"] { --tone: var(--ink-2); --tone-soft: var(--surface-2); }
+html[data-look="plain"] .deck-item .deck-av { box-shadow: none; }
+html[data-look="plain"] .deck-item:hover { border-color: var(--line-2); }
+
+html[data-look="plain"] .vol-card::before,
+html[data-look="plain"] .vol-card:nth-child(4n+2)::before,
+html[data-look="plain"] .vol-card:nth-child(4n+3)::before,
+html[data-look="plain"] .vol-card:nth-child(4n+4)::before {
+  background: var(--line-2) !important;
+  opacity: 1;
+}
+html[data-look="plain"] .vol-card:hover { border-color: var(--line-2); }
+
+html[data-look="plain"] .home-extras .home-card:nth-child(n) {
+  --hc: var(--ink-2);
+  --hc-ink: var(--ink-1);
+  --hc-soft: var(--surface-2);
+}
+html[data-look="plain"] .home-extras .home-card { background-image: none !important; }
+html[data-look="plain"] .home-card::before { display: none !important; }
+html[data-look="plain"] .home-extras .home-card:hover {
+  border-color: var(--line-2);
+  box-shadow: var(--sh-sm);
+}
+
+html[data-look="plain"] .wk-col:nth-child(n) .wk-bar:not([data-zero="1"]) {
+  background: var(--ink-3) !important;
+  box-shadow: none !important;
+}
+html[data-look="plain"] .wk-col.today .wk-bar:not([data-zero="1"]) { background: var(--ink-1) !important; }
+
+html[data-look="plain"] .deck-ring {
+  background: conic-gradient(from -90deg, var(--ink-2) 0 calc(var(--p, 0) * 3.6deg), var(--line-2) 0);
+}
+html[data-look="plain"] .summary-ring {
+  background: conic-gradient(from -90deg, var(--ink-2) 0 calc(var(--p, 0) * 3.6deg), var(--line-2) 0);
+}
+
+html[data-look="plain"] .rs-seg.s1,
+html[data-look="plain"] .rs-seg.s2,
+html[data-look="plain"] .rs-seg.s3,
+html[data-look="plain"] .rs-seg.s4 { background: var(--ink-3); }
+html[data-look="plain"] .rating-bar.r1,
+html[data-look="plain"] .rating-bar.r2,
+html[data-look="plain"] .rating-bar.r3,
+html[data-look="plain"] .rating-bar.r4 { background: var(--ink-3); }
+
+html[data-look="plain"] .empty-ico {
+  background-image: none !important;
+  background: var(--surface-2) !important;
+  color: var(--ink-3) !important;
+}
+html[data-look="plain"] .flip-front,
+html[data-look="plain"] .flip-back { background-image: none !important; }
+html[data-look="plain"] .status-dot,
+html[data-look="plain"] .live-dot { animation: none !important; }
+
+/* 头像兜底 / 等级 / 打卡 / 登录 / 账户菜单 */
+html[data-look="plain"] [class*="ava-c"] {
+  background: var(--ink-4) !important;
+  color: #fff !important;
+}
+html[data-look="plain"] .set-acct-ava,
+html[data-look="plain"] .am-head-acct .ava-lg {
+  background: var(--line-2) !important;
+  box-shadow: none !important;
+}
+html[data-look="plain"] .lv-badge {
+  background: var(--ink-1) !important;
+  color: var(--bg) !important;
+  box-shadow: none !important;
+}
+html[data-look="plain"] .sk-badge,
+html[data-look="plain"] .streak-card.done .sk-badge {
+  background: var(--ink-1) !important;
+  color: var(--bg) !important;
+  box-shadow: none !important;
+}
+html[data-look="plain"] .sk-dot.on i,
+html[data-look="plain"] .streak-card.done .sk-dot.on i { background: var(--ink-1) !important; }
+
+html[data-look="plain"] .login-card::before { display: none !important; }
+html[data-look="plain"] .login-tab.on,
+html[data-theme="dark"][data-look="plain"] .login-tab.on {
+  background: var(--brand) !important;
+  color: var(--brand-ink) !important;
+  box-shadow: none !important;
+}
+html[data-look="plain"] .login-form .otp-row > .btn:hover:not(:disabled) {
+  background: var(--brand) !important;
+  background-image: none !important;
+  color: var(--brand-ink) !important;
+}
+html[data-look="plain"] .am-item-primary,
+html[data-theme="dark"][data-look="plain"] .am-item-primary {
+  background: var(--brand) !important;
+  background-image: none !important;
+  color: var(--brand-ink) !important;
+  box-shadow: none !important;
+}
+html[data-look="plain"] .am-item-primary .am-ico { background: rgba(127, 127, 127, .16) !important; color: inherit !important; }
+
+/* 设置页图标：统一灰底线性 */
+html[data-look="plain"] .set-ico,
+html[data-look="plain"] .set-ico[class*="t-"] {
+  background: var(--surface-2) !important;
+  color: var(--ink-2) !important;
+}
+
+/* 数据页空态图标 */
+html[data-look="plain"] .data-empty [class*="ico"] {
+  background: var(--surface-2) !important;
+  background-image: none !important;
+  color: var(--ink-3) !important;
+  box-shadow: none !important;
+}
+
+/* 预设小样：素白 / 流光 */
+.pc-default .pc-prev { background: #F4F4F5; }
+.pc-default .pc-surface { background: #FFFFFF; box-shadow: 0 0 0 1px #E6E6EA; }
+.pc-default .pc-accent { background: #1A1A1C; }
+.pc-vivid .pc-prev { background: linear-gradient(135deg, #F3EDFF 0%, #FFE9F2 100%); }
+.pc-vivid .pc-surface { background: #FFFFFF; }
+.pc-vivid .pc-accent { background: linear-gradient(90deg, #7C5CFF, #FF6B9D); }
+html[data-theme="dark"] .pc-default .pc-prev { background: #1F1F21; }
+html[data-theme="dark"] .pc-default .pc-surface { background: #171718; box-shadow: 0 0 0 1px #2A2A2E; }
+html[data-theme="dark"] .pc-default .pc-accent { background: #F2F2F3; }
+
+/* ---------- 6. 动效档位 ---------- */
+/* 轻：停掉长期流动，保留必要的界面过渡 */
+html[data-motion="calm"] #app::before,
+html[data-motion="calm"] #app::after,
+html[data-motion="calm"] #root::after,
+html[data-motion="calm"] .overview-hero,
+html[data-motion="calm"] .overview-hero::before,
+html[data-motion="calm"] .overview-hero::after,
+html[data-motion="calm"] .hero-float,
+html[data-motion="calm"] .home-card::before,
+html[data-motion="calm"] .progress > span,
+html[data-motion="calm"] .deck-prog > span,
+html[data-motion="calm"] .sf-prog > span,
+html[data-motion="calm"] .vol-prog > span,
+html[data-motion="calm"] .rsb-progress i,
+html[data-motion="calm"] .resume-study-banner,
+html[data-motion="calm"] .btn-primary,
+html[data-motion="calm"] .ai-fab,
+html[data-motion="calm"] .tab,
+html[data-motion="calm"] .status-dot,
+html[data-motion="calm"] .live-dot { animation: none !important; }
+
+/* 关：所有动画静止 */
+html[data-motion="off"] *,
+html[data-motion="off"] *::before,
+html[data-motion="off"] *::after {
+  animation: none !important;
+  transition-duration: .01ms !important;
+}
