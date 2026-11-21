@@ -80,6 +80,7 @@
     seriesId: '',
     showRemovedSeries: false,
     cardManageDeckId: '',
+    folderId: '',
     study: null,
     studySessions: {},      // 按学习范围（deckId，''=学全部）分别保存的会话，互不串台
     studyActive: true,      // false = 会话已挂起（首页显示「继续学习」，不强制进入全屏）
@@ -2595,6 +2596,44 @@
       this.tab = 1;
       this.render();
     },
+    // ---- 自定义文件夹 ----
+    createFolder: function (moveDeckId) {
+      const name = prompt('新建文件夹名称', '新文件夹');
+      if (name === null) return;
+      const nm = String(name).trim() || '新文件夹';
+      const id = FC.addFolder(this.state, nm);
+      this.save();
+      if (moveDeckId) {
+        FC.moveDeckToFolder(this.state, moveDeckId, id);
+        this.save();
+        this.closeModal();
+        this.toast('已新建文件夹并移入牌组');
+      } else {
+        this.render();
+      }
+    },
+    renameFolder: function (id) {
+      const f = FC.folderById(this.state, id);
+      if (!f) return;
+      const name = prompt('文件夹名称', f.name);
+      if (name === null) return;
+      FC.renameFolder(this.state, id, String(name).trim() || f.name);
+      this.save(); this.render();
+    },
+    deleteFolder: function (id) {
+      const f = FC.folderById(this.state, id);
+      if (!f) return;
+      if (!confirm('删除文件夹「' + f.name + '」？里面的牌组不会被删除，只是移出文件夹。')) return;
+      FC.deleteFolder(this.state, id);
+      this.folderId = '';
+      this.save(); this.render();
+    },
+    moveDeckToFolder: function (deckId, folderId) {
+      FC.moveDeckToFolder(this.state, deckId, folderId);
+      this.save(); this.closeModal();
+      this.toast(folderId ? '已移动到文件夹' : '已移出文件夹');
+      this.render();
+    },
     importSeries: function (id) {
       const series = FC.seriesById ? FC.seriesById(id, this.state) : null;
       if (!series) { this.toast('系列不存在'); return; }
@@ -3030,11 +3069,19 @@
           const here = page === 'cards' ? '' : page + '/';
           if (here !== dirs[t]) { window.location.href = FC.siteRoot() + dirs[t]; break; }
         }
-        App.tab = t; App.seriesId = ''; App.cardManageDeckId = ''; App.accountOpen = false; App.activeClassId = ''; App.aiOpen = false; App.cmdOpen = false; App.noticePageOpen = false; App.backupPageOpen = false; App.modal = null; App.render(); break;
+        App.tab = t; App.seriesId = ''; App.cardManageDeckId = ''; App.folderId = ''; App.accountOpen = false; App.activeClassId = ''; App.aiOpen = false; App.cmdOpen = false; App.noticePageOpen = false; App.backupPageOpen = false; App.modal = null; App.render(); break;
       }
       case 'new-deck': App.openModal({ type: 'deck', id: '', name: '', desc: '' }); break;
       case 'deck-open': App.cardManageDeckId = d.id; App.render(); break;
       case 'deck-back': App.cardManageDeckId = ''; App.render(); break;
+      case 'folder-new': App.createFolder(); break;
+      case 'folder-open': App.folderId = d.id; App.cardManageDeckId = ''; App.seriesId = ''; App.render(); break;
+      case 'folder-back': App.folderId = ''; App.render(); break;
+      case 'folder-rename': App.renameFolder(d.id); break;
+      case 'folder-delete': App.deleteFolder(d.id); break;
+      case 'deck-move-menu': App.openModal({ type: 'folder-move', deckId: d.id }); break;
+      case 'folder-new-then-move': App.createFolder(d.id); break;
+      case 'deck-move': App.moveDeckToFolder(d.id, d.folder || ''); break;
       case 'series-open': App.openSeries(d.id); break;
       case 'series-back': App.closeSeries(); break;
       case 'series-import': App.importSeries(d.id); break;
@@ -3774,6 +3821,7 @@
       App.accountMenuOpen = false;
       App.seriesId = '';
       App.cardManageDeckId = '';
+      App.folderId = '';
       App.activeClassId = '';
       App.browser = null;
       if (page === 'settings') {
