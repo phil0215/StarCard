@@ -117,7 +117,7 @@ body {
   flex: none;
   fill: none;
   stroke: currentColor;
-  stroke-width: 1.6;
+  stroke-width: 1.7;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -207,7 +207,7 @@ body {
   box-shadow: none;
 }
 .tab.active .ico { color: var(--brand); }
-.tab.active .ico .ic { stroke-width: 2.1; }
+.tab.active .ico .ic { stroke-width: 1.9; }
 
 /* 侧栏底部账户 */
 .side-account {
