@@ -156,13 +156,16 @@ body {
   width: 30px;
   height: 30px;
   flex: none;
+  border-radius: 9px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: none;
-  box-shadow: none;
+  color: #fff;
+  background: linear-gradient(135deg, #7C5CFF 0%, #9B6BFF 45%, #FF6B9D 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45),
+              0 3px 8px rgba(124, 92, 255, .35),
+              0 8px 18px -4px rgba(255, 107, 157, .5);
 }
-.logo img { width: 100%; height: 100%; display: block; object-fit: contain; }
 .logo svg { width: 17px; height: 17px; display: block; }
 .brand-txt { min-width: 0; }
 .brand-cn {
@@ -2104,7 +2107,7 @@ body.privacy-covered::after {
 [data-theme="dark"] .rating-bar.r2 { background: #FFD35F; }
 [data-theme="dark"] .rating-bar.r3 { background: #A78BFF; }
 [data-theme="dark"] .rating-bar.r4 { background: #3DD9BC; }
-[data-theme="dark"] .logo { background: none; }
+[data-theme="dark"] .logo { background: linear-gradient(135deg, #A78BFF, #FF7BA0); }
 
 @media (max-width: 1080px) {
   .browser-body { grid-template-columns: minmax(0, 1fr) 280px; }
@@ -3308,7 +3311,7 @@ html[data-motion="off"] .toast-ai .ic { animation: none; }
 @keyframes xlPop { 0% { transform: scale(.8); } 60% { transform: scale(1.18); } 100% { transform: scale(1); } }
 
 /* 品牌 Logo 轻微浮动（作品集 device-card 的灵动感） */
-.brand .logo { animation: none; }
+.brand .logo { animation: xlFloat 4.5s ease-in-out infinite; }
 @keyframes xlFloat {
   0%, 100% { transform: translateY(0) rotate(0); }
   50% { transform: translateY(-3px) rotate(-4deg); }
@@ -4683,10 +4686,11 @@ html[data-motion="off"] .hero-float { animation: none !important; }
 .login-head .logo {
   width: 46px; height: 46px; flex: none;
   display: inline-flex; align-items: center; justify-content: center;
-  background: none;
-  box-shadow: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #7C5CFF, #FF6B9D);
+  color: #fff;
+  box-shadow: 0 10px 20px -8px rgba(124, 92, 255, .65), inset 0 1px 0 rgba(255, 255, 255, .3);
 }
-.login-head .logo img { width: 100%; height: 100%; display: block; object-fit: contain; }
 .login-head .logo svg { width: 26px; height: 26px; }
 .login-title { font-size: 18px; font-weight: 750; letter-spacing: -.4px; }
 .login-sub { font-size: 12px; color: var(--ink-3); margin-top: 4px; }
@@ -5544,3 +5548,34 @@ html[data-motion="off"] .hero-float { animation: none !important; }
 /* 设置页图标补色：等级（琥珀）/ 关于（灰） */
 .set-ico.t-amber { background: linear-gradient(135deg, #FFC94A, #FF9F45); }
 .set-ico.t-gray  { background: linear-gradient(135deg, #A9B0C0, #C6CBD8); }
+
+/* ============================================================
+   设置页 · 账户 ID 编辑（__ + 6 位随机后缀）
+   ============================================================ */
+.set-idbox { margin: 2px 0 8px; }
+.set-id-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--line-2);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--ink-1);
+  font-family: 'HarmonyOS Sans SC', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 14px;
+  letter-spacing: .05em;
+  text-align: center;
+  transition: border-color .16s, box-shadow .16s, background .16s;
+}
+.set-id-input:focus {
+  outline: none;
+  border-color: var(--brand);
+  background: var(--surface);
+  box-shadow: 0 0 0 3px var(--brand-soft);
+}
+.set-block .set-actions { padding: 8px 0 0; }
+
+/* 账户 ID 变长后：收紧字距，菜单里超长自动省略 */
+.set-acct-id { font-size: 11.5px; letter-spacing: .05em; }
+.acct-idline { letter-spacing: .05em; }
+.am-head-id { letter-spacing: .02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
