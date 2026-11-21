@@ -1992,22 +1992,38 @@
       } else if (m.type === 'class') {
         const name = id('mCName').value.trim();
         if (!name) { this.toast('请填写班级名'); return; }
-        this.state.classrooms.push({
-          id: FC.makeId(), name: name, description: id('mCDesc').value.trim(),
-          code: genCode(), members: [], createdAt: FC.nowIso()
+        if (!FC.Classroom || !FC.Classroom.hasSession()) { this.toast('请先登录，再建班'); return; }
+        const self = this;
+        const form = {
+          name: name,
+          slogan: (id('mCDesc') || {}).value || '',
+          daily_goal: parseInt((id('mCDaily') || {}).value, 10) || 30,
+          total_goal: parseInt((id('mCTotal') || {}).value, 10) || 1000,
+          max_members: parseInt((id('mCMax') || {}).value, 10) || 50,
+          ends_on: (id('mCEnds') || {}).value || null
+        };
+        this.toast('正在创建班级…');
+        FC.Classroom.create(form).then(function (r) {
+          if (!r || !r.ok) { self.toast((r && r.msg) || '创建失败，稍后再试'); return; }
+          self.modal = null;
+          self._clsState = null; self._clsDetail = null;
+          self.activeClassId = r.class.id;
+          self.render();
+          self.toast('班级已建好，密钥 ' + FC.Classroom.fmtKey(r.class.join_key));
         });
-        this.toast('班级已创建');
       } else if (m.type === 'join') {
-        const code = id('mCode').value.trim().toUpperCase();
-        if (!code) { this.toast('请输入邀请码'); return; }
-        let found = null;
-        for (let i = 0; i < this.state.classrooms.length; i++) if (this.state.classrooms[i].code === code) found = this.state.classrooms[i];
-        if (!found) {
-          found = { id: FC.makeId(), name: '班级-' + code, description: '', code: code, members: [], createdAt: FC.nowIso() };
-          this.state.classrooms.push(found);
-          this.toast('已新建班级 ' + code);
-        } else { this.toast('已加入 ' + code); }
-        this.activeClassId = found.id;
+        if (!FC.Classroom || !FC.Classroom.hasSession()) { this.toast('请先登录，再加入班级'); return; }
+        const code = FC.Classroom.cleanKey(id('mCode').value);
+        if (code.length !== 8) { this.toast('密钥是 8 位，别漏字符'); return; }
+        const self2 = this;
+        FC.Classroom.join(code).then(function (r) {
+          if (!r || !r.ok) { self2.toast((r && r.msg) || '加入失败'); return; }
+          self2.modal = null;
+          self2._clsState = null; self2._clsDetail = null;
+          self2.activeClassId = r.class.id;
+          self2.render();
+          self2.toast(r.already ? ('你已经在「' + r.class.name + '」里了') : ('已加入「' + r.class.name + '」'));
+        });
       } else if (m.type === 'member') {
         const name = id('mMember').value.trim();
         if (!name) { this.toast('请输入名字'); return; }
@@ -2035,12 +2051,31 @@
         this.saveAccount();
         this.accountOpen = false;
         this.toast('已退出登录，本机学习数据仍保留');
+      } else if (m.type === 'confirm' && m.action === 'class-leave') {
+        const cid = m.classId;
+        const self3 = this;
+        FC.Classroom.leave(cid).then(function (r) {
+          if (!r || !r.ok) { self3.toast((r && r.msg) || '退出失败'); return; }
+          self3._clsState = null; self3._clsDetail = null;
+          self3.activeClassId = '';
+          self3.render();
+          self3.toast(r && r.code === 'owner' ? '创建者不能退出班级' : '已退出班级');
+        });
       } else if (m.type === 'confirm' && m.action === 'account-clear') {
         this.account = defaultAccount();
         this.saveAccount();
         setPrivacyCover(false);
         this.accountOpen = true;
         this.toast('已清除本机账户数据');
+      } else if (m.type === 'confirm' && m.action === 'class-new-key') {
+        const cid2 = m.classId;
+        const self4 = this;
+        FC.Classroom.newKey(cid2).then(function (r) {
+          if (!r || !r.ok) { self4.toast((r && r.msg) || '换密钥失败'); return; }
+          self4._clsState = null; self4._clsDetail = null;
+          self4.render();
+          self4.toast('新密钥 ' + FC.Classroom.fmtKey(r.join_key) + '（旧密钥已失效）');
+        });
       } else if (m.type === 'confirm' && m.action === 'reset') {
         this.state = FC.defaultState();
         this.cardManageDeckId = ''; this.study = null; this.wb = null; this.battle = null; this.accountOpen = false; this.activeClassId = '';
@@ -2997,9 +3032,29 @@
       case 'wb-stop': App.stopWordBook(); break;
       case 'class-back': App.activeClassId = ''; App.render(); break;
       case 'account-back': App.accountOpen = false; App.render(); break;
-      case 'class-new': App.openModal({ type: 'class', id: '', name: '', desc: '' }); break;
+      case 'class-new': App.openModal({ type: 'class', name: '', desc: '' }); break;
       case 'class-join': App.openModal({ type: 'join', code: '' }); break;
       case 'class-open': App.activeClassId = d.id; App.render(); break;
+      case 'class-login': App.accountOpen = true; App.render(); break;
+      case 'class-refresh': App._clsState = null; App._clsDetail = null; App.render(); break;
+      case 'class-refresh-detail':
+        if (App._clsDetail) delete App._clsDetail[(d && d.id) || App.activeClassId];
+        App.render(); break;
+      case 'class-copy-key': {
+        var k = (d && d.key) || '';
+        FC.Classroom.copy(FC.Classroom.fmtKey(k)).then(function (ok) {
+          App.toast(ok ? '密钥已复制，发给同学就能加入' : ('密钥是 ' + FC.Classroom.fmtKey(k)));
+        });
+        break;
+      }
+      case 'class-new-key':
+        App.openModal({ type: 'confirm', title: '换一个新密钥？',
+          message: '换完旧密钥立即失效；已经进班的同学不受影响。', action: 'class-new-key', classId: d.id });
+        break;
+      case 'class-leave':
+        App.openModal({ type: 'confirm', title: '退出这个班级？',
+          message: '退出后你的学习量不再计入这个班级，之后仍可用密钥重新加入。', action: 'class-leave', classId: d.id });
+        break;
       case 'member-add': App.openModal({ type: 'member', classId: d.id, name: '' }); break;
       case 'deskmate-add': App.openModal({ type: 'deskmate', name: '', note: '' }); break;
       case 'deskmate-del':

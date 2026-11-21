@@ -1285,60 +1285,221 @@
   }
 
   // ---------------------------------------------------------------- 班级
+  // ---------------------------------------------------------------- 班级（真实班级 · 密钥加入）
+  function classTag(role) {
+    if (role === 'owner') return '<span class="cls-tag owner">创建者</span>';
+    if (role === 'admin') return '<span class="cls-tag">管理员</span>';
+    return '';
+  }
+
+  function classKeyText(k) {
+    return FC.Classroom ? FC.Classroom.fmtKey(k) : String(k || '');
+  }
+
+  function classLoginCard(text) {
+    return '<div class="card wide cls-login">' +
+      '<div class="cls-login-ico">' + icon('key', 'i26') + '</div>' +
+      '<div class="cls-login-t">' + esc(text) + '</div>' +
+      '<button class="btn btn-primary btn-block" style="margin-top:14px" data-act="class-login">' +
+      icon('lock', 'i16') + '登录后使用班级</button>' +
+      '<div class="hint" style="margin-top:10px">班级和密钥存放在云端，换设备也能加入。没有账号的话，用邮箱收验证码即可，几秒钟。</div>' +
+      '</div>';
+  }
+
+  function classInvalidate(app) {
+    app._clsState = null;
+    app._clsDetail = null;
+  }
+
+  function classEnsureList(app) {
+    const st = app._clsState || (app._clsState = { list: null, loading: false, err: null });
+    if (st.list !== null || st.loading) return st;
+    st.loading = true; st.err = null;
+    FC.Classroom.list().then(function (r) {
+      st.loading = false;
+      if (r && r.ok) { st.list = r.classes || []; }
+      else if (r && r.code === 'no_auth') { st.list = null; st.err = 'no_auth'; }
+      else { st.err = (r && r.msg) || '班级加载失败'; }
+      app.render();
+    }).catch(function (e) {
+      st.loading = false; st.err = (e && e.message) || '网络错误';
+      app.render();
+    });
+    return st;
+  }
+
   function classroomList(app) {
-    let html = titlebar('班级', '一起攒积分', {
+    let html = titlebar('班级', '一起攒学习量', {
       actions: '<button class="btn btn-sm btn-primary" data-act="class-new">' + icon('plus', 'i14') + '创建班级</button>'
     }) + '<div class="content">';
-    html += '<button class="btn btn-block" data-act="class-join">' +
-      icon('key', 'i16') + '用邀请码加入班级</button>';
-    if (app.state.classrooms.length === 0) {
-      html += emptyBox('users', '还没有班级。建一个，或者用邀请码加入。');
-    } else {
-      for (let i = 0; i < app.state.classrooms.length; i++) {
-        const c = app.state.classrooms[i];
-        html += '<div class="list-item" data-act="class-open" data-id="' + esc(c.id) + '">' +
-          '<div class="avatar">' + icon('users', 'i20') + '</div>' +
-          '<div class="li-main"><div class="name">' + esc(c.name) + '</div>' +
-          '<div class="meta">邀请码 ' + esc(c.code) + ' · ' + c.members.length + ' 人</div></div>' +
-          '<span class="chev">' + icon('chevronRight', 'i18') + '</span></div>';
-      }
+
+    if (!FC.Classroom || !FC.Classroom.available()) {
+      html += emptyBox('cloud', '云同步还没配置，班级功能暂时不可用。');
+      return html + '</div>' + tabbar(2, app);
+    }
+    if (!FC.Classroom.hasSession()) {
+      html += classLoginCard('班级是真实存在的：建班后给你一个 8 位密钥，同学用这个密钥就能加进来，一起攒学习量。');
+      html += '<button class="btn btn-block" data-act="class-login">' + icon('key', 'i16') + '我已有密钥，先去登录</button>';
+      return html + '</div>' + tabbar(2, app);
+    }
+
+    const st = classEnsureList(app);
+
+    html += '<button class="btn btn-block cls-join-btn" data-act="class-join">' +
+      icon('key', 'i16') + '用密钥加入班级</button>';
+
+    if (st.err === 'no_auth') {
+      html += classLoginCard('登录状态过期了，重新登录一次就能继续用班级。');
+      return html + '</div>' + tabbar(2, app);
+    }
+    if (st.err) {
+      html += '<div class="card wide" style="text-align:center;padding:26px 20px">' +
+        '<div class="cls-login-t">' + esc(st.err) + '</div>' +
+        '<button class="btn" style="margin-top:12px" data-act="class-refresh">' + icon('rotate', 'i14') + '重试</button></div>';
+      return html + '</div>' + tabbar(2, app);
+    }
+    if (st.loading && st.list === null) {
+      html += '<div class="card wide"><div class="subtle">正在同步班级…</div></div>';
+      return html + '</div>' + tabbar(2, app);
+    }
+    if (!st.list || st.list.length === 0) {
+      html += emptyBox('users', '还没有班级。建一个，同学用密钥进来一起攒。', '创建班级', 'class-new');
+      return html + '</div>' + tabbar(2, app);
+    }
+
+    for (let i = 0; i < st.list.length; i++) {
+      const c = st.list[i];
+      const key = classKeyText(c.join_key);
+      html += '<div class="list-item cls-item" data-act="class-open" data-id="' + esc(c.id) + '">' +
+        '<div class="avatar">' + icon('users', 'i20') + '</div>' +
+        '<div class="li-main">' +
+        '<div class="name">' + esc(c.name) + classTag(c.role) + '</div>' +
+        '<div class="meta">' + esc(key) + ' · ' + c.member_count + ' 人 · 今日 ' + (c.today_cards || 0) + '</div>' +
+        '</div>' +
+        '<div class="cls-mine"><b>' + (c.my_today || 0) + '</b><i>我今天</i></div>' +
+        '<span class="chev">' + icon('chevronRight', 'i18') + '</span></div>';
     }
     html += '</div>';
     return html + tabbar(2, app);
+  }
+
+  function classEnsureDetail(app, id) {
+    const cache = app._clsDetail || (app._clsDetail = {});
+    const rec = cache[id];
+    if (rec && (rec.loading || rec.data || rec.err)) return rec;
+    const slot = cache[id] = { loading: true, data: null, err: null };
+    FC.Classroom.detail(id).then(function (r) {
+      slot.loading = false;
+      if (r && r.ok) { slot.data = r; }
+      else { slot.err = (r && r.msg) || '班级加载失败'; if (r && (r.code === 'not_member' || r.code === 'not_found')) slot.gone = true; }
+      app.render();
+    }).catch(function (e) {
+      slot.loading = false; slot.err = (e && e.message) || '网络错误';
+      app.render();
+    });
+    return slot;
   }
 
   function classroomDetail(app) {
-    const c = app.activeClass();
-    let html = titlebar(c ? c.name : '班级', c ? ('班级 · ' + c.members.length + ' 名成员') : '', {
+    const id = app.activeClassId;
+
+    if (!FC.Classroom || !FC.Classroom.hasSession()) {
+      return titlebar('班级', '', { back: { act: 'class-back' } }) +
+        '<div class="content">' + classLoginCard('登录后就能看到这个班级的学习量榜。') + '</div>' + tabbar(2, app);
+    }
+
+    const rec = classEnsureDetail(app, id);
+
+    if (!rec || rec.loading) {
+      return titlebar('班级', '正在加载…', { back: { act: 'class-back' } }) +
+        '<div class="content"><div class="card wide"><div class="subtle">正在同步班级…</div></div></div>' + tabbar(2, app);
+    }
+    if (rec.gone) {
+      return titlebar('班级', '', { back: { act: 'class-back' } }) +
+        '<div class="content">' + emptyBox('users', '这个班级不在了，或者你已经不在里面。') + '</div>' + tabbar(2, app);
+    }
+    if (rec.err) {
+      return titlebar('班级', '', { back: { act: 'class-back' } }) +
+        '<div class="content"><div class="card wide" style="text-align:center;padding:26px 20px">' +
+        '<div class="cls-login-t">' + esc(rec.err) + '</div>' +
+        '<button class="btn" style="margin-top:12px" data-act="class-refresh-detail">' + icon('rotate', 'i14') + '重试</button></div></div>' +
+        tabbar(2, app);
+    }
+
+    const d = rec.data || {};
+    const c = d.class || {};
+    const members = d.members || [];
+    const sum = d.summary || {};
+    const totalGoal = Math.max(1, c.total_goal || 1);
+    const done = sum.total || 0;
+    const pct = Math.min(100, Math.round(done / totalGoal * 100));
+    const key = classKeyText(c.join_key);
+    const isOwner = c.my_role === 'owner';
+
+    let html = titlebar(c.name || '班级', c.slogan || ('班级 · ' + members.length + ' 人'), {
       back: { act: 'class-back' },
-      actions: c ? '<button class="btn btn-sm btn-primary" data-act="member-add" data-id="' + esc(c.id) + '">' +
-        icon('plus', 'i14') + '添加成员</button>' : ''
+      actions: '<button class="btn btn-sm" data-act="class-copy-key" data-key="' + esc(c.join_key || '') + '">' +
+        icon('key', 'i14') + '邀请</button>'
     }) + '<div class="content">';
-    if (!c) { html += emptyBox('users', '这个班级不在了'); return html + tabbar(2, app); }
-    html += '<div class="card wide"><div class="between">' +
-      '<div><div class="subtle">班级邀请码</div>' +
-      '<div class="mono" style="font-size:15px;font-weight:600;letter-spacing:.8px;margin-top:3px">' +
-      esc(c.code) + '</div></div>' +
-      (c.description ? '<div class="subtle" style="text-align:right;max-width:60%">' + esc(c.description) + '</div>' : '') +
-      '</div></div>';
-    html += '<div class="section-title">积分榜</div>';
-    const sorted = c.members.slice().sort(function (a, b) { return b.score - a.score; });
-    if (sorted.length === 0) {
-      html += emptyBox('trophy', '还没有成员，右上角加一个');
+
+    // 密钥 + 目标 + 进度
+    html += '<div class="card wide cls-hero">' +
+      '<div class="cls-hero-row">' +
+      '<div class="cls-keyblock"><div class="subtle">班级密钥</div>' +
+      '<div class="cls-key">' + esc(key) + '</div></div>' +
+      '<div class="cls-hero-acts">' +
+      '<button class="btn btn-sm" data-act="class-copy-key" data-key="' + esc(c.join_key || '') + '">' +
+      icon('clipboard', 'i14') + '复制</button>' +
+      (isOwner ? '<button class="btn btn-sm" data-act="class-new-key" data-id="' + esc(c.id) + '">换一个</button>' : '') +
+      '</div></div>' +
+      '<div class="cls-goals">' +
+      '<span>每日目标 <b>' + (c.daily_goal || 0) + '</b> 张</span>' +
+      '<span>总目标 <b>' + (c.total_goal || 0) + '</b> 张</span>' +
+      '<span>成员 <b>' + members.length + '/' + (c.max_members || 0) + '</b></span>' +
+      (c.ends_on ? '<span>截止 <b>' + esc(c.ends_on) + '</b></span>' : '<span>长期有效</span>') +
+      '</div>' +
+      '<div class="progress" style="margin-top:14px"><span style="width:' + pct + '%"></span></div>' +
+      '<div class="between" style="margin-top:8px">' +
+      '<span class="subtle">已攒 ' + done + ' / ' + totalGoal + ' 张</span>' +
+      '<span class="subtle">' + (done >= totalGoal ? '已达成' : (pct + '%')) + '</span></div>' +
+      '</div>';
+
+    html += '<div class="cls-stats">' +
+      '<div class="cls-stat accent"><b>' + (sum.today || 0) + '</b><i>今日 · 全班</i></div>' +
+      '<div class="cls-stat"><b>' + (sum.week || 0) + '</b><i>本周 · 全班</i></div>' +
+      '<div class="cls-stat"><b>' + done + '</b><i>累计 · 全班</i></div>' +
+      '</div>';
+
+    html += '<div class="section-title">学习量榜</div>';
+    if (members.length === 0) {
+      html += emptyBox('trophy', '还没有成员，把密钥发给同学吧。');
     } else {
-      for (let i = 0; i < sorted.length; i++) {
-        const m = sorted[i];
+      for (let i = 0; i < members.length; i++) {
+        const m = members[i];
         const g = i === 0 ? 'g1' : i === 1 ? 'g2' : i === 2 ? 'g3' : '';
-        html += '<div class="list-item" style="padding:13px 16px">' +
+        html += '<div class="list-item cls-row">' +
           '<span class="rank ' + g + '">' + (i + 1) + '</span>' +
-          '<div class="li-main"><div class="name" style="font-size:14.5px">' + esc(m.name) + '</div></div>' +
-          '<div style="font-weight:700;color:var(--primary);font-size:13.5px">' + m.score + ' 分</div></div>';
+          '<div class="avatar cls-ava">' + esc(String(m.nickname || '同').slice(0, 1)) + '</div>' +
+          '<div class="li-main">' +
+          '<div class="name" style="font-size:14.5px">' + esc(m.nickname || '同学') + classTag(m.role) + '</div>' +
+          '<div class="meta">今日 ' + (m.today || 0) + ' 张 · 连续 ' + (m.streak || 0) + ' 天</div>' +
+          '</div>' +
+          '<div class="cls-total"><b>' + (m.total || 0) + '</b><i>累计</i></div>' +
+          '</div>';
       }
     }
+
+    html += '<div class="cls-foot">';
+    if (isOwner) {
+      html += '<div class="subtle" style="text-align:center">你是这个班级的创建者，密钥可以随时换一个（换完旧密钥立即失效）。</div>';
+    } else {
+      html += '<button class="btn btn-danger btn-block" data-act="class-leave" data-id="' + esc(c.id) + '">退出这个班级</button>';
+    }
+    html += '</div>';
+
     html += '</div>';
     return html + tabbar(2, app);
   }
-
   function deskmatePage(app) {
     let html = titlebar('同桌', '互相看一眼进度', {
       actions: '<button class="btn btn-sm btn-primary" data-act="deskmate-add">' + icon('plus', 'i14') + '添加同桌</button>'
@@ -2522,13 +2683,33 @@
         '<button class="btn btn-primary" data-act="modal-ok">导入</button></div>';
     } else if (m.type === 'class') {
       inner = '<h3>创建班级</h3>' +
-        '<div class="field"><label>班级名称</label><input id="mCName" value="' + esc(m.name || '') + '" placeholder="考研冲刺班" /></div>' +
-        '<div class="field"><label>简介（可选）</label><input id="mCDesc" value="' + esc(m.desc || '') + '" placeholder="一句话说明" /></div>' +
+        '<div class="subtle" style="margin-bottom:10px">建好的同时会生成一个 8 位密钥，同学输入它就能进来。</div>' +
+        '<div class="field"><label>班级名称</label>' +
+        '<input id="mCName" value="' + esc(m.name || '') + '" maxlength="24" placeholder="如：雅思 30 天冲刺班" /></div>' +
+        '<div class="field"><label>一句话说明（可选）</label>' +
+        '<input id="mCDesc" value="' + esc(m.desc || '') + '" maxlength="60" placeholder="每天 30 张，掉队的请奶茶" /></div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
+        '<div class="field"><label>每日目标（张）</label>' +
+        '<input id="mCDaily" type="number" inputmode="numeric" min="1" max="9999" value="30" /></div>' +
+        '<div class="field"><label>总目标（张）</label>' +
+        '<input id="mCTotal" type="number" inputmode="numeric" min="10" max="9999999" value="1000" /></div>' +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' +
+        '<div class="field"><label>人数上限</label>' +
+        '<input id="mCMax" type="number" inputmode="numeric" min="2" max="500" value="50" /></div>' +
+        '<div class="field"><label>截止日期（可选）</label>' +
+        '<input id="mCEnds" type="date" /></div>' +
+        '</div>' +
+        '<div class="hint">密钥只给班级成员，随时可以在班级里换新的；换完旧密钥立即失效。</div>' +
         '<div class="dialog-actions"><button class="btn" data-act="modal-cancel">取消</button>' +
-        '<button class="btn btn-primary" data-act="modal-ok">创建</button></div>';
+        '<button class="btn btn-primary" data-act="modal-ok">创建并生成密钥</button></div>';
     } else if (m.type === 'join') {
-      inner = '<h3>加入班级</h3><div class="subtle" style="margin-bottom:8px">输入本机已有班级的邀请码；若没有会自动新建。</div>' +
-        '<div class="field"><input id="mCode" value="' + esc(m.code || '') + '" placeholder="6 位邀请码" /></div>' +
+      inner = '<h3>用密钥加入班级</h3>' +
+        '<div class="subtle" style="margin-bottom:10px">输入班级创建者给你的密钥，连字符打不打都行。</div>' +
+        '<div class="field"><input id="mCode" value="' + esc(m.code || '') + '" maxlength="12" ' +
+        'inputmode="latin" autocomplete="off" autocapitalize="characters" placeholder="如 UZ33-9Y7X" ' +
+        'style="letter-spacing:2px;text-transform:uppercase;font-weight:600" /></div>' +
+        '<div class="hint">加入后，你和同学的今日、累计学习量会自动汇总到这个班级。</div>' +
         '<div class="dialog-actions"><button class="btn" data-act="modal-cancel">取消</button>' +
         '<button class="btn btn-primary" data-act="modal-ok">加入</button></div>';
     } else if (m.type === 'member') {

@@ -6698,8 +6698,7 @@ html[data-theme="light"][data-look="plain"] .set-pane .set-card.set-nav:last-of-
 }
 html[data-theme="light"][data-look="plain"] .set-pane .set-card.set-nav { background: #F6F6F7 !important; }
 
-/* ============================================================
-   2026-11-21 · 侧栏打卡去卡片化（火苗不再套框）
+/* =====================================================   2026-11-21 · 侧栏打卡去卡片化（火苗不再套框）
    + 设置页内嵌登录卡 / 隐私开关（原个人中心页已移除）
    ============================================================ */
 .streak-mini,
@@ -7031,6 +7030,153 @@ html[data-theme="dark"][data-look="plain"] .streak-mini .sm-week {
   width: 100% !important;
   height: 5px !important;
   margin-left: 0 !important;
+=======
+/* ===== 班级 v2（密钥 / 学习量 / 榜） ===== */
+.cls-tag {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .2px;
+  vertical-align: 1px;
+}
+.cls-tag.owner { background: rgba(124, 92, 255, .14); color: #6B48FF; }
+
+.cls-key {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 2.6px;
+  margin-top: 5px;
+  color: var(--ink-1);
+  font-variant-numeric: tabular-nums;
+}
+.cls-hero-acts { display: flex; gap: 8px; flex: none; align-items: center; }
+.cls-goals {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin-top: 14px;
+  font-size: 12px;
+  color: var(--ink-3);
+  line-height: 1.7;
+}
+.cls-goals b {
+  color: var(--ink-1);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.cls-mine,
+.cls-total {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex: none;
+  margin-right: 4px;
+  min-width: 42px;
+}
+.cls-mine b {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--brand-strong);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.cls-total b {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ink-1);
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+.cls-mine i,
+.cls-total i {
+  font-style: normal;
+  font-size: 10px;
+  color: var(--ink-4);
+  margin-top: 3px;
+  letter-spacing: .2px;
+}
+.cls-ava {
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+  font-size: 14px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+.cls-row .li-main { min-width: 0; }
+.cls-item .li-main { min-width: 0; }
+
+.cls-login {
+  text-align: center;
+  padding: 26px 22px 22px;
+}
+.cls-login-ico {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 14px;
+  border-radius: 17px;
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.cls-login-t {
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--ink-2);
+  max-width: 420px;
+  margin: 0 auto;
+}
+.cls-join-btn { margin-bottom: 14px; }
+.cls-foot { margin: 22px 0 8px; }
+.cls-hero { padding: 16px 18px 18px; }
+
+.cls-item .meta, .cls-row .meta { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.cls-hero-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.cls-keyblock { min-width: 0; flex: 1; }
+.cls-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 4px; }
+.cls-stat {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-xs);
+  padding: 12px 13px 13px;
+  min-width: 0;
+}
+.cls-stat b {
+  display: block;
+  font-size: 21px;
+  font-weight: 700;
+  letter-spacing: -.6px;
+  color: var(--ink-1);
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cls-stat.accent b { color: var(--brand); }
+.cls-stat i {
+  display: block;
+  font-style: normal;
+  font-size: 10.5px;
+  color: var(--ink-3);
+  margin-top: 4px;
+  letter-spacing: .2px;
+  white-space: nowrap;
 }
 
 /* ============================================================
