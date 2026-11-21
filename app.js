@@ -184,7 +184,7 @@
       leechThreshold: 8, leechAction: 'tag',
       buryRelated: true, newOrder: 'mix', reviewOrder: 'due',
       showTimer: true, autoRevealSeconds: 0, theme: 'light',
-      studyFont: 'm', motion: true,
+      studyFont: 'm', motion: 'calm',
       // 学习提示音（翻面 / 评分）与备份提醒频率（天，0 = 关闭提醒）
       sound: true, backupRemindDays: 14,
       accent: 'brand', bg: 'default', preset: 'default'
@@ -284,7 +284,7 @@
       leechThreshold: s.leechThreshold, leechAction: s.leechAction,
       buryRelated: s.buryRelated, newOrder: s.newOrder, reviewOrder: s.reviewOrder,
       showTimer: s.showTimer, autoRevealSeconds: s.autoRevealSeconds, theme: s.theme,
-      studyFont: s.studyFont || 'm', motion: s.motion !== false
+      studyFont: s.studyFont || 'm', motion: (s.motion !== 'off' && s.motion !== false)
     };
   }
 
@@ -1020,7 +1020,8 @@
       state.settings.autoRevealSeconds = Math.max(0, Math.round(num(s.autoRevealSeconds, 0)));
       state.settings.theme = (str(s.theme, '') === 'dark') ? 'dark' : (str(s.theme, '') === 'auto' ? 'auto' : 'light');
       state.settings.studyFont = (str(s.studyFont, '') === 's') ? 's' : (str(s.studyFont, '') === 'l' ? 'l' : 'm');
-      state.settings.motion = s.motion !== false;
+      const mo = s.motion === false ? 'off' : str(s.motion, '');
+      state.settings.motion = (mo === 'off' || mo === 'full') ? mo : 'calm';
       state.settings.sound = s.sound !== false;
       state.settings.backupRemindDays = Math.max(0, Math.round(num(s.backupRemindDays, d.backupRemindDays)));
       state.settings.accent = ['brand', 'green', 'teal', 'amber', 'red', 'rose'].indexOf(str(s.accent, '')) >= 0 ? s.accent : 'brand';
@@ -6811,10 +6812,6 @@
           { v: 'm', label: '标准', on: s.studyFont !== 's' && s.studyFont !== 'l' },
           { v: 'l', label: '大', on: s.studyFont === 'l' }
         ])) +
-        row('sparkles', 'orange', '界面动效', sel('setMotion', [
-          { v: '1', label: '开启', on: s.motion !== false },
-          { v: '0', label: '关闭 · 更省电', on: s.motion === false }
-        ])) +
         '</div>' + saveBar
       );
   
@@ -6822,6 +6819,7 @@
       html += paneBox('appearance',
         '<div class="set-card">' +
         block('明暗模式', themeModeBtns(s.theme || 'light'), '独立于主题配色，切到任何主题都会生效。') +
+        block('动效', fxBtns(s.motion || 'calm'), '「轻」只保留翻页、弹窗这类必要过渡；「完整」保留彩色流动；「关闭」全部静止。') +
         block('主题预设', presetGrid(s.preset || 'default'), '一套「配色 + 背景」的组合，点选立即生效。') +
         block('强调色', '<div class="swatch-row" id="setAccent">' +
           swatch('brand', '星空紫', s.accent, 'accent') +
@@ -6910,7 +6908,8 @@
 
   // 主题预设：一套「配色 + 背景」的组合，一键应用；明暗模式（跟随系统/浅色/深色）独立切换，应用到所有主题
   const THEME_PRESETS = [
-    { id: 'default', name: '素白', desc: '白底 · 星空紫', accent: 'brand', bg: 'default' },
+    { id: 'default', name: '素白', desc: '黑白 · 无装饰', accent: 'brand', bg: 'default' },
+    { id: 'vivid', name: '流光', desc: '紫粉 · 缓慢流动', accent: 'brand', bg: 'default' },
     { id: 'paper', name: '暖纸', desc: '纸感 · 琥珀', accent: 'amber', bg: 'paper' },
     { id: 'forest', name: '林间', desc: '柔雾 · 青绿', accent: 'green', bg: 'mist' },
     { id: 'ocean', name: '海雾', desc: '点阵 · 湖蓝', accent: 'teal', bg: 'dots' },
@@ -6938,6 +6937,23 @@
     return '<label class="swatch sw-' + esc(value) + (on ? ' on' : '') + '" title="' + esc(label) + '">' +
       '<input type="radio" name="' + esc(group) + 'R" value="' + esc(value) + '"' + (on ? ' checked' : '') + ' />' +
       '<span class="sw-dot"></span><span class="sw-name">' + esc(label) + '</span></label>';
+  }
+
+  // 动效档位三选一：轻（默认）/ 完整 / 关闭
+  function fxBtns(current) {
+    const modes = [
+      { v: 'calm', label: '轻', ico: 'sliders' },
+      { v: 'full', label: '完整', ico: 'sparkles' },
+      { v: 'off', label: '关闭', ico: 'moon' }
+    ];
+    let out = '<div class="theme-mode fx-mode">';
+    for (let i = 0; i < modes.length; i++) {
+      const m = modes[i];
+      const on = String(current || 'calm') === m.v;
+      out += '<button class="mode-btn' + (on ? ' on' : '') + '" data-act="set-fx" data-fx="' + m.v + '">' +
+        icon(m.ico, 'i16') + '<span>' + m.label + '</span></button>';
+    }
+    return out + '</div>';
   }
 
   // 外观模式三选一：跟随系统 / 浅色 / 深色（即时生效，独立于主题预设，应用到所有主题）
@@ -8770,10 +8786,14 @@
       root.setAttribute('data-bg', s.bg || 'default');
       // 主题预设：整套底色 / 卡片 / 侧栏配色，不只是强调色
       root.setAttribute('data-preset', s.preset || 'default');
+      // 素白（默认）走极简黑白；其余彩色主题保留流动装饰
+      const pre = s.preset || 'default';
+      root.setAttribute('data-look', (pre === 'default' || pre === 'custom' || pre === '') ? 'plain' : 'vivid');
       // 学习卡字号：小 / 标准 / 大 —— 用 CSS 变量统一缩放正面词、背面释义与结构化释文
       const scale = s.studyFont === 's' ? 0.86 : (s.studyFont === 'l' ? 1.18 : 1);
       root.style.setProperty('--sf', String(scale));
-      root.setAttribute('data-motion', s.motion === false ? 'off' : 'on');
+      const mv = s.motion === false ? 'off' : (s.motion === 'full' ? 'full' : (s.motion === 'off' ? 'off' : 'calm'));
+      root.setAttribute('data-motion', mv === 'full' ? 'on' : mv);
     },
     // 一键应用主题预设（配色 + 背景）；明暗模式独立，不随预设改变
     applyPreset: function (id) {
@@ -8787,6 +8807,15 @@
       this.save();
       this.toast('已切换到「' + p.name + '」');
       if (this.modal) this.modal = null;
+      this.render();
+    },
+    // 动效档位：轻 / 完整 / 关闭（即时生效）
+    setFx: function (mode) {
+      if (mode !== 'full' && mode !== 'calm' && mode !== 'off') return;
+      this.state.settings.motion = mode;
+      this.applyTheme();
+      this.save();
+      this.toast(mode === 'off' ? '已关闭动效' : (mode === 'full' ? '已开启完整动效' : '已切换为轻动效'));
       this.render();
     },
     // 明暗模式：跟随系统 / 浅色 / 深色（即时生效，应用到所有主题）
@@ -10817,8 +10846,13 @@
         const p = plist[pi];
         if (p.accent === s.accent && p.bg === s.bg) { matchedPreset = p.id; break; }
       }
+      // 素白与流光共用同一组 accent/bg，保存其他设置时不能把当前主题改掉
+      if (matchedPreset) {
+        for (let pi = 0; pi < plist.length; pi++) {
+          if (plist[pi].id === s.preset && plist[pi].accent === s.accent && plist[pi].bg === s.bg) { matchedPreset = s.preset; break; }
+        }
+      }
       s.preset = matchedPreset || 'custom';
-      if (byId('setMotion')) s.motion = byId('setMotion').value !== '0';
 
       const parseArr = function (idv) {
         const el = byId(idv);
@@ -11514,6 +11548,7 @@
       case 'notice-go': if (d.page === 'backup') { App.openBackupPage(); } else { App.noticesGo(parseInt(d.tab, 10)); } break;
       case 'theme-preset': App.applyPreset(d.id); break;
       case 'theme-mode': App.setThemeMode(d.theme); break;
+      case 'set-fx': App.setFx(d.fx); break;
     }
   });
 
