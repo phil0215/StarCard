@@ -2765,6 +2765,24 @@
   // 悬浮入口按钮：学习会话中隐藏，避免挡住评分条；打开后进入完整页面 AiPage
   function aiLayer(app) { return ''; }  // AI 助手已移除
 
+  // 账户菜单定位：贴着左下角头像块的「上方」弹出（不再固定在侧栏中段）
+  function acctMenuPlacement() {
+    try {
+      if (typeof document === 'undefined' || !document.querySelector) return '';
+      const el = document.querySelector('.side-account');
+      if (!el) return '';
+      const r = el.getBoundingClientRect();
+      const vw = window.innerWidth || document.documentElement.clientWidth || 0;
+      const vh = window.innerHeight || document.documentElement.clientHeight || 0;
+      if (!vw || !vh || vw <= 600) return '';
+      const width = Math.min(288, vw - 24);
+      const left = Math.max(10, Math.min(Math.round(r.left), vw - width - 10));
+      const bottom = Math.max(10, Math.round(vh - r.top + 8));
+      const maxH = Math.max(240, Math.round(r.top - 24));
+      return ' style="left:' + left + 'px;bottom:' + bottom + 'px;top:auto;right:auto;max-height:' + maxH + 'px"';
+    } catch (e) { return ''; }
+  }
+
   // 账户菜单：点头像弹出，参照 WorkBuddy 的账户面板（高面板 + 账户卡 + 功能入口）
   function accountMenuLayer(app) {
     if (!app.accountMenuOpen) return '';
@@ -2797,7 +2815,7 @@
     };
     const cloudCfg = (window.FC && FC.CLOUD_SYNC_CONFIG && FC.CLOUD_SYNC_CONFIG.anonKey);
     return '<div class="acct-menu-mask" data-act="account-menu-close"></div>' +
-      '<div class="acct-menu" role="dialog" aria-label="账户菜单">' +
+      '<div class="acct-menu" role="dialog" aria-label="账户菜单"' + acctMenuPlacement() + '>' +
       '<div class="am-head">' +
       '<button class="am-head-acct" data-act="account-open">' + avatarFace(acc, 'ava-lg') +
       '<span class="am-head-txt"><b>' + esc(on ? name : '匿名用户') + '</b>' +
