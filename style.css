@@ -6561,3 +6561,20 @@ html[data-theme="dark"][data-look="plain"] .set-pane .set-card.set-nav {
   background: #232323 !important;
   border: 0 !important;
 }
+
+/* 去掉设置页的分类名，只靠分块与分隔线区分 */
+html[data-look="plain"] .set-grp-title { display: none; }
+html[data-theme="dark"][data-look="plain"] .set-pane .set-card.set-nav { margin-bottom: 10px; }
+html[data-theme="dark"][data-look="plain"] .set-pane .set-card.set-nav:first-of-type { margin-top: 20px; }
+html[data-theme="dark"][data-look="plain"] .set-pane .set-card.set-nav:last-of-type { margin-bottom: 4px; }
+
+/* 合并成一整列：块间无缝，只在最上/最下保留圆角 */
+html[data-theme="dark"][data-look="plain"] .set-pane .set-card.set-nav {
+  margin-bottom: 0; border-radius: 0;
+}
+html[data-theme="dark"][data-look="plain"] .set-pane .set-card.set-nav:first-of-type {
+  margin-top: 20px; border-radius: 12px 12px 0 0;
+}
+html[data-theme="dark"][data-look="plain"] .set-pane .set-card.set-nav:last-of-type {
+  border-radius: 0 0 12px 12px;
+}
