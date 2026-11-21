@@ -7693,7 +7693,7 @@ html[data-theme="light"] .ss-item.on { background: #EFEFF1; }
 .set-layout { grid-template-columns: 186px minmax(0, 1fr); gap: 26px; }
 
 /* —— 左栏搜索框 —— */
-.ss-search { position: relative; margin: 0 0 10px; }
+.ss-search { position: relative; margin: 0 0 8px; }
 .ss-search .ic { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: var(--ink-4); pointer-events: none; }
 .ss-search input {
   width: 100%; height: 34px; padding: 0 10px 0 30px;
@@ -7703,8 +7703,8 @@ html[data-theme="light"] .ss-item.on { background: #EFEFF1; }
 }
 .ss-search input::placeholder { color: var(--ink-4); }
 .ss-search input:focus { border-color: var(--brand); }
-.ss-group { padding: 15px 8px 5px; font-size: 11.5px; font-weight: 600; letter-spacing: .02em; }
-.ss-item { padding: 8px 10px; font-size: 13px; }
+.ss-group { padding: 9px 8px 3px; font-size: 11.5px; font-weight: 600; letter-spacing: .02em; }
+.ss-item { padding: 4px 10px; font-size: 13px; line-height: 1.35; }
 .ss-item .ss-label { font-weight: 500; }
 .ss-item.on .ss-label { font-weight: 600; }
 .ss-empty { padding: 10px; font-size: 12px; color: var(--ink-4); }
@@ -7714,7 +7714,7 @@ html[data-theme="light"] .ss-item.on { background: #EFEFF1; }
 .ss-acct .ava-sm { width: 26px; height: 26px; }
 .ss-main b { font-size: 12.5px; }
 .ss-main small { font-size: 11px; }
-.set-ver { margin-top: 18px; }
+.set-ver { margin-top: 8px; }
 
 /* —— 右栏：不重复分类大标题，直接分区块 —— */
 .set-main-head { display: none; }
@@ -7763,7 +7763,7 @@ html[data-theme="dark"][data-look="plain"] .set-main .set-card { background: #23
   transition: none !important;
 }
 html { scroll-behavior: auto !important; }
-=======
+
 /* 设置页 · 分块之间留白，让每块能看出独立边界（WorkBuddy 观感） */
 .set-main .set-card { margin-bottom: 14px; }
 .set-main .set-card:last-child { margin-bottom: 0; }
