@@ -166,7 +166,7 @@
       graduatingInterval: 1, easyInterval: 4,
       leechThreshold: 8, leechAction: 'tag',
       buryRelated: true, newOrder: 'mix', reviewOrder: 'due',
-      showTimer: true, autoRevealSeconds: 0, theme: 'light',
+      showTimer: true, autoRevealSeconds: 0, theme: 'dark',
       studyFont: 'm', motion: 'calm',
       // 学习提示音（翻面 / 评分）与备份提醒频率（天，0 = 关闭提醒）
       sound: true, backupRemindDays: 14,
