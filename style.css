@@ -156,13 +156,17 @@ body {
   width: 30px;
   height: 30px;
   flex: none;
+  border-radius: 9px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: none;
-  box-shadow: none;
+  color: #fff;
+  background: linear-gradient(135deg, #7C5CFF 0%, #9B6BFF 45%, #FF6B9D 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45),
+              0 3px 8px rgba(124, 92, 255, .35),
+              0 8px 18px -4px rgba(255, 107, 157, .5);
 }
-.logo img { width: 100%; height: 100%; display: block; object-fit: contain; }
+.logo svg { width: 17px; height: 17px; display: block; }
 .brand-txt { min-width: 0; }
 .brand-cn {
   display: block;
@@ -2103,7 +2107,7 @@ body.privacy-covered::after {
 [data-theme="dark"] .rating-bar.r2 { background: #FFD35F; }
 [data-theme="dark"] .rating-bar.r3 { background: #A78BFF; }
 [data-theme="dark"] .rating-bar.r4 { background: #3DD9BC; }
-[data-theme="dark"] .logo { background: none; }
+[data-theme="dark"] .logo { background: linear-gradient(135deg, #A78BFF, #FF7BA0); }
 
 @media (max-width: 1080px) {
   .browser-body { grid-template-columns: minmax(0, 1fr) 280px; }
@@ -3306,8 +3310,8 @@ html[data-motion="off"] .toast-ai .ic { animation: none; }
 .tab.active .ico { color: var(--brand); animation: xlPop .45s var(--ease) both; }
 @keyframes xlPop { 0% { transform: scale(.8); } 60% { transform: scale(1.18); } 100% { transform: scale(1); } }
 
-/* 品牌 Logo 静态显示，与应用图标一致 */
-.brand .logo { animation: none; }
+/* 品牌 Logo 轻微浮动（作品集 device-card 的灵动感） */
+.brand .logo { animation: xlFloat 4.5s ease-in-out infinite; }
 @keyframes xlFloat {
   0%, 100% { transform: translateY(0) rotate(0); }
   50% { transform: translateY(-3px) rotate(-4deg); }
@@ -4682,10 +4686,12 @@ html[data-motion="off"] .hero-float { animation: none !important; }
 .login-head .logo {
   width: 46px; height: 46px; flex: none;
   display: inline-flex; align-items: center; justify-content: center;
-  background: none;
-  box-shadow: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #7C5CFF, #FF6B9D);
+  color: #fff;
+  box-shadow: 0 10px 20px -8px rgba(124, 92, 255, .65), inset 0 1px 0 rgba(255, 255, 255, .3);
 }
-.login-head .logo img { width: 100%; height: 100%; display: block; object-fit: contain; }
+.login-head .logo svg { width: 26px; height: 26px; }
 .login-title { font-size: 18px; font-weight: 750; letter-spacing: -.4px; }
 .login-sub { font-size: 12px; color: var(--ink-3); margin-top: 4px; }
 
@@ -5416,4 +5422,89 @@ html[data-motion="off"] .hero-float { animation: none !important; }
   font-size: 11.5px;
   line-height: 1.7;
   color: var(--ink-4);
+}
+
+/* ================= 头像统一圆形 ================= */
+.ava,
+.ava-sm,
+.ava-lg,
+.ava-xl,
+.avatar.avatar-flush .ava,
+.side-account .ava,
+.am-head-acct .ava-lg,
+.set-acct-ava .ava-lg,
+.set-acct-ava .avatar,
+.set-acct-ava .ava-face { border-radius: 50%; }
+.acct-ava-btn { border-radius: 50%; }
+
+/* ================= 头像裁剪 ================= */
+.crop-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin: 6px 0 2px;
+}
+.crop-stage {
+  position: relative;
+  width: 240px; height: 240px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #120E20;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .16), 0 14px 34px -18px rgba(0, 0, 0, .65);
+  touch-action: none;
+  cursor: grab;
+}
+.crop-stage:active { cursor: grabbing; }
+.crop-img {
+  position: absolute;
+  left: 50%; top: 50%;
+  transform-origin: 50% 50%;
+  will-change: transform;
+  user-select: none;
+  -webkit-user-drag: none;
+  pointer-events: none;
+}
+.crop-ring {
+  position: absolute; inset: 0;
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: inset 0 0 0 2px rgba(255, 255, 255, .5);
+}
+.crop-zoom {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 300px;
+}
+.crop-zoom input[type="range"] {
+  flex: 1 1 auto;
+  margin: 0;
+  accent-color: var(--brand);
+}
+.crop-btn {
+  flex: none;
+  width: 30px; height: 30px;
+  padding: 0;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-1);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.crop-btn:hover { border-color: var(--brand); color: var(--brand-strong); }
+.crop-tip {
+  font-size: 11.5px;
+  color: var(--ink-4);
+  text-align: center;
+  line-height: 1.6;
+}
+.crop-tip b { color: var(--brand-strong); font-weight: 700; }
+@media (max-width: 600px) {
+  .crop-stage { width: 200px; height: 200px; }
 }
