@@ -2186,8 +2186,8 @@ body.privacy-covered::after {
 [data-theme="dark"] .av-tone-6 { background: rgba(112,72,216,.16); color: #B79AF5; }
 [data-theme="dark"] .av-tone-7 { background: rgba(194,24,107,.16); color: #F27CB4; }
 
-/* 牌组两列网格（工具箱式；窄屏自动单列） */
-.series-group { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+/* 牌组网格（工具箱式）：按可用宽度自动 3~4 列，不再一张卡占半屏；窄屏单列 */
+.series-group { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
 .series-group .sg-head { grid-column: 1 / -1; }
 .content > .list-item.deck-item,
 .series-group .deck-item { min-width: 0; }
@@ -3863,7 +3863,7 @@ html[data-motion="off"] #app::after { display: none; }
   /* 列数跟着「可用宽度」走，而不是跟着窗口宽度走：
      预览面板 / 分屏 / 悬浮窗里窗口可能很宽、内容区却很窄，
      固定 3 列会把卡片压成细条（文字竖排）。auto-fit 会自动掉列。 */
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
   align-items: start;
   gap: 12px;
@@ -7664,3 +7664,23 @@ html[data-theme="light"] .ss-item.on { background: #EFEFF1; }
   .shp-mrow-acts { flex: 1 0 100%; justify-content: flex-end; margin-top: 8px; flex-direction: row; }
   .shp-card { flex-basis: 172px; }
 }
+
+/* 牌组卡片 · 窄卡紧凑化：头像+信息在上，操作按钮整行靠右，避免 300px 内挤压 */
+.series-group .deck-item {
+  padding: 12px 13px; gap: 9px; flex-wrap: wrap; align-items: flex-start;
+}
+.series-group .deck-item .deck-av { width: 34px; height: 34px; border-radius: 10px; }
+.series-group .deck-item .deck-av .ic { width: 18px; height: 18px; }
+.series-group .deck-item .li-main { flex: 1 1 120px; min-width: 0; }
+.series-group .deck-item .name { font-size: 13px; line-height: 1.35; }
+.series-group .deck-item .meta { font-size: 11.5px; margin-top: 2px; }
+.series-group .deck-item .deck-chips { margin-left: 0; margin-top: 3px; display: flex; flex-wrap: wrap; gap: 4px; }
+.series-group .deck-item .deck-prog { margin-top: 8px; }
+.series-group .deck-item .cap-warn { font-size: 11px; }
+.series-group .deck-item .li-actions {
+  flex: 0 0 100%; justify-content: flex-end; gap: 6px; margin-top: 2px;
+}
+.series-group .deck-item .li-actions .btn-sm { padding: 0 11px; height: 29px; font-size: 12.5px; }
+.series-group .deck-item .btn-more { width: 28px; padding: 0; }
+@media (max-width: 900px) { .series-group { grid-template-columns: 1fr; } }
+@media (max-width: 420px) { .series-group { grid-template-columns: 1fr; } }

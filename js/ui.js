@@ -721,7 +721,7 @@
           : (total > 0 ? '<span class="deck-chips"><span class="dchip dc-done">今日已完成</span></span>' : '')) + '</div>' +
         '<div class="meta">' + (d.description ? esc(d.description) + ' · ' : '') + '已掌握 ' + masteredCount + ' / ' + total + ' 张</div>' +
         (capped ? '<div class="cap-warn" data-act="settings-open" title="点击前往统一设置">' +
-          icon('info', 'i13') + '今日新卡限 ' + left + ' 张（共 ' + c[0] + ' 张待学）· 点此调大上限</div>' : '') +
+          icon('info', 'i13') + '新卡限 ' + left + ' 张 · 调大上限</div>' : '') +
         '<div class="progress deck-prog"><span style="width:' + masterPct + '%"></span></div></div>' +
         '<div class="li-actions">' +
         '<button class="btn btn-sm btn-primary" data-act="study-deck" data-id="' + esc(d.id) + '">学习</button>' +
@@ -3289,7 +3289,7 @@
     if (capped) {
       main.child(new A.El('div').cls('cap-warn').attr('act', 'settings-open').title('点击前往统一设置').children([
         iconEl('info', 'i13'),
-        new A.El('span', '今日新卡限 ' + left + ' 张（共 ' + c[0] + ' 张待学）· 点此调大上限')
+        new A.El('span', '新卡限 ' + left + ' 张 · 调大上限')
       ]));
     }
     main.child(new A.El('div').cls('progress deck-prog').child(new A.El('span').style('width', masterPct + '%')));
