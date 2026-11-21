@@ -6608,3 +6608,42 @@ html[data-theme="dark"][data-look="plain"] .set-pane .set-card.set-nav:last-of-t
 html[data-theme="dark"][data-look="plain"] .ava-anon {
   background: linear-gradient(180deg, #C6C6C6, #9A9A9A) !important;
 }
+
+/* ===== 我的成就：等级 / 勋章 / 任务 / 积分 / 碎片 ===== */
+.ach-hero { display: flex; align-items: center; gap: 18px; }
+.ach-lv { flex: none; display: flex; flex-direction: column; }
+.ach-lv b { font-size: 26px; font-weight: 700; letter-spacing: -.5px; color: var(--ink-1); line-height: 1.1; }
+.ach-lv small { font-size: 12px; color: var(--ink-4); margin-top: 3px; }
+.ach-hero-main { flex: 1 1 auto; min-width: 0; }
+.ach-hero-bar { height: 6px; border-radius: 6px; background: var(--line-2); overflow: hidden; }
+.ach-hero-bar i { display: block; height: 100%; border-radius: 6px; background: var(--brand); }
+.ach-hero-sub { margin-top: 8px; font-size: 12.5px; color: var(--ink-4); }
+
+.ach-medals { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.ach-medal { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; padding: 14px 8px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); }
+.ach-medal .am-ico { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--line-2); color: var(--ink-3); }
+.ach-medal b { font-size: 12.5px; font-weight: 600; color: var(--ink-3); }
+.ach-medal small { font-size: 11px; line-height: 1.35; color: var(--ink-4); }
+.ach-medal.got { border-color: rgba(255,159,10,.28); background: rgba(255,159,10,.10); }
+.ach-medal.got .am-ico { background: #FF9F0A; color: #fff; }
+.ach-medal.got b { color: var(--ink-1); }
+
+.ach-task { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.ach-task:last-child { border-bottom: 0; padding-bottom: 2px; }
+.ach-task .at-check { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--line-2); display: grid; place-items: center; color: #fff; }
+.ach-task.done .at-check { background: #2FBF6B; border-color: #2FBF6B; }
+.at-main { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 7px; }
+.at-main b { font-size: 13.5px; font-weight: 500; color: var(--ink-1); }
+.at-bar { height: 4px; border-radius: 4px; background: var(--line-2); overflow: hidden; }
+.at-bar i { display: block; height: 100%; border-radius: 4px; background: var(--brand); }
+.at-num { flex: none; font-size: 12px; color: var(--ink-3); }
+
+.ach-points { display: flex; align-items: baseline; gap: 10px; }
+.ach-points b { font-size: 28px; font-weight: 700; letter-spacing: -.5px; color: var(--brand-strong); line-height: 1; }
+.ach-points span { font-size: 12px; color: var(--ink-4); }
+
+.ach-shards { display: flex; gap: 8px; flex-wrap: wrap; }
+.ach-shard { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; border: 1px dashed var(--line-2); color: var(--ink-4); }
+.ach-shard.got { border: 1px solid rgba(139,123,240,.42); background: rgba(139,123,240,.16); color: #A794FF; }
+.ach-shard-sub { margin-top: 10px; font-size: 12px; color: var(--ink-4); }
+html[data-theme="dark"][data-look="plain"] .ach-medal { background: rgba(255,255,255,.03); }

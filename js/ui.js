@@ -1785,6 +1785,103 @@
     };
   }
 
+  // 成就：等级 / 勋章 / 任务 / 积分 / 碎片（全部由本机学习记录派生，不联网）
+  function achievementInfo(app, lv, streak) {
+    const st = (app && app.state) || {};
+    const stats = Array.isArray(st.stats) ? st.stats : [];
+    const decks = Array.isArray(st.decks) ? st.decks : [];
+    let reviews = 0, days = 0;
+    const seen = {};
+    for (let i = 0; i < stats.length; i++) {
+      const e = stats[i];
+      if (!e || !e.date) continue;
+      const r = Number(e.reviews) || 0;
+      reviews += r;
+      if (r > 0 && !seen[e.date]) { seen[e.date] = 1; days++; }
+    }
+    const d = new Date();
+    const keyOf = function (t) {
+      return t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+    };
+    const today = keyOf(d);
+    let todayReviews = 0;
+    for (let i = 0; i < stats.length; i++) {
+      const e = stats[i];
+      if (e && e.date === today) todayReviews += Number(e.reviews) || 0;
+    }
+    const weekKeys = {};
+    for (let k = 0; k < 7; k++) { weekKeys[keyOf(new Date(d.getTime() - k * 86400000))] = 1; }
+    let weekDays = 0;
+    const wk = {};
+    for (let i = 0; i < stats.length; i++) {
+      const e = stats[i];
+      if (e && e.date && weekKeys[e.date] && (Number(e.reviews) || 0) > 0 && !wk[e.date]) { wk[e.date] = 1; weekDays++; }
+    }
+    const backed = !!(app && app.lastBackupAt && app.lastBackupAt());
+    const streakDays = (streak && streak.days) || 0;
+    const medals = [
+      { ico: 'layers', name: '初次上手', desc: '导入第一个词库', got: decks.length > 0 },
+      { ico: 'zap', name: '连学三天', desc: '连续 3 天打卡', got: streakDays >= 3 },
+      { ico: 'flame', name: '七日不断', desc: '连续 7 天打卡', got: streakDays >= 7 },
+      { ico: 'flame', name: '月满', desc: '连续 30 天打卡', got: streakDays >= 30 },
+      { ico: 'rotate', name: '百次复习', desc: '累计复习 100 张', got: reviews >= 100 },
+      { ico: 'rotate', name: '千锤百炼', desc: '累计复习 500 张', got: reviews >= 500 },
+      { ico: 'calendar', name: '十日在册', desc: '累计学习 10 天', got: days >= 10 },
+      { ico: 'calendar', name: '半百', desc: '累计学习 50 天', got: days >= 50 },
+      { ico: 'shield', name: '有备无患', desc: '至少备份过一次', got: backed }
+    ];
+    let gotCount = 0;
+    for (let i = 0; i < medals.length; i++) { if (medals[i].got) gotCount++; }
+    const points = reviews * 1 + days * 10 + gotCount * 20;
+    const shards = Math.min(9, Math.floor(reviews / 120));
+    const tasks = [
+      { name: '今日复习 20 张', now: Math.min(todayReviews, 20), max: 20, unit: '张' },
+      { name: '本周学习 5 天', now: Math.min(weekDays, 5), max: 5, unit: '天' },
+      { name: '今天打卡', now: (streak && streak.doneToday) ? 1 : 0, max: 1, unit: '次' }
+    ];
+    return { reviews: reviews, days: days, gotCount: gotCount, points: points, shards: shards, medals: medals, tasks: tasks };
+  }
+
+  function achievementPane(app, lv, streak) {
+    const ach = achievementInfo(app, lv, streak);
+    let medalHtml = '';
+    for (let i = 0; i < ach.medals.length; i++) {
+      const m = ach.medals[i];
+      medalHtml += '<div class="ach-medal' + (m.got ? ' got' : '') + '">' +
+        '<span class="am-ico">' + icon(m.ico, 'i18') + '</span>' +
+        '<b>' + esc(m.name) + '</b><small>' + esc(m.desc) + '</small></div>';
+    }
+    let taskHtml = '';
+    for (let i = 0; i < ach.tasks.length; i++) {
+      const t = ach.tasks[i];
+      const done = t.now >= t.max;
+      taskHtml += '<div class="ach-task' + (done ? ' done' : '') + '">' +
+        '<span class="at-check">' + (done ? icon('check', 'i12') : '') + '</span>' +
+        '<span class="at-main"><b>' + esc(t.name) + '</b></span>' +
+        '<span class="at-num">' + t.now + '/' + t.max + ' ' + t.unit + '</span></div>';
+    }
+    let shardHtml = '';
+    for (let i = 0; i < 9; i++) {
+      shardHtml += '<span class="ach-shard' + (i < ach.shards ? ' got' : '') + '">' + icon('sparkles', 'i14') + '</span>';
+    }
+    return '<div class="set-card">' +
+      '<div class="set-block"><div class="set-block-h">等级</div>' +
+      '<div class="ach-hero">' +
+      '<div class="ach-lv"><b>Lv.' + lv.level + '</b><small>' + (lv.days > 0 ? '已学习 ' + lv.days + ' 天' : '还没开始') + '</small></div>' +
+      '<div class="ach-hero-main"><div class="ach-hero-bar"><i style="width:' + lv.pct + '%"></i></div>' +
+      '<div class="ach-hero-sub">' + (lv.days > 0 ? '再学习 ' + lv.left + ' 天升到 Lv.' + (lv.level + 1) : '完成第一次学习即可开启进度') + '</div></div>' +
+      '</div></div>' +
+      '<div class="set-block"><div class="set-block-h">勋章 ' + ach.gotCount + ' / ' + ach.medals.length + '</div>' +
+      '<div class="ach-medals">' + medalHtml + '</div></div>' +
+      '<div class="set-block"><div class="set-block-h">今日任务</div>' + taskHtml + '</div>' +
+      '<div class="set-block"><div class="set-block-h">积分</div>' +
+      '<div class="ach-points"><b>' + ach.points + '</b><span>复习 1 次 1 分 · 学习 1 天 10 分 · 每枚勋章 20 分</span></div></div>' +
+      '<div class="set-block"><div class="set-block-h">碎片 ' + ach.shards + ' / 9</div>' +
+      '<div class="ach-shards">' + shardHtml + '</div>' +
+      '<div class="ach-shard-sub">每复习 120 张攒 1 枚碎片，集齐 9 枚点亮一整套。</div></div>' +
+      '</div>';
+  }
+
   // ---------------------------------------------------------------- 设置页
     function settingsPage(app) {
       const s = app.state.settings;
@@ -1838,8 +1935,8 @@
       })();
       const lvNow = levelInfo(app);
       const CATS = [
-        { k: 'account', t: '账户与身份', d: '昵称、头像与账户 ID', ico: 'user', tone: 'blue', g: '账户', val: (on ? name : '未登录') },
-        { k: 'level', t: '等级', d: '学习天数换来的成长进度', ico: 'trophy', tone: 'amber', g: '账户', val: 'Lv.' + lvNow.level },
+        { k: 'account', t: '账户与身份', d: '昵称、头像与账户 ID', ico: 'user', tone: 'blue', g: '账户', val: (on ? name : '匿名用户') },
+        { k: 'level', t: '我的成就', d: '勋章、等级、任务、积分与碎片', ico: 'trophy', tone: 'amber', g: '账户', val: 'Lv.' + lvNow.level },
         { k: 'plan', t: '学习计划', d: '每日新卡与复习上限', ico: 'target', tone: 'blue', g: '学习', val: s.newCardsPerDay + ' / ' + s.reviewCardsPerDay },
         { k: 'fsrs', t: '记忆算法', d: 'FSRS-5 留存率与间隔', ico: 'zap', tone: 'purple', g: '学习', val: '' },
         { k: 'study', t: '学习行为', d: '顺序、Leech、提示音与字号', ico: 'bell', tone: 'orange', g: '学习', val: '' },
@@ -1909,20 +2006,8 @@
   
       // 等级
       const lv = lvNow;
-      html += paneBox('level',
-        '<div class="set-card"><div class="set-block set-level">' +
-        '<div class="lv-top"><span class="lv-badge">Lv.' + lv.level + '</span>' +
-        '<span class="lv-title">' + (lv.days > 0 ? '已学习 ' + lv.days + ' 天' : '还没开始学习') + '</span>' +
-        '<span class="lv-pct">' + lv.pct + '%</span></div>' +
-        '<div class="lv-bar"><i style="width:' + lv.pct + '%"></i></div>' +
-        '<div class="lv-sub">' +
-        (lv.days > 0
-          ? '再学习 ' + lv.left + ' 天可升到 Lv.' + (lv.level + 1)
-          : '完成第一次学习，就能拿到 Lv.1 的第一格进度') +
-        '。等级由学习天数与学习数据综合决定，正式规则后续上线。</div>' +
-        '</div></div>'
-      );
-  
+      html += paneBox('level', achievementPane(app, lvNow, streakStat(app)));
+
       // 学习计划
       html += paneBox('plan',
         '<div class="set-card">' +
