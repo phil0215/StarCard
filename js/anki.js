@@ -996,13 +996,8 @@
     const avgSec = revSum > 0 ? FC.clamp(secSum / revSum, 6, 30) : 12;
     const minutes = Math.round(planned * avgSec / 60);
 
-    // 连续打卡：今天有学从今天起算，否则从昨日起算
-    const byDate = {};
-    for (let i = 0; i < stats.length; i++) byDate[stats[i].date] = (stats[i].reviews || 0) > 0;
-    const cursor = new Date(now); cursor.setHours(12, 0, 0, 0);
-    if (!byDate[FC.dateKey(cursor.getTime())]) cursor.setDate(cursor.getDate() - 1);
-    let streak = 0;
-    while (byDate[FC.dateKey(cursor.getTime())]) { streak++; cursor.setDate(cursor.getDate() - 1); }
+    // 连续打卡：标准由 FC.checkinStreak 统一判定（每天 10 分钟 + 100 词，含补签）
+    const streak = FC.checkinStreak ? FC.checkinStreak(state, now).days : 0;
 
     const mastered = a.review;                       // 已毕业进入复习态
     const learning = a.learning + a.relearning;      // 学习中 / 重学中
