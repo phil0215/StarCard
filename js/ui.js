@@ -241,7 +241,7 @@
       avatarEl(acc, 'ava-sm'),
       new A.El('span').cls('sa-txt').children([
         new A.El('span', on ? name : '匿名用户').cls('sa-name'),
-        new A.El('span', on ? '查看个人中心' : '个人中心 · 未登录').cls('sa-sub')
+        new A.El('span', on ? '打开账户菜单' : '点击登录').cls('sa-sub')
       ]),
       new A.El('span').cls('chev').child(iconEl('chevronRight', 'i14'))
     ]));
@@ -431,7 +431,7 @@
     html += '<div class="side-account' + (on ? ' on' : '') + '" data-act="account-menu" title="账户菜单">' +
       avatarFace(acc, 'ava-sm') +
       '<span class="sa-txt"><span class="sa-name">' + esc(on ? name : '匿名用户') + '</span>' +
-      '<span class="sa-sub">' + (on ? '查看个人中心' : '点击登录') + '</span></span>' +
+      '<span class="sa-sub">' + (on ? '打开账户菜单' : '点击登录') + '</span></span>' +
       '<span class="chev">' + icon('chevronRight', 'i14') + '</span>' +
       '</div>' +
       '<div class="side-by" title="小李工作室 XiaoLi Studio">小李工作室</div></nav>';
@@ -1941,7 +1941,7 @@
       })();
       const lvNow = levelInfo(app);
       const CATS = [
-        { k: 'account', t: '账户与身份', d: '昵称、头像与账户 ID', ico: 'user', tone: 'blue', g: '账户', val: (on ? name : '匿名用户') },
+        { k: 'account', t: '账户与身份', d: '登录、昵称、账户 ID 与隐私', ico: 'user', tone: 'blue', g: '账户', val: (on ? name : '未登录') },
         { k: 'level', t: '我的成就', d: '勋章、等级、任务、积分与碎片', ico: 'trophy', tone: 'amber', g: '账户', val: 'Lv.' + lvNow.level },
         { k: 'plan', t: '学习计划', d: '每日新卡与复习上限', ico: 'target', tone: 'blue', g: '学习', val: s.newCardsPerDay + ' / ' + s.reviewCardsPerDay },
         { k: 'fsrs', t: '记忆算法', d: 'FSRS-5 留存率与间隔', ico: 'zap', tone: 'purple', g: '学习', val: '' },
@@ -1967,7 +1967,7 @@
         '<div class="set-acct-ava">' + avatarFace(a, 'ava-lg') + '</div>' +
         '<div class="set-acct-name">' + esc(on ? name : '匿名用户') + '</div>' +
         '<div class="set-acct-id' + (idt.ready ? '' : ' is-empty') + '" title="账户 ID">' + esc(idt.code || '待填手机尾号') + '</div>' +
-        '<button class="set-acct-btn" data-act="account-open">' + icon('user', 'i15') + (on ? '账户管理' : '登录 / 注册') + '</button>' +
+        '<button class="set-acct-btn" data-act="set-pane" data-pane="account">' + icon('user', 'i15') + (on ? '账户管理' : '登录 / 注册') + '</button>' +
         '</div>';
       const navGroups = ['账户', '学习', '个性化', '系统'];
       for (let gi = 0; gi < navGroups.length; gi++) {
@@ -1990,15 +1990,58 @@
   
       // ================= 二级：各类参数 =================
   
-      // 账户与身份
+      // 账户与身份（原「个人中心」整页已并入这里）
+      const p = a.privacy || { rememberLogin: true, showNickname: true, privacyBlur: false };
+      const loginLabel = a.provider === 'huawei' ? '华为账号'
+        : a.provider === 'phone' ? '手机号验证码'
+          : a.provider === 'email' ? '邮箱验证码' : '本机账户';
+      const loginMini = (function () {
+        if (on) return '';
+        const mode = app.loginMode === 'phone' ? 'phone' : 'email';
+        const isPhone = mode === 'phone';
+        const draft = app._loginDraft || {};
+        const dv = function (k, fb) { return draft[k] !== undefined ? draft[k] : (fb || ''); };
+        const msg = app._loginMsg || {};
+        const cnt = app._otpCountdown || 0;
+        const busy = !!app._otpBusy;
+        const canSend = !busy && cnt <= 0;
+        return '<div class="set-card set-login"><div class="set-block">' +
+          '<div class="set-block-h">登录 / 注册</div>' +
+          '<div class="set-block-sub">用邮箱或手机收验证码。昵称、头像、牌组与学习记录都只留本机。</div>' +
+          '<div class="login-tabs">' +
+          '<button class="login-tab' + (isPhone ? '' : ' on') + '" data-act="login-tab" data-mode="email">' + icon('mail', 'i15') + '邮箱</button>' +
+          '<button class="login-tab' + (isPhone ? ' on' : '') + '" data-act="login-tab" data-mode="phone">' + icon('phone', 'i15') + '手机号</button>' +
+          '</div>' +
+          '<div class="login-form">' +
+          (isPhone
+            ? '<div class="field"><label>手机号</label><input id="loginPhone" type="tel" inputmode="numeric" maxlength="11" value="' + esc(dv('phone', a.phone)) + '" placeholder="11 位手机号" autocomplete="tel" /></div>'
+            : '<div class="field"><label>邮箱</label><input id="loginEmail" type="email" value="' + esc(dv('email', a.email)) + '" placeholder="name@example.com" autocomplete="email" /></div>') +
+          '<div class="field"><label>验证码</label><div class="otp-row">' +
+          '<input id="loginCode" type="text" inputmode="numeric" maxlength="6" value="' + esc(dv('code')) + '" placeholder="收到的验证码" autocomplete="one-time-code" />' +
+          '<button type="button" class="btn btn-sm" id="btnSendCode" data-act="login-send"' + (canSend ? '' : ' disabled') + '>' +
+          (busy ? '发送中…' : (cnt > 0 ? cnt + ' 秒后重发' : '获取验证码')) + '</button></div></div>' +
+          (!isPhone && app._otpChallenge && !app._otpChallenge.isExistingUser
+            ? '<div class="field"><label>设置密码（新用户）</label><input id="loginPassword" type="password" value="' + esc(dv('password')) + '" placeholder="至少 6 位" autocomplete="new-password" /></div>'
+            : '') +
+          '<div class="login-msg' + (msg.text ? ' login-msg-' + (msg.kind || 'err') : '') + '" id="loginMsg">' + esc(msg.text || '') + '</div>' +
+          '<label class="agree"><input type="checkbox" id="loginAgree"' + (draft.agree ? ' checked' : '') + ' />' +
+          '<span>我已阅读并同意 <button class="link-btn" data-act="privacy-info">隐私说明</button></span></label>' +
+          '<button class="btn btn-primary btn-block" data-act="login-submit">' + icon('lock', 'i16') + '登录 / 注册</button>' +
+          '</div></div></div>';
+      })();
+
       html += paneBox('account',
+        loginMini +
         '<div class="set-card">' +
         row('user', 'blue', '昵称与头像',
-          '<button class="set-link" data-act="' + (on ? 'profile-open' : 'account-open') + '">' + esc(on ? name : '匿名用户') + icon('chevronRight', 'i12') + '</button>',
+          '<button class="set-link" data-act="profile-open">' + esc(a.nickname || (on ? name : '未设置')) + icon('chevronRight', 'i12') + '</button>',
           '点击修改') +
         row('phone', 'blue', '手机尾号',
           '<input class="set-num" id="setPhoneTail" value="' + esc(accountPhoneTail(app)) + '" placeholder="5186" maxlength="4" inputmode="numeric" />',
           '账户 ID 的后四位') +
+        row('shield', 'blue', '登录状态',
+          '<span class="set-val' + (on ? ' ok' : '') + '">' + esc(on ? loginLabel : '未登录') + '</span>',
+          on ? ((a.provider === 'phone' ? a.phone : a.email) || (a.joinedAt ? '加入于 ' + a.joinedAt.substring(0, 10) : '')) : '登录后账户 ID 可在多台设备间对应') +
         '</div>' +
         '<div class="set-card"><div class="set-block">' +
         '<div class="set-block-h">账户 ID</div>' +
@@ -2006,7 +2049,15 @@
         '<div class="set-block-sub">后半段可以自己改，但必须是 <b>3 个数字 + 3 个字母</b>（大小写随意、顺序随意），且不能和别人重复。</div>' +
         '<div class="set-actions"><button class="btn btn-sm" data-act="id-regen">' + icon('sparkles', 'i14') + '随机换一个</button></div>' +
         '</div></div>' +
-        '<div class="set-tip">账户 ID = <b>注册序号代号 + 注册年份 + 手机尾号</b>，再接 <b>__</b> 和 6 位随机后缀。序号前 1000 位为 A，1 万以内 B，10 万以内 C，依次到 G。例：<b>A20265186__9aK2z3</b>。</div>' +
+        '<div class="set-card"><div class="set-block">' +
+        '<div class="set-block-h">隐私</div>' +
+        privacyRow('rememberLogin', p.rememberLogin !== false, '记住登录状态', '关闭后每次打开都要重新登录') +
+        privacyRow('showNickname', p.showNickname !== false, '显示我的昵称', '关闭后界面中统一显示为「学习者」') +
+        privacyRow('privacyBlur', p.privacyBlur === true, '离开窗口时隐藏内容', '切到其他窗口时自动遮盖学习界面') +
+        '<div class="set-actions">' +
+        '<button class="btn btn-sm" data-act="privacy-info">' + icon('info', 'i14') + '隐私说明</button>' +
+        (on ? '<button class="btn btn-sm" data-act="account-logout">' + icon('logout', 'i14') + '退出登录</button>' : '') +
+        '</div></div></div>' +
         saveBar
       );
   
@@ -2735,7 +2786,6 @@
       '</div>' +
       '<div class="am-list">' +
       '<div class="am-group">' +
-      item('user', 'account-open', '个人中心') +
       item('settings', 'goto-settings', '设置') +
       '</div>' +
       '<div class="am-group">' +
@@ -3210,7 +3260,6 @@
       // 系列详情页同样优先于页签：它是从「词书」进入的文件夹式内容视图
       if (app.cardManageDeckId) body = cardManagePage(app);
       else if (app.seriesId) body = seriesPage(app);
-      else if (app.accountOpen) body = accountPage(app);
       else if (app.tab === 0) body = deckPage(app);
       else if (app.tab === 1) body = wordBookPage(app);
       else if (app.tab === 2) body = app.activeClassId ? classroomDetail(app) : classroomList(app);
