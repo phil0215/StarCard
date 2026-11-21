@@ -7754,3 +7754,12 @@ html[data-theme="dark"][data-look="plain"] .set-main .set-card { background: #23
   .set-row { padding: 10px 12px; }
   .set-block { padding: 12px; }
 }
+
+/* ============================================================
+   全局关闭动态效果（动画 / 过渡全部停用）
+   ============================================================ */
+*, *::before, *::after {
+  animation: none !important;
+  transition: none !important;
+}
+html { scroll-behavior: auto !important; }
