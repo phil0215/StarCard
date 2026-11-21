@@ -92,6 +92,31 @@
       (IC[name] || IC.card) + '</svg>';
   }
 
+  // 火苗图标：未打卡 = 统一描边图标；已打卡 = 渐变实心 + 内焰，配合 CSS 燃烧动画
+  const FLAME_PATH = 'M8.6 14.4A2.4 2.4 0 0 0 11 12c0-1.3-.5-1.9-1-2.9-1-2.1-.2-3.9 2-5.7.5 2.4 1.9 4.7 3.8 6.2 1.9 1.5 2.9 3.4 2.9 5.3a6.7 6.7 0 1 1-13.4 0c0-1.1.4-2.2 1-2.9a2.4 2.4 0 0 0 2.3 2.4z';
+  function flameSvgHtml(size) {
+    return '<svg class="ic ' + (size || 'i18') + ' sm-fire" viewBox="0 0 24 24" aria-hidden="true">' +
+      '<defs><linearGradient id="smFireGrad" x1="0" y1="1" x2="0" y2="0">' +
+      '<stop offset="0" stop-color="#FF2D1F"/><stop offset=".45" stop-color="#FF6A12"/><stop offset="1" stop-color="#FFC23A"/>' +
+      '</linearGradient></defs>' +
+      '<path class="sm-fire-outer" fill="url(#smFireGrad)" stroke="none" d="' + FLAME_PATH + '"/>' +
+      '<g transform="translate(12.6 15) scale(.44) translate(-12.6 -15)">' +
+      '<path class="sm-fire-inner" fill="#FFE9A3" stroke="none" opacity=".92" d="' + FLAME_PATH + '"/></g>' +
+      '</svg>';
+  }
+  function flameIcon(size, lit) {
+    return lit ? flameSvgHtml(size) : icon('flame', size);
+  }
+  function flameEl(size, lit) {
+    if (!lit) return iconEl('flame', size);
+    const e = new A.El('svg');
+    e._attrs.viewBox = '0 0 24 24';
+    e._attrs['aria-hidden'] = 'true';
+    e._attrs.class = 'ic ' + (size || 'i18') + ' sm-fire';
+    e._html = flameSvgHtml(size).replace(/^<svg[^>]*>/, '').replace(/<\/svg>$/, '');
+    return e;
+  }
+
   // ============================================================
   // ArkUI 声明式基础组件（鸿蒙 ArkTS 风格：返回 El 树）
   // ============================================================
@@ -195,18 +220,15 @@
     const children = [];
     const sd = streakStat(app);
     const wk = Array.isArray(sd.week) ? sd.week : [];
-    const goal = FC.DAY_GOAL || { minutes: 10, words: 100 };
-    const weekCells = [];
-    for (let wi = 0; wi < wk.length; wi++) {
-      weekCells.push(new A.El('i').cls((wk[wi].ok ? 'on' : '') + (wk[wi].isToday ? ' today' : ''))
-        .title(weekBarTitles(wk[wi], goal)));
-    }
-    const weekBars = new A.El('div').cls('sm-week').children(weekCells);
+    const weekOk = wk.filter(function (d) { return d.ok; }).length;
+    const weekPct = wk.length ? Math.round(weekOk / wk.length * 100) : 0;
+    const weekBars = new A.El('div').cls('sm-week').title('本周 ' + weekOk + '/' + wk.length + ' 天达标')
+      .child(new A.El('span').cls('sm-fill').style('width', weekPct + '%'));
     children.push(new A.El('div').cls('streak-mini' + (sd.doneToday ? ' lit' : ''))
       .title('连续打卡 ' + (sd.days > 0 ? sd.days : 0) + ' 天 · 每天 10 分钟 + 100 词')
       .children([
         new A.El('div').cls('sm-top').children([
-          new A.El('span').cls('sm-flame').children([iconEl('flame', 'i18')]),
+          new A.El('span').cls('sm-flame').children([flameEl('i18', sd.doneToday)]),
           new A.El('span').cls('sm-txt').children([
             new A.El('b', (sd.days > 0 ? sd.days : 0) + ' 天'),
             new A.El('small', sd.doneToday ? '今日已打卡' : '连续打卡')
@@ -374,15 +396,11 @@
       day.words + '/' + goal.words + ' 词' + (day.makeup ? ' · 补签' : '');
   }
   function weekBarsHtml(sd) {
-    const goal = FC.DAY_GOAL || { minutes: 10, words: 100 };
     const week = Array.isArray(sd.week) ? sd.week : [];
-    let out = '';
-    for (let i = 0; i < week.length; i++) {
-      const d = week[i];
-      out += '<i class="' + (d.ok ? 'on' : '') + (d.isToday ? ' today' : '') +
-        '" title="' + esc(weekBarTitles(d, goal)) + '"></i>';
-    }
-    return out;
+    const ok = week.filter(function (d) { return d.ok; }).length;
+    const pct = week.length ? Math.round(ok / week.length * 100) : 0;
+    return '<div class="sm-week" title="本周 ' + ok + '/' + week.length + ' 天达标">' +
+      '<span class="sm-fill" style="width:' + pct + '%"></span></div>';
   }
 
   // 侧栏顶部：火苗 + 连续打卡天数 + 本周进度（橙红 = 达标，黑 = 未达标）
@@ -391,10 +409,10 @@
     const days = sd.days > 0 ? sd.days : 0;
     return '<div class="streak-mini' + (sd.doneToday ? ' lit' : '') + '" title="连续打卡 ' + days + ' 天 · 每天 10 分钟 + 100 词">' +
       '<div class="sm-top">' +
-      '<span class="sm-flame">' + icon('flame', 'i18') + '</span>' +
+      '<span class="sm-flame">' + flameIcon('i18', sd.doneToday) + '</span>' +
       '<span class="sm-txt"><b>' + days + ' 天</b>' +
       '<small>' + (sd.doneToday ? '今日已打卡' : '连续打卡') + '</small></span></div>' +
-      '<div class="sm-week">' + weekBarsHtml(sd) + '</div></div>';
+      weekBarsHtml(sd) + '</div>';
   }
 
   function tabbar(active, app) {
