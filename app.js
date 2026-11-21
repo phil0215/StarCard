@@ -6518,16 +6518,46 @@
       '<div class="v' + (accent ? ' accent' : '') + '">' + esc(v) + '</div></div>';
   }
 
+  // ------------------------------------------------------- 账户公开 ID
+  // 规则：注册序号代号 + 注册年份 + 手机尾号 4 位，例如 A20265186
+  // 序号 1–999 → A；1 000–9 999 → B；1 万–9.9 万 → C；依次到 1 亿–9.9 亿 → G
+  const REG_LETTERS = 'ABCDEFG';
+  function regCodeLetter(no) {
+    const n = Math.max(1, Math.floor(Number(no) || 1));
+    const idx = Math.min(REG_LETTERS.length - 1, Math.max(0, String(n).length - 3));
+    return REG_LETTERS.charAt(idx);
+  }
+  function accountPhoneTail(app) {
+    const a = (app && app.account) || {};
+    let t = String(a.phoneTail || '').replace(/\D/g, '');
+    if (t.length < 4) {
+      const raw = String(a.phone || a.cloudPhone || '').replace(/\D/g, '');
+      if (raw.length >= 4) t = raw;
+    }
+    return t.slice(-4);
+  }
+  function accountIdentity(app) {
+    const a = (app && app.account) || {};
+    const cloudNo = Number(a.regNo) || 0;
+    const no = cloudNo || 1; // 本机账户先按第 1 位展示，登录后以云端注册号为准
+    const year = String(a.regYear || '').replace(/\D/g, '').slice(0, 4) ||
+      String(a.joinedAt || '').slice(0, 4) || String(new Date().getFullYear());
+    const tail = accountPhoneTail(app);
+    const letter = regCodeLetter(no);
+    return {
+      no: no, letter: letter, year: year, tail: tail,
+      code: letter + year + (tail || ''),
+      ready: tail.length === 4, cloud: cloudNo > 0
+    };
+  }
+
   // ---------------------------------------------------------------- 设置页
   function settingsPage(app) {
     const s = app.state.settings;
     const a = app.account || {};
     const on = !!a.loggedIn;
     const name = app.accountDisplayName ? app.accountDisplayName() : (a.nickname || '未登录');
-    const cloudId = a.provider === 'phone' ? (a.cloudPhone || a.phone) : (a.cloudEmail || a.email);
-    const providerTxt = a.provider === 'phone' ? '手机号验证码登录'
-      : a.provider === 'huawei' ? '华为账号'
-      : a.provider === 'email' ? '邮箱验证码登录' : '本机账户';
+    const idt = accountIdentity(app);
 
     // 行 / 组 / 块 三个基础构件：一行 = 彩色圆角图标 + 标题 + 右侧控件
     const row = function (ico, tone, label, right, sub) {
@@ -6558,13 +6588,24 @@
 
     let html = titlebar('设置', '学习 · 外观 · 数据 · 隐私') + '<div class="content set-content"><div class="set-win">';
 
-    // —— 账户头部：头像 + 昵称 + 账号 + 账户管理 ——
+    // —— 账户头部：头像 + 昵称 + 账户 ID + 账户管理 ——
     html += '<div class="set-acct">' +
       '<div class="set-acct-ava">' + avatarFace(a, 'ava-lg') + '</div>' +
       '<div class="set-acct-name">' + esc(on ? name : '未登录') + '</div>' +
-      '<div class="set-acct-id">' + esc(on ? ((cloudId ? cloudId + ' · ' : '') + providerTxt) : '登录后可跨设备同步学习进度') + '</div>' +
+      '<div class="set-acct-id' + (idt.ready ? '' : ' is-empty') + '" title="账户 ID">' + esc(idt.code || '待填手机尾号') + '</div>' +
       '<button class="set-acct-btn" data-act="account-open">' + icon('user', 'i15') + (on ? '账户管理' : '登录 / 注册') + '</button>' +
       '</div>';
+
+    // —— 账户与身份 ——
+    html += grp('账户与身份',
+      row('user', 'blue', '昵称与头像',
+        '<button class="set-link" data-act="' + (on ? 'profile-open' : 'account-open') + '">' + esc(on ? name : '登录 / 注册') + icon('chevronRight', 'i12') + '</button>',
+        '点击修改') +
+      row('phone', 'blue', '手机尾号',
+        '<input class="set-num" id="setPhoneTail" value="' + esc(accountPhoneTail(app)) + '" placeholder="5186" maxlength="4" inputmode="numeric" />',
+        '账户 ID 的后四位') +
+      '<div class="set-tip">账户 ID 由 <b>注册序号代号 + 注册年份 + 手机尾号</b> 组成：前 1000 位为 A，1 万以内 B，10 万以内 C，依次到 G。例：第 1 位注册、2026 年、尾号 5186 → <b>A20265186</b>。</div>'
+    );
 
     // —— 学习计划 ——
     html += grp('学习计划',
@@ -6854,6 +6895,7 @@
     const a = app.account || {};
     const on = !!a.loggedIn;
     const name = app.accountDisplayName ? app.accountDisplayName() : (a.nickname || '未登录');
+    const idt = accountIdentity(app);
     const p = a.privacy || { rememberLogin: true, showNickname: true, privacyBlur: false };
     const draft = app._loginDraft || {};
     let html = titlebar('个人中心', '资料 · 登录 · 隐私', { back: { act: 'account-back' } }) + '<div class="content">';
@@ -6864,6 +6906,7 @@
     if (on) {
       const cloudId = a.provider === 'phone' ? (a.cloudPhone || a.phone) : (a.cloudEmail || a.email);
       html += '<div class="acct-name">' + esc(name) + '</div>' +
+        '<div class="acct-idline">' + esc(idt.code || '待填手机尾号') + '</div>' +
         '<div class="acct-sub">' + (cloudId ? esc(cloudId) + ' · ' : '') +
         (a.joinedAt ? '加入于 ' + esc(a.joinedAt.substring(0, 10)) : '') + '</div>' +
         '<div class="acct-badge">' + icon('checkCircle', 'i14') +
@@ -6875,6 +6918,7 @@
         '</div>';
     } else {
       html += '<div class="acct-name">还没登录</div>' +
+        '<div class="acct-idline is-empty">' + esc(idt.code || '待填手机尾号') + '</div>' +
         '<div class="acct-sub">用邮箱或手机号收验证码登录。头像现在就能换，学习数据只留本机。</div>';
     }
     html += '</div>';
@@ -7216,9 +7260,7 @@
     const acc = app.account || {};
     const on = !!acc.loggedIn;
     const name = app.accountDisplayName ? app.accountDisplayName() : (acc.nickname || '学习者');
-    const provider = acc.provider === 'phone' ? '手机号验证码登录'
-      : acc.provider === 'huawei' ? '华为账号'
-      : acc.provider === 'email' ? '邮箱验证码登录' : '本机账户';
+    const idt = accountIdentity(app);
     // 学习概览统计
     let decks = 0, cards = 0, mastered = 0;
     const st = app.state || {};
@@ -7248,7 +7290,7 @@
       '<div class="am-head">' +
       '<button class="am-head-acct" data-act="account-open">' + avatarFace(acc, 'ava-lg') +
       '<span class="am-head-txt"><b>' + esc(on ? name : '登录 / 注册') + '</b>' +
-      '<small>' + esc(on ? provider : '登录后进度可跨设备同步') + '</small></span>' +
+      '<small class="am-head-id">' + esc(on ? (idt.ready ? idt.code : 'ID 待填手机尾号') : '登录后生成账户 ID') + '</small></span>' +
       icon('chevronRight', 'i14') + '</button>' +
       '<div class="am-head-meta">' + decks + ' 牌组 · ' + cards + ' 卡片 · 已掌握 ' + mastered + '</div>' +
       '</div>' +
@@ -8389,6 +8431,8 @@
   function defaultAccount() {
     return {
       loggedIn: false, nickname: '', email: '', phone: '', uid: '', joinedAt: '',
+      // 账户公开 ID 的构成：云端注册序号 + 注册年份 + 手机尾号
+      regNo: 0, regYear: 0, phoneTail: '',
       // 云端登录身份：provider = email | phone；cloudUid 为云端用户 ID
       provider: '', cloudUid: '', cloudEmail: '', cloudPhone: '',
       avatarColor: 0, avatarData: '',
@@ -8601,6 +8645,11 @@
         d.uid = typeof a.uid === 'string' ? a.uid : '';
         d.joinedAt = typeof a.joinedAt === 'string' ? a.joinedAt : '';
         d.phone = typeof a.phone === 'string' ? a.phone : '';
+        const rn = parseInt(a.regNo, 10);
+        d.regNo = (rn > 0) ? rn : 0;
+        const ry = parseInt(a.regYear, 10);
+        d.regYear = (ry >= 2000 && ry <= 2200) ? ry : 0;
+        d.phoneTail = String(a.phoneTail || '').replace(/\D/g, '').slice(-4);
         d.provider = typeof a.provider === 'string' ? a.provider : '';
         d.cloudUid = typeof a.cloudUid === 'string' ? a.cloudUid : '';
         d.cloudEmail = typeof a.cloudEmail === 'string' ? a.cloudEmail : '';
@@ -9723,6 +9772,10 @@
           : (target ? target.slice(0, 3) + '****' + target.slice(-4) : '学习者');
       }
       if (!a.joinedAt) a.joinedAt = FC.nowIso();
+      if (!a.regYear) a.regYear = new Date().getFullYear();
+      if (provider === 'phone' && !a.phoneTail) {
+        a.phoneTail = String(target || '').replace(/\D/g, '').slice(-4);
+      }
       this._otpChallenge = null;
       this._otpCountdown = 0;
       this._loginDraft = null;
@@ -9755,6 +9808,7 @@
       if (email) { a.email = email; a.cloudEmail = email; a.provider = a.provider || 'email'; }
       if (!a.uid) a.uid = 'bc_' + FC.makeId().replace(/-/g, '').slice(0, 10);
       if (!a.joinedAt) a.joinedAt = FC.nowIso();
+      if (!a.regYear) a.regYear = new Date().getFullYear();
       this._loginDraft = null;
       this.saveAccount();
       this.toast('已登录，欢迎 ' + nickname);
@@ -10520,6 +10574,14 @@
       };
       const ls = parseArr('setLearn'); if (ls.length) s.learningSteps = ls;
       const rs = parseArr('setRelearn'); if (rs.length) s.relearningSteps = rs;
+      // 账户 ID 的手机尾号：只留数字，取后 4 位
+      if (byId('setPhoneTail')) {
+        const t = String(byId('setPhoneTail').value || '').replace(/\D/g, '').slice(-4);
+        if (t !== (this.account.phoneTail || '')) {
+          this.account.phoneTail = t;
+          this.saveAccount();
+        }
+      }
       this.applyTheme();
       this.save();
       this.toast('设置已保存');
