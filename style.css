@@ -7875,7 +7875,9 @@ html[data-look="plain"] .am-item-danger .am-txt b {
    ============================================================ */
 :root { --side-w: 186px; }
 .tabbar { padding: 14px 8px 10px; }
-.tab { height: 32px; padding: 0 9px; gap: 9px; font-size: 13px; border-radius: 8px; }
+/* 与 html[data-theme][data-look="plain"] .tab（height 40 / 14.5px）同权重，写在其后生效 */
+.tab { padding: 0 9px; border-radius: 8px; }
+html[data-theme][data-look="plain"] .tab { height: 32px; gap: 9px; font-size: 13px; }
 .tab .ico { flex: 0 0 18px; display: flex; justify-content: center; }
 .tab .ico .ic, .tab .ico svg { width: 18px; height: 18px; }
 .tab .lab { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
