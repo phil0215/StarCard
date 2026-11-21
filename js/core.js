@@ -256,7 +256,7 @@
     return {
       id: makeId(), name: name, description: description || '',
       createdAt: t, modifiedAt: t, tags: [], cards: [],
-      options: defaultDeckOptions()
+      options: defaultDeckOptions(), folderId: ''
     };
   }
 
@@ -300,7 +300,9 @@
       // 连续打卡：已解锁勋章 id（如 d7）+ 剩余补签卡
       badges: [], makeupCards: 0,
       // 动态系列：导入词库时自动生成一个系列（文件夹）收纳本批牌组；collapsedSeries 记住折叠状态
-      series: [], collapsedSeries: []
+      series: [], collapsedSeries: [],
+      // 自定义文件夹：用户在工坊里手动建的分类，每个含若干 deckId
+      folders: []
     };
   }
 
@@ -341,9 +343,79 @@
     return {
       id: d.id, name: d.name, description: d.description,
       createdAt: d.createdAt, modifiedAt: d.modifiedAt, tags: d.tags.slice(), cards: cards,
-      options: d.options ? copyDeckOptions(d.options) : null
+      options: d.options ? copyDeckOptions(d.options) : null, folderId: (d.folderId || '')
     };
   }
+  // ---- 自定义文件夹（工坊里用户自建的分类）----
+  function folderById(state, id) {
+    const fs = (state && state.folders) || [];
+    for (let i = 0; i < fs.length; i++) if (fs[i].id === id) return fs[i];
+    return null;
+  }
+  function decksInFolder(state, id) {
+    const f = folderById(state, id); if (!f) return [];
+    const ids = f.deckIds || []; const out = [];
+    for (let i = 0; i < ids.length; i++) {
+      const d = (state.decks || []).find(function (x) { return x.id === ids[i]; });
+      if (d) out.push(d);
+    }
+    return out;
+  }
+  function decksUncategorized(state) {
+    const ds = (state.decks || []).slice();
+    const series = FC.visibleSeries ? FC.visibleSeries(state) : ((FC.SERIES || []).slice());
+    const out = [];
+    for (let i = 0; i < ds.length; i++) {
+      const d = ds[i];
+      if (d.folderId) continue; // 已归入自定义文件夹
+      let inSeries = false;
+      for (let j = 0; j < series.length; j++) {
+        if ((d.tags || []).indexOf(series[j].tagKey) >= 0) { inSeries = true; break; }
+      }
+      if (!inSeries) out.push(d);
+    }
+    return out;
+  }
+  function addFolder(state, name) {
+    const t = nowIso(); const id = 'folder-' + makeId();
+    state.folders = state.folders || [];
+    state.folders.push({ id: id, name: String(name || '新文件夹').slice(0, 40), deckIds: [], createdAt: t });
+    return id;
+  }
+  function renameFolder(state, id, name) {
+    const f = folderById(state, id); if (f) f.name = String(name || '文件夹').slice(0, 40);
+  }
+  function deleteFolder(state, id) {
+    if (!state.folders) return;
+    // 解除其中牌组的归属
+    for (let i = 0; i < state.decks.length; i++) {
+      if (state.decks[i].folderId === id) state.decks[i].folderId = '';
+    }
+    state.folders = state.folders.filter(function (x) { return x.id !== id; });
+  }
+  function moveDeckToFolder(state, deckId, folderId) {
+    const d = (state.decks || []).find(function (x) { return x.id === deckId; });
+    if (!d) return;
+    // 先从原文件夹（若有）的 deckIds 里移除
+    const old = d.folderId || '';
+    if (old) {
+      const fo = folderById(state, old);
+      if (fo) fo.deckIds = (fo.deckIds || []).filter(function (x) { return x !== deckId; });
+    }
+    d.folderId = folderId || '';
+    if (folderId) {
+      const f = folderById(state, folderId);
+      if (f) {
+        f.deckIds = f.deckIds || [];
+        if (f.deckIds.indexOf(deckId) < 0) f.deckIds.push(deckId);
+      }
+    }
+  }
+  function folderOfDeck(state, deckId) {
+    const d = (state.decks || []).find(function (x) { return x.id === deckId; });
+    return d && d.folderId ? folderById(state, d.folderId) : null;
+  }
+
   function copyDeckOptions(o) {
     return {
       newPerDay: o.newPerDay, reviewsPerDay: o.reviewsPerDay,
@@ -1054,7 +1126,8 @@
       wordBooks: s.wordBooks.slice(), wordProgress: s.wordProgress.slice(),
       classrooms: s.classrooms.slice(), deskmates: s.deskmates.slice(), battleRecords: s.battleRecords.slice(),
       savedSearches: (s.savedSearches || []).slice(), removedSeries: (s.removedSeries || []).slice(),
-      series: JSON.parse(JSON.stringify(s.series || [])), collapsedSeries: (s.collapsedSeries || []).slice()
+      series: JSON.parse(JSON.stringify(s.series || [])), collapsedSeries: (s.collapsedSeries || []).slice(),
+      folders: JSON.parse(JSON.stringify(s.folders || []))
     };
   }
   function copyStats(stats) {
@@ -1192,6 +1265,16 @@
     state.savedSearches = strArray(raw.savedSearches);
     state.removedSeries = strArray(raw.removedSeries);
     state.collapsedSeries = strArray(raw.collapsedSeries);
+    if (raw.folders !== undefined && raw.folders !== null && Array.isArray(raw.folders)) {
+      const fl = [];
+      for (let i = 0; i < raw.folders.length; i++) {
+        const fo = raw.folders[i];
+        if (fo && typeof fo === 'object' && fo.id && fo.name) {
+          fl.push({ id: fo.id, name: String(fo.name), deckIds: Array.isArray(fo.deckIds) ? fo.deckIds.filter(function (x) { return typeof x === 'string'; }) : [] });
+        }
+      }
+      state.folders = fl;
+    }
     if (raw.series !== undefined && raw.series !== null && Array.isArray(raw.series)) {
       const sl = [];
       for (let i = 0; i < raw.series.length; i++) {
@@ -1222,7 +1305,11 @@
     emptyBattle: emptyBattle, progressCounts: progressCounts,
     Fsrs: Fsrs, Scheduler: Scheduler, SrcdCodec: SrcdCodec, loadState: loadState,
     FLAG_COLORS: FLAG_COLORS, defaultDeckOptions: defaultDeckOptions,
-    copyDeckOptions: copyDeckOptions, normalizeFields: normalizeFields
+    copyDeckOptions: copyDeckOptions, normalizeFields: normalizeFields,
+    // 自定义文件夹
+    folderById: folderById, decksInFolder: decksInFolder, decksUncategorized: decksUncategorized,
+    addFolder: addFolder, renameFolder: renameFolder, deleteFolder: deleteFolder,
+    moveDeckToFolder: moveDeckToFolder, folderOfDeck: folderOfDeck
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = FC;
