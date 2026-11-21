@@ -7032,3 +7032,21 @@ html[data-theme="dark"][data-look="plain"] .streak-mini .sm-week {
   height: 5px !important;
   margin-left: 0 !important;
 }
+
+/* ============================================================
+   2026-11-21 · 账户菜单：贴头像上方弹出，背景不模糊 / 不变暗
+   ============================================================ */
+.acct-menu-mask,
+.acct-menu-mask:hover {
+  background: transparent !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+  animation: none !important;
+}
+.acct-menu {
+  transform-origin: 18px calc(100% - 12px);
+  box-shadow: 0 18px 50px -12px rgba(20, 16, 34, .22), 0 2px 8px rgba(20, 16, 34, .06);
+}
+@media (max-width: 600px) {
+  .acct-menu { left: 10px !important; right: 10px !important; width: auto !important; }
+}
