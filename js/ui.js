@@ -193,6 +193,13 @@
     const name = (app && app.accountDisplayName) ? app.accountDisplayName() : (acc.nickname || '学习者');
     const children = [];
     const sd = streakStat(app);
+    children.push(new A.El('div').cls('brand-head').children([
+      new A.El('img').cls('brand-logo').src(pageHref(0) + 'icon-192.png').alt(''),
+      new A.El('span').cls('brand-name').children([
+        new A.El('b', '闪星卡'),
+        new A.El('small', 'StarCard')
+      ])
+    ]));
     children.push(new A.El('div').cls('streak-mini' + (sd.doneToday ? ' lit' : ''))
       .title('连续打卡 ' + sd.days + ' 天')
       .children([
@@ -321,7 +328,7 @@
     if (at >= 0) return cur.slice(0, at + mark.length);
     const seg = cur.split('/').filter(function (x) { return !!x; });
     const known = { books: 1, 'class': 1, deskmate: 1, battle: 1, stats: 1, settings: 1, browse: 1 };
-    if (seg.length && (known[seg[seg.length - 1]] || /\.[a-z0-9]+$/i.test(seg[seg.length - 1]))) seg.pop();
+    while (seg.length && (known[seg[seg.length - 1]] || /\.[a-z0-9]+$/i.test(seg[seg.length - 1]))) seg.pop();
     return '/' + seg.join('/') + (seg.length ? '/' : '');
   }
   // 生成某页签的地址；tab 6（设置）也在其中，但没有侧栏高亮
@@ -372,7 +379,9 @@
   // 侧栏顶部：火苗 + 连续打卡天数
   function streakMiniHtml(app) {
     const sd = streakStat(app);
-    return '<div class="streak-mini' + (sd.doneToday ? ' lit' : '') + '" title="连续打卡 ' + sd.days + ' 天">' +
+    return '<div class="brand-head"><img class="brand-logo" src="' + pageHref(0) + 'icon-192.png" alt="">' +
+      '<span class="brand-name"><b>闪星卡</b><small>StarCard</small></span></div>' +
+      '<div class="streak-mini' + (sd.doneToday ? ' lit' : '') + '" title="连续打卡 ' + sd.days + ' 天">' +
       '<span class="sm-flame">' + icon('flame', 'i18') + '</span>' +
       '<span class="sm-txt"><b>' + (sd.days > 0 ? sd.days : 0) + ' 天</b>' +
       '<small>' + (sd.doneToday ? '今日已打卡' : '连续打卡') + '</small></span></div>';
