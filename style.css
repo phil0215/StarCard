@@ -5508,3 +5508,43 @@ html[data-motion="off"] .hero-float { animation: none !important; }
 @media (max-width: 600px) {
   .crop-stage { width: 200px; height: 200px; }
 }
+
+/* ============================================================
+   设置页 · 分类目录（一级）+ 参数页（二级）
+   ============================================================ */
+.set-pane { display: none; padding-bottom: 4px; }
+.set-pane.on { display: block; }
+
+.set-card.set-nav { padding: 0; }
+.set-nav-row {
+  display: flex; align-items: center; gap: 12px;
+  width: 100%; padding: 13px 14px;
+  background: none; border: 0; text-align: left; cursor: pointer;
+  color: inherit; font: inherit;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .16s ease;
+}
+.set-nav-row + .set-nav-row { border-top: 1px solid var(--line); }
+.set-nav-row:hover { background: var(--surface-2); }
+.set-nav-row:active { background: var(--brand-soft); }
+.set-nav-row .set-ico { flex: 0 0 auto; }
+.set-nav-txt { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.set-nav-t { font-size: 14px; font-weight: 650; color: var(--ink-1); line-height: 1.25; }
+.set-nav-s { font-size: 11.5px; color: var(--ink-3); line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.set-nav-val { flex: 0 1 auto; max-width: 38%; font-size: 12px; color: var(--ink-3); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.set-nav-arrow { flex: 0 0 auto; display: inline-flex; align-items: center; color: var(--ink-4); }
+.set-ver { margin: 18px 4px 12px; text-align: center; font-size: 11px; color: var(--ink-4); letter-spacing: .02em; }
+
+/* 二级页首个卡片贴顶留白 */
+.set-pane > .set-card:first-child { margin-top: 2px; }
+.set-pane > .set-tip:first-child { margin-top: 0; }
+
+@media (max-width: 600px) {
+  .set-nav-row { padding: 12px 12px; gap: 10px; }
+  .set-nav-t { font-size: 13.5px; }
+  .set-nav-val { display: none; }
+}
+
+/* 设置页图标补色：等级（琥珀）/ 关于（灰） */
+.set-ico.t-amber { background: linear-gradient(135deg, #FFC94A, #FF9F45); }
+.set-ico.t-gray  { background: linear-gradient(135deg, #A9B0C0, #C6CBD8); }
