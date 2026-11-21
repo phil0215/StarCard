@@ -5059,7 +5059,7 @@
     const name = (app && app.accountDisplayName) ? app.accountDisplayName() : (acc.nickname || '学习者');
     const children = [];
     children.push(new A.El('div').cls('brand').children([
-      new A.El('span').cls('logo').html('<img src="icon-192.png" alt="" />'),
+      new A.El('span').cls('logo').html('<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M12 3.2c.5 4.5 2.3 6.3 6.8 6.8-4.5.5-6.3 2.3-6.8 6.8-.5-4.5-2.3-6.3-6.8-6.8 4.5-.5 6.3-2.3 6.8-6.8Z"/><path d="M18.6 15.6c.22 1.8.9 2.48 2.7 2.7-1.8.22-2.48.9-2.7 2.7-.22-1.8-.9-2.48-2.7-2.7 1.8-.22 2.48-.9 2.7-2.7Z"/></svg>'),
       new A.El('span').cls('brand-txt').children([
         new A.El('span', '闪星卡').cls('brand-cn'),
         new A.El('span', 'StarCard').cls('brand-en')
@@ -5189,8 +5189,11 @@
   ];
 
   function logo() {
-    // 闪星卡：直接显示应用图标（与 favicon 同源，原样呈现）
-    return '<span class="logo"><img src="icon-192.png" alt="" /></span>';
+    // 闪星卡：一大一小双星标记，跟随 currentColor
+    return '<span class="logo"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">' +
+      '<path d="M12 3.2c.5 4.5 2.3 6.3 6.8 6.8-4.5.5-6.3 2.3-6.8 6.8-.5-4.5-2.3-6.3-6.8-6.8 4.5-.5 6.3-2.3 6.8-6.8Z"/>' +
+      '<path d="M18.6 15.6c.22 1.8.9 2.48 2.7 2.7-1.8.22-2.48.9-2.7 2.7-.22-1.8-.9-2.48-2.7-2.7 1.8-.22 2.48-.9 2.7-2.7Z"/>' +
+      '</svg></span>';
   }
 
   function tabbar(active, app) {
@@ -6533,6 +6536,40 @@
     }
     return t.slice(-4);
   }
+  // 账户 ID 后缀：__ 后面跟 3 个数字 + 3 个字母，字母大小写随机、6 位顺序随机
+  const ID_LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  function genIdSuffix() {
+    const pool = [];
+    for (let i = 0; i < 3; i++) pool.push(ID_LETTERS.charAt(Math.floor(Math.random() * ID_LETTERS.length)));
+    for (let i = 0; i < 3; i++) pool.push(String(Math.floor(Math.random() * 10)));
+    for (let i = pool.length - 1; i > 0; i--) {   // 打乱位置：数字和字母交错
+      const j = Math.floor(Math.random() * (i + 1));
+      const t = pool[i]; pool[i] = pool[j]; pool[j] = t;
+    }
+    return pool.join('');
+  }
+  function idSuffixValid(v) {
+    const str = String(v || '');
+    if (!/^[A-Za-z0-9]{6}$/.test(str)) return false;
+    let d = 0, l = 0;
+    for (let i = 0; i < str.length; i++) {
+      const c = str.charAt(i);
+      if (c >= '0' && c <= '9') d++; else l++;
+    }
+    return d === 3 && l === 3;
+  }
+  // 后缀一旦生成就固定下来，之后每次渲染都读同一个值
+  function ensureIdSuffix(app) {
+    const a = (app && app.account) || {};
+    const cur = String(a.idSuffix || '').replace(/[^A-Za-z0-9]/g, '');
+    if (idSuffixValid(cur)) return cur;
+    const suf = genIdSuffix();
+    if (app && app.account) {
+      app.account.idSuffix = suf;
+      try { if (typeof app.saveAccount === 'function') app.saveAccount(); } catch (e) { /* 忽略 */ }
+    }
+    return suf;
+  }
   function accountIdentity(app) {
     const a = (app && app.account) || {};
     const cloudNo = Number(a.regNo) || 0;
@@ -6541,9 +6578,12 @@
       String(a.joinedAt || '').slice(0, 4) || String(new Date().getFullYear());
     const tail = accountPhoneTail(app);
     const letter = regCodeLetter(no);
+    const base = letter + year + (tail || '');
+    const suffix = ensureIdSuffix(app);
     return {
       no: no, letter: letter, year: year, tail: tail,
-      code: letter + year + (tail || ''),
+      base: base, suffix: suffix,
+      code: base + '__' + suffix,
       ready: tail.length === 4, cloud: cloudNo > 0
     };
   }
@@ -6685,7 +6725,13 @@
           '<input class="set-num" id="setPhoneTail" value="' + esc(accountPhoneTail(app)) + '" placeholder="5186" maxlength="4" inputmode="numeric" />',
           '账户 ID 的后四位') +
         '</div>' +
-        '<div class="set-tip">账户 ID 由 <b>注册序号代号 + 注册年份 + 手机尾号</b> 组成：前 1000 位为 A，1 万以内 B，10 万以内 C，依次到 G。例：第 1 位注册、2026 年、尾号 5186 → <b>A20265186</b>。</div>' +
+        '<div class="set-card"><div class="set-block">' +
+        '<div class="set-block-h">账户 ID</div>' +
+        '<div class="set-idbox"><input class="set-id-input" id="setIdCode" value="' + esc(idt.code) + '" placeholder="A20265186__9aK2z3" spellcheck="false" autocapitalize="off" autocomplete="off" /></div>' +
+        '<div class="set-block-sub">后半段可以自己改，但必须是 <b>3 个数字 + 3 个字母</b>（大小写随意、顺序随意），且不能和别人重复。</div>' +
+        '<div class="set-actions"><button class="btn btn-sm" data-act="id-regen">' + icon('sparkles', 'i14') + '随机换一个</button></div>' +
+        '</div></div>' +
+        '<div class="set-tip">账户 ID = <b>注册序号代号 + 注册年份 + 手机尾号</b>，再接 <b>__</b> 和 6 位随机后缀。序号前 1000 位为 A，1 万以内 B，10 万以内 C，依次到 G。例：<b>A20265186__9aK2z3</b>。</div>' +
         saveBar
       );
   
@@ -10057,6 +10103,7 @@
         const d = (r && r.data) || {};
         self.finishCloudLogin(d.user || d.session || {}, ch.type, ch.target);
         self.render();
+        self.verifyPublicId();
       });
     },
     // 旧内嵌入口兼容：等同提交验证码
@@ -10792,13 +10839,54 @@
           this.saveAccount();
         }
       }
+      // 账户 ID 后缀：可以自己改，但必须 3 个数字 + 3 个字母；不合规就保留原值
+      let idChanged = false;
+      if (byId('setIdCode')) {
+        const raw = String(byId('setIdCode').value || '').trim();
+        const cut = raw.indexOf('__');
+        const suf = (cut >= 0 ? raw.slice(cut + 2) : raw).replace(/[^A-Za-z0-9]/g, '');
+        if (suf !== (this.account.idSuffix || '')) {
+          if (idSuffixValid(suf)) {
+            this.account.idSuffix = suf;
+            this.saveAccount();
+            idChanged = true;
+          } else {
+            this.toast('ID 后缀要 3 个数字 + 3 个字母，共 6 位');
+          }
+        }
+      }
       this.applyTheme();
       this.save();
+      if (idChanged) this.verifyPublicId();
       this.toast('设置已保存');
       this.render();
     },
 
-    // ---- CSV ----
+    // 账户 ID 查重：云端记录过同一个 ID 就自动换一个后缀（未登录 / 断网时静默跳过）
+    verifyPublicId: function (tries) {
+      const self = this;
+      const n = Number(tries) || 0;
+      if (n > 3) return Promise.resolve(false);
+      if (typeof FC === 'undefined' || !FC.CloudSync || !FC.CloudSync.checkPublicId) return Promise.resolve(true);
+      const idt = accountIdentity(self);
+      return FC.CloudSync.checkPublicId(idt.code).then(function (r) {
+        if (!r || !r.taken) return true;
+        self.account.idSuffix = genIdSuffix();
+        self.saveAccount();
+        self.toast('这个 ID 已被占用，已帮你换成 ' + self.account.idSuffix);
+        self.render();
+        return self.verifyPublicId(n + 1);
+      }).catch(function () { return true; });
+    },
+
+    // 随机换一个 ID 后缀（设置页按钮）
+    regenPublicId: function () {
+      this.account.idSuffix = genIdSuffix();
+      this.saveAccount();
+      this.toast('已换成 ' + this.account.idSuffix);
+      this.render();
+      this.verifyPublicId();
+    },
     doCsvExport: function () {
       const text = FC.Csv.encode(this.state.decks);
       const blob = new Blob([text], { type: 'text/csv;charset=utf-8' });
@@ -11390,6 +11478,7 @@
       // 设置页二级分类：点分类进参数页，返回回到目录
       case 'set-pane': App.settingsPane = d.pane || 'root'; App.render(); try { window.scrollTo(0, 0); } catch (err) {} break;
       case 'set-pane-back': App.settingsPane = 'root'; App.render(); try { window.scrollTo(0, 0); } catch (err) {} break;
+      case 'id-regen': App.regenPublicId(); break;
       // 设置页顶部锚点：只滚动，不重绘（重绘会打断正在编辑的输入框）
       case 'set-jump': {
         const target = byId(d.target);
