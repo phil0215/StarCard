@@ -305,7 +305,7 @@
         id: 'today', icon: 'clock', tone: 'brand',
         title: '今天还有 ' + ov.planned + ' 张',
         desc: '新卡 ' + ov.newLeft + ' · 到期 ' + ov.due + ' · 约 ' + ov.minutes + ' 分钟',
-        tab: 0, cta: '去学'
+        tab: 1, cta: '去工坊'
       });
     }
     if (ov && ov.hasData && ov.streak > 0) {
@@ -373,8 +373,7 @@
   }
 
   const NAV = [
-    { kind: 'tab', tab: 0, label: '卡片', ico: 'cards', group: '学习' },
-    { kind: 'tab', tab: 1, label: '词书', ico: 'book', group: '学习' },
+    { kind: 'tab', tab: 1, label: '工坊', ico: 'pencil', group: '学习' },
     { kind: 'tab', tab: 2, label: '班级', ico: 'users', group: '一起学' },
     { kind: 'tab', tab: 3, label: '同桌', ico: 'link', group: '一起学' },
     { kind: 'tab', tab: 8, label: '社区', ico: 'chat', group: '一起学' },
@@ -947,7 +946,7 @@
     const st = app.state;
     const s = new FC.Scheduler(st.settings);
     const now = Date.now();
-    let html = titlebar('词书', '导入 · 制作 · 管理', {
+    let html = titlebar('工坊', '制作 · 导入 · 管理', {
       actions: '<button class="btn btn-sm" data-act="browser-open">' + icon('table', 'i14') + '浏览全部</button>'
     }) + '<div class="content">';
 
@@ -1019,8 +1018,8 @@
         '<button class="btn btn-sm btn-primary" data-act="import-hub">去导入</button></div>' +
         '<div class="ww-step"><span class="ww-n">2</span><div><b>自己制作</b><small>新建牌组手动添加卡片，或按行批量粘贴正反面</small></div>' +
         '<button class="btn btn-sm" data-act="new-deck">新建牌组</button></div>' +
-        '<div class="ww-step"><span class="ww-n">3</span><div><b>开始学习</b><small>做好的牌组会同步到「卡片」页，用 FSRS 科学间隔重复复习</small></div>' +
-        '<button class="btn btn-sm" data-act="tab" data-tab="0">前往卡片</button></div>' +
+        '<div class="ww-step"><span class="ww-n">3</span><div><b>开始学习</b><small>做好的牌组在工坊里点「学习」即可开始 FSRS 间隔重复复习</small></div>' +
+        '<button class="btn btn-sm btn-primary" data-act="study-all">开始学习</button></div>' +
         '</div></div>';
     } else {
       for (let si = 0; si < seriesList.length; si++) {
@@ -2678,7 +2677,7 @@
           '<span class="notice-ico">' + icon(it.icon, 'i18') + '</span>' +
           '<div class="notice-txt"><b>' + esc(it.title) + '</b><small>' + esc(it.desc) + '</small></div>' +
           (it.cta ? '<button class="btn btn-sm' + (i === 0 ? ' btn-primary' : '') + '" data-act="notice-go"' +
-            (it.page ? ' data-page="' + it.page + '"' : ' data-tab="' + (it.tab || 0) + '"') + '>' + esc(it.cta) + '</button>' : '') +
+            (it.page ? ' data-page="' + it.page + '"' : ' data-tab="' + (it.tab || 1) + '"') + '>' + esc(it.cta) + '</button>' : '') +
           '</div>';
       }
       html += '</div></div>';
@@ -3431,7 +3430,7 @@
           if (it.cta) {
             const b = btnEl({ label: it.cta, size: 'sm', act: 'notice-go' });
             if (i === 0) b.cls('btn btn-sm btn-primary');
-            if (it.page) b.attr('page', it.page); else b.attr('tab', it.tab || 0);
+            if (it.page) b.attr('page', it.page); else b.attr('tab', it.tab || 1);
             row.child(b);
           }
           list.child(row);
