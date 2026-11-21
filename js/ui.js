@@ -350,14 +350,14 @@
   // ---------------------------------------------------------------- 导航
   // 侧栏导航：统一页签(tab)与完整页面(page)，tab 序号 0-6 保持稳定
   // 多页面：每个页签对应站点里的一个目录（真实网址，刷新/分享都能直达）
-  const PAGE_DIRS = ['', 'books/', 'class/', 'deskmate/', 'battle/', 'stats/', 'settings/'];
+  const PAGE_DIRS = ['', 'books/', 'class/', 'deskmate/', 'battle/', 'stats/', 'settings/', 'store/'];
   function siteRootPath() {
     const cur = (typeof location !== 'undefined' && location.pathname) ? location.pathname : '/';
     const mark = '/StarCard/';
     const at = cur.indexOf(mark);
     if (at >= 0) return cur.slice(0, at + mark.length);
     const seg = cur.split('/').filter(function (x) { return !!x; });
-    const known = { books: 1, 'class': 1, deskmate: 1, battle: 1, stats: 1, settings: 1, browse: 1 };
+    const known = { books: 1, 'class': 1, deskmate: 1, battle: 1, stats: 1, settings: 1, browse: 1, store: 1 };
     while (seg.length && (known[seg[seg.length - 1]] || /\.[a-z0-9]+$/i.test(seg[seg.length - 1]))) seg.pop();
     return '/' + seg.join('/') + (seg.length ? '/' : '');
   }
@@ -372,6 +372,7 @@
     { kind: 'tab', tab: 2, label: '班级', ico: 'users', group: '一起学' },
     { kind: 'tab', tab: 3, label: '同桌', ico: 'link', group: '一起学' },
     { kind: 'tab', tab: 4, label: '比赛', ico: 'zap', group: '一起学' },
+    { kind: 'tab', tab: 7, label: '商铺', ico: 'grid', group: '工具' },
     { kind: 'tab', tab: 5, label: '数据', ico: 'chart', group: '工具' },
     { kind: 'page', act: 'notice-open', label: '通知', ico: 'bell', group: '工具', badge: true }
     // 「设置」已移入左下角头像弹出的账户菜单（见 accountMenuLayer）
@@ -1899,7 +1900,9 @@
       '<div class="ach-medals">' + medalHtml + '</div></div>' +
       '<div class="set-block"><div class="set-block-h">今日任务</div>' + taskHtml + '</div>' +
       '<div class="set-block"><div class="set-block-h">积分</div>' +
-      '<div class="ach-points"><b>' + ach.points + '</b><span>复习 1 次 1 分 · 学习 1 天 10 分 · 每枚勋章 20 分</span></div></div>' +
+      '<div class="ach-points"><b>' + (window.SCShop ? SCShop.balance(app) : ach.points) + '</b><span>复习 1 次 1 分 · 学习 1 天 10 分 · 每枚勋章 20 分</span></div>' +
+      '<div class="set-actions"><button class="btn btn-sm btn-accent" data-act="shop-goto" data-tab="store">' + icon('grid', 'i14') + '去商铺花积分</button>' +
+      '<button class="btn btn-sm" data-act="shop-goto" data-tab="ledger">积分明细</button></div></div>' +
       '<div class="set-block"><div class="set-block-h">碎片 ' + ach.shards + ' / 9</div>' +
       '<div class="ach-shards">' + shardHtml + '</div>' +
       '<div class="ach-shard-sub">每复习 120 张攒 1 枚碎片，集齐 9 枚点亮一整套。</div></div>' +
@@ -3253,6 +3256,10 @@
   const FCUI = {
     esc: esc,
     icon: icon,
+    tabbarHtml: tabbar,
+    achievementInfo: achievementInfo,
+    levelInfo: levelInfo,
+    streakStat: streakStat,
     aiLayer: aiLayer,
     cmdRowsHtml: cmdRowsHtml,
     aiBriefing: aiBriefing,
@@ -3284,6 +3291,7 @@
       else if (app.tab === 3) body = deskmatePage(app);
       else if (app.tab === 4) body = battleConfig(app);
       else if (app.tab === 5) body = statsPage(app);
+      else if (app.tab === 7 && window.SCShopUI) body = window.SCShopUI.render(app);
       else body = settingsPage(app);
 
       let html = '<div id="root">' + body + '</div>';

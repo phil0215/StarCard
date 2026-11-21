@@ -2643,6 +2643,9 @@
     // 模态遮罩点击关闭（只有点在遮罩本身，点弹窗内部不关闭）
     if (act === 'mask-click') { if (e.target === el) App.closeModal(); return; }
 
+    // 商铺 / 积分相关交互统一交给 shop.js
+    if (act.indexOf('shop-') === 0 && window.SCShop) { window.SCShop.handleAct(act, el, App); return; }
+
     switch (act) {
       // —— 小星助手 / 命令面板：入口已移除 ——
       case 'ai-close': App.aiClose(); break;
@@ -3374,7 +3377,7 @@
   // 多页面入口：各页 HTML 用 window.SC_PAGE 声明首屏显示哪一块，避免每次都从卡片页开始
   (function applyPageEntry() {
     var page = String((typeof window !== 'undefined' && window.SC_PAGE) || '').toLowerCase();
-    var TABS = { cards: 0, books: 1, 'class': 2, deskmate: 3, battle: 4, stats: 5, settings: 6 };
+    var TABS = { cards: 0, books: 1, 'class': 2, deskmate: 3, battle: 4, stats: 5, settings: 6, store: 7 };
     if (Object.prototype.hasOwnProperty.call(TABS, page)) {
       App.tab = TABS[page];
       App.accountOpen = false;
