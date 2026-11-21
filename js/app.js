@@ -87,7 +87,7 @@
     wb: null,
     accountOpen: false,
     accountMenuOpen: false,
-    settingsPane: 'root',      // 设置页二级分类：root / account / plan / fsrs / study / appearance / data / privacy / keys / about / level
+    settingsPane: 'account',   // 设置页当前分类：account / level / plan / fsrs / study / appearance / data / privacy / keys / about
     noticePageOpen: false,
     backupPageOpen: false,
     activeClassId: '',
@@ -1411,7 +1411,7 @@
     gotoSettings: function () {
       this.accountMenuOpen = false;
       this.accountOpen = false;
-      this.settingsPane = 'root';
+      this.settingsPane = 'account';
       this.aiOpen = false; this.cmdOpen = false;
       this.noticePageOpen = false; this.backupPageOpen = false;
       this.modal = null;
@@ -3102,8 +3102,8 @@
       case 'save-settings': App.saveSettings(); break;
       case 'checkin-makeup': App.useMakeupCard(); break;
       // 设置页二级分类：点分类进参数页，返回回到目录
-      case 'set-pane': App.settingsPane = d.pane || 'root'; App.render(); try { window.scrollTo(0, 0); } catch (err) {} break;
-      case 'set-pane-back': App.settingsPane = 'root'; App.render(); try { window.scrollTo(0, 0); } catch (err) {} break;
+      case 'set-pane': App.settingsPane = d.pane || 'account'; App.render(); try { window.scrollTo(0, 0); } catch (err) {} break;
+      case 'set-pane-back': App.settingsPane = 'account'; App.render(); try { window.scrollTo(0, 0); } catch (err) {} break;
       case 'id-regen': App.regenPublicId(); break;
       // 设置页顶部锚点：只滚动，不重绘（重绘会打断正在编辑的输入框）
       case 'set-jump': {
