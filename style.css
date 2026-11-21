@@ -5211,34 +5211,34 @@ html[data-motion="off"] .hero-float { animation: none !important; }
    账户菜单 · 豆包式紧凑分组（覆盖前面的实现）
    ============================================================ */
 .acct-menu {
-  left: calc(var(--side-w) + 12px);
+  left: calc(var(--side-w) + 10px);
   bottom: 14px;
-  width: 264px;
-  border-radius: 16px;
+  width: 206px;
+  border-radius: 14px;
 }
 .am-head {
-  padding: 10px 12px 9px;
+  padding: 8px 10px 7px;
   background: transparent;
   border-bottom: 1px solid var(--line);
 }
-.am-head-acct { gap: 9px; }
+.am-head-acct { gap: 7px; }
 .am-head-acct .ava-lg {
-  width: 32px; height: 32px;
-  border-radius: 9px;
-  font-size: 13px;
+  width: 26px; height: 26px;
+  border-radius: 8px;
+  font-size: 11px;
 }
-.am-head-txt { gap: 1px; }
-.am-head-txt b { font-size: 13px; letter-spacing: -.2px; }
-.am-head-txt small { font-size: 10px; }
+.am-head-txt { gap: 0; }
+.am-head-txt b { font-size: 11.5px; letter-spacing: -.2px; }
+.am-head-txt small { font-size: 9px; }
 .am-head-acct > .ic:last-child { margin-left: auto; color: var(--ink-4); opacity: .55; }
 .am-head-meta {
-  margin-top: 7px;
-  font-size: 10px;
+  margin-top: 5px;
+  font-size: 9px;
   color: var(--ink-4);
   letter-spacing: .1px;
 }
 
-.am-list { padding: 4px 5px; }
+.am-list { padding: 3px 4px; }
 .am-group { padding: 1px 0; }
 .am-group + .am-group {
   border-top: 1px solid var(--line);
@@ -5246,41 +5246,41 @@ html[data-motion="off"] .hero-float { animation: none !important; }
   padding-top: 3px;
 }
 .am-item {
-  gap: 10px;
-  min-height: 33px;
-  padding: 5px 8px;
+  gap: 8px;
+  min-height: 29px;
+  padding: 4px 7px;
   margin: 1px 0;
-  border-radius: 9px;
+  border-radius: 8px;
 }
 .am-ico {
-  width: 19px; height: 19px;
+  width: 16px; height: 16px;
   border-radius: 0;
   background: none;
   color: var(--ink-2);
 }
-.am-ico svg { width: 17px; height: 17px; }
-.am-txt b { font-size: 12.5px; font-weight: 600; letter-spacing: -.1px; }
+.am-ico svg { width: 14px; height: 14px; }
+.am-txt b { font-size: 11px; font-weight: 600; letter-spacing: -.1px; }
 .am-item > .ic:last-child { color: var(--ink-4); opacity: .5; }
-.am-val { font-size: 10.5px; color: var(--ink-4); flex: none; }
+.am-val { font-size: 9.5px; color: var(--ink-4); flex: none; }
 
 .am-foot {
-  padding: 4px 5px 3px;
+  padding: 3px 4px 3px;
   border-top: 1px solid var(--line);
   background: transparent;
 }
-.am-foot .am-item { min-height: 34px; }
-.am-sign { padding: 3px 0 5px; margin-top: 2px; font-size: 9.5px; }
+.am-foot .am-item { min-height: 30px; }
+.am-sign { padding: 2px 0 4px; margin-top: 2px; font-size: 9px; }
 .am-item-danger .am-ico { background: none; color: var(--red); }
 .am-item-danger .am-txt b { color: var(--red); }
 .am-item-primary {
-  min-height: 34px;
+  min-height: 30px;
   justify-content: center;
   box-shadow: none;
-  border-radius: 9px;
+  border-radius: 8px;
 }
 .am-item-primary .am-ico { background: none; color: #fff; }
 .am-item-primary .am-txt { flex: 0 0 auto; }
-.am-item-primary .am-txt b { font-size: 12.5px; }
+.am-item-primary .am-txt b { font-size: 11.5px; }
 [data-theme="dark"] .acct-menu { background: #2A2438; }
 [data-theme="dark"] .am-item:hover { background: rgba(255, 255, 255, .06); }
 [data-theme="dark"] .am-item-primary { background: linear-gradient(135deg, #8B6CFF, #6E4DF0); }
@@ -5290,7 +5290,7 @@ html[data-motion="off"] .hero-float { animation: none !important; }
   .acct-menu {
     left: 10px; right: 10px; bottom: 10px;
     width: auto;
-    max-width: 300px;
+    max-width: 206px;
     margin-left: auto; margin-right: auto;
   }
 }
