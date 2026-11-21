@@ -5947,3 +5947,19 @@ html[data-motion="off"] *::after {
   animation: none !important;
   transition-duration: .01ms !important;
 }
+
+/* ---- 素白（plain）补充：补齐未盖到的彩色细节，限定 plain 模式，不影响 vivid ---- */
+html[data-look="plain"] .tab:hover { background: var(--surface-2) !important; background-image: none !important; }
+html[data-look="plain"] .tab.active { background: var(--surface-2) !important; background-image: none !important; color: var(--ink-1) !important; box-shadow: none !important; }
+html[data-look="plain"] .tab.active::before { display: none !important; }
+html[data-look="plain"] .tab.active .ico { color: var(--brand) !important; }
+html[data-look="plain"] .nav-label::before { background: var(--ink-4) !important; }
+html[data-look="plain"] .side-badge { background: var(--ink-4) !important; color: #fff !important; }
+html[data-look="plain"] .section-title::before { background: var(--ink-4) !important; background-image: none !important; }
+html[data-look="plain"] .av-tone-0, html[data-look="plain"] .av-tone-1, html[data-look="plain"] .av-tone-2, html[data-look="plain"] .av-tone-3,
+html[data-look="plain"] .av-tone-4, html[data-look="plain"] .av-tone-5, html[data-look="plain"] .av-tone-6, html[data-look="plain"] .av-tone-7 {
+  background: var(--surface-2) !important; color: var(--ink-3) !important; box-shadow: none !important;
+}
+html[data-look="plain"] .cap-warn { background: var(--surface-2) !important; color: var(--ink-3) !important; border: 1px solid var(--line) !important; }
+html[data-look="plain"] .dc-new, html[data-look="plain"] .dc-due, html[data-look="plain"] .dc-done { background: var(--surface-2) !important; color: var(--ink-3) !important; }
+
