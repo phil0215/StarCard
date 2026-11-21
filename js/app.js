@@ -226,7 +226,7 @@
     },
     applyTheme: function () {
       const s = this.state.settings || {};
-      const t = s.theme || 'dark';
+      const t = s.theme || 'light';
       let dark = t === 'dark';
       if (t === 'auto') {
         dark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
@@ -323,6 +323,65 @@
       const today = FC.dateKey(Date.now());
       if (this.state.lastNewDate !== today) { this.state.lastNewDate = today; this.state.newToday = 0; }
       if (this.state.lastReviewDate !== today) { this.state.lastReviewDate = today; this.state.reviewToday = 0; }
+      this.syncCheckinRewards(true);
+    },
+
+    // ---- 连续打卡奖励：达标天数解锁勋章，勋章发补签卡 ----
+    syncCheckinRewards: function (silent) {
+      if (!FC.checkinStreak || !FC.CHECKIN_BADGES) return false;
+      const ck = FC.checkinStreak(this.state, Date.now());
+      if (!Array.isArray(this.state.badges)) this.state.badges = [];
+      let grant = 0;
+      const fresh = [];
+      for (let i = 0; i < FC.CHECKIN_BADGES.length; i++) {
+        const b = FC.CHECKIN_BADGES[i];
+        const id = 'd' + b.days;
+        if (ck.longest < b.days || this.state.badges.indexOf(id) >= 0) continue;
+        this.state.badges.push(id);
+        grant += b.cards;
+        fresh.push(b);
+      }
+      if (!fresh.length) return false;
+      this.state.makeupCards = (Number(this.state.makeupCards) || 0) + grant;
+      this.save();
+      if (!silent) {
+        const last = fresh[fresh.length - 1];
+        this.toast('解锁勋章「' + last.name + '」· 补签卡 +' + grant);
+      }
+      return true;
+    },
+
+    // ---- 用补签卡补上最近漏掉的一天（把断掉的连击接回来） ----
+    useMakeupCard: function () {
+      if ((Number(this.state.makeupCards) || 0) <= 0) {
+        this.toast('还没有补签卡：连续打卡解锁勋章后可以获得');
+        return;
+      }
+      const map = {};
+      for (let i = 0; i < this.state.stats.length; i++) {
+        const e = this.state.stats[i];
+        if (e && e.date) map[e.date] = e;
+      }
+      const now = Date.now();
+      const okOf = function (k) { return FC.dayCheckin(map[k]).ok; };
+      let target = '';
+      for (let i = 1; i <= 7; i++) {
+        const k = FC.dateKey(now - i * FC.DAY_MS);
+        if (!okOf(k)) { target = k; break; }
+      }
+      if (!target) {
+        this.toast('最近一周都打卡了，不需要补签');
+        return;
+      }
+      this.state.stats.push({
+        date: target, reviews: 0, passed: 0, timeMs: 0,
+        newCount: 0, reviewCount: 0, makeup: true
+      });
+      this.state.makeupCards = Math.max(0, (Number(this.state.makeupCards) || 0) - 1);
+      this.syncCheckinRewards(true);
+      this.save();
+      this.render();
+      this.toast('已补签 ' + target + '，连击接上了');
     },
 
     // ---- 查询辅助 ----
@@ -1057,6 +1116,7 @@
       st.done = false;
       this.advanceToNext();
       this.save();
+      this.syncCheckinRewards();
       this.render();
     },
 
@@ -2979,6 +3039,7 @@
       case 'account-logout': App.openModal({ type: 'confirm', title: '退出登录', message: '退出后本机学习数据仍会保留，重新登录即可继续使用。', action: 'logout' }); break;
       case 'account-clear': App.openModal({ type: 'confirm', title: '清除本机账户数据', message: '将删除昵称、邮箱、头像与隐私偏好，并退出登录。牌组与学习记录不受影响。', action: 'account-clear' }); break;
       case 'save-settings': App.saveSettings(); break;
+      case 'checkin-makeup': App.useMakeupCard(); break;
       // 设置页二级分类：点分类进参数页，返回回到目录
       case 'set-pane': App.settingsPane = d.pane || 'root'; App.render(); try { window.scrollTo(0, 0); } catch (err) {} break;
       case 'set-pane-back': App.settingsPane = 'root'; App.render(); try { window.scrollTo(0, 0); } catch (err) {} break;
