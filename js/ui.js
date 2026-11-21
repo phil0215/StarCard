@@ -2320,7 +2320,7 @@
         { k: 'appearance', t: '外观与个性化', d: '明暗模式、主题、强调色与底纹', ico: 'palette', tone: 'pink', g: '个性化', val: presetNow + ' · ' + themeName },
         { k: 'data', t: '数据与备份', d: '备份提醒与本机数据', ico: 'cloud', tone: 'cyan', g: '系统', val: '' },
         { k: 'privacy', t: '隐私与安全', d: '数据存在哪、怎么清除', ico: 'shield', tone: 'indigo', g: '系统', val: '' },
-        { k: 'keys', t: '快捷键', d: '键盘操作一览', ico: 'key', tone: 'slate', g: '系统', val: '' },
+        { k: 'keys', t: '快捷键', d: '键盘操作一览', ico: 'keyboard', tone: 'slate', g: '系统', val: '' },
         { k: 'about', t: '关于', d: '版本与开发团队', ico: 'info', tone: 'gray', g: '系统', val: '' }
       ];
       let curCat = null;
