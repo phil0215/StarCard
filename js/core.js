@@ -106,6 +106,109 @@
   }
 
   // -------------------------------------------------------------------------
+  // 打卡（连续学习）：标准 = 当天学习满 10 分钟 且 过卡满 100 个单词
+  // -------------------------------------------------------------------------
+  const DAY_GOAL = { minutes: 10, words: 100 };
+
+  // 连续打卡勋章：每达成一档，发一次补签卡
+  const CHECKIN_BADGES = [
+    { days: 3, name: '启程', cards: 1 },
+    { days: 7, name: '一周', cards: 1 },
+    { days: 14, name: '半月', cards: 1 },
+    { days: 30, name: '满月', cards: 2 },
+    { days: 60, name: '双月', cards: 2 },
+    { days: 100, name: '百日', cards: 2 },
+    { days: 180, name: '半年', cards: 3 },
+    { days: 365, name: '一年', cards: 3 }
+  ];
+
+  // 单日打卡判定：补签日直接算打卡
+  function dayCheckin(stat) {
+    const timeMs = Math.max(0, Number(stat && stat.timeMs) || 0);
+    const words = Math.max(0, Math.round(Number(stat && stat.reviews) || 0));
+    const minutes = timeMs / 60000;
+    const makeup = !!(stat && stat.makeup);
+    return {
+      ok: makeup || (minutes >= DAY_GOAL.minutes && words >= DAY_GOAL.words),
+      makeup: makeup,
+      minutes: minutes,
+      words: words,
+      timePct: Math.min(1, minutes / DAY_GOAL.minutes),
+      wordPct: Math.min(1, words / DAY_GOAL.words)
+    };
+  }
+
+  function statMap(stats) {
+    const map = {};
+    const list = Array.isArray(stats) ? stats : [];
+    for (let i = 0; i < list.length; i++) {
+      const e = list[i];
+      if (e && e.date) map[e.date] = e;
+    }
+    return map;
+  }
+
+  // 本周起点：周一 00:00
+  function startOfWeek(ms) {
+    const d = new Date(ms);
+    d.setHours(0, 0, 0, 0);
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+    return d.getTime();
+  }
+
+  // 本周 7 天（周一 → 周日）
+  function weekCheckins(state, nowMs) {
+    const at = nowMs || Date.now();
+    const map = statMap(state && state.stats);
+    const start = startOfWeek(at);
+    const todayKey = dateKey(at);
+    const out = [];
+    for (let i = 0; i < 7; i++) {
+      const t = start + i * DAY_MS;
+      const k = dateKey(t);
+      const c = dayCheckin(map[k]);
+      out.push({
+        key: k, ts: t, ok: c.ok, makeup: c.makeup,
+        minutes: c.minutes, words: c.words, timePct: c.timePct, wordPct: c.wordPct,
+        isToday: k === todayKey, isFuture: t > at
+      });
+    }
+    return out;
+  }
+
+  // 连续天数（今天没达标但昨天达标，连击仍延续）
+  function checkinStreak(state, nowMs) {
+    const at = nowMs || Date.now();
+    const map = statMap(state && state.stats);
+    const okOf = function (k) { return dayCheckin(map[k]).ok; };
+    const todayKey = dateKey(at);
+    const doneToday = okOf(todayKey);
+
+    let days = 0;
+    const cur = new Date(at);
+    cur.setHours(12, 0, 0, 0);
+    if (!doneToday) cur.setDate(cur.getDate() - 1);
+    while (okOf(dateKey(cur.getTime()))) {
+      days++;
+      cur.setDate(cur.getDate() - 1);
+    }
+
+    const keys = [];
+    for (const k in map) if (dayCheckin(map[k]).ok) keys.push(k);
+    keys.sort();
+    let longest = 0, run = 0, prevT = null;
+    for (let i = 0; i < keys.length; i++) {
+      const t = Date.parse(keys[i] + 'T00:00:00');
+      if (isNaN(t)) continue;
+      run = (prevT !== null && Math.round((t - prevT) / DAY_MS) === 1) ? run + 1 : 1;
+      if (run > longest) longest = run;
+      prevT = t;
+    }
+
+    return { days: days, doneToday: doneToday, longest: longest, week: weekCheckins(state, at) };
+  }
+
+  // -------------------------------------------------------------------------
   // 数据模型构造函数 / 复制函数
   // -------------------------------------------------------------------------
   function defaultScheduling() {
@@ -194,6 +297,8 @@
       lastNewDate: '', newToday: 0, lastReviewDate: '', reviewToday: 0,
       wordBooks: [], wordProgress: [], classrooms: [], deskmates: [], battleRecords: [],
       savedSearches: [], removedSeries: [],
+      // 连续打卡：已解锁勋章 id（如 d7）+ 剩余补签卡
+      badges: [], makeupCards: 0,
       // 动态系列：导入词库时自动生成一个系列（文件夹）收纳本批牌组；collapsedSeries 记住折叠状态
       series: [], collapsedSeries: []
     };
@@ -1022,11 +1127,21 @@
         const e = raw.stats[i];
         if (e && typeof e.date === 'string') stats.push({
           date: e.date, reviews: nonNegInt(e.reviews, 0), passed: nonNegInt(e.passed, 0),
-          timeMs: Math.max(0, num(e.timeMs, 0)), newCount: nonNegInt(e.newCount, 0), reviewCount: nonNegInt(e.reviewCount, 0)
+          timeMs: Math.max(0, num(e.timeMs, 0)), newCount: nonNegInt(e.newCount, 0), reviewCount: nonNegInt(e.reviewCount, 0),
+          makeup: e.makeup === true
         });
       }
       state.stats = stats;
     }
+    if (Array.isArray(raw.badges)) {
+      const bd = [];
+      for (let i = 0; i < raw.badges.length; i++) {
+        const v = str(raw.badges[i], '');
+        if (v && bd.indexOf(v) < 0) bd.push(v);
+      }
+      state.badges = bd;
+    }
+    state.makeupCards = nonNegInt(raw.makeupCards, 0);
     state.lastNewDate = str(raw.lastNewDate, '');
     state.newToday = nonNegInt(raw.newToday, 0);
     state.lastReviewDate = str(raw.lastReviewDate, '');
@@ -1098,6 +1213,8 @@
     STATE_NEW: STATE_NEW, STATE_LEARNING: STATE_LEARNING, STATE_REVIEW: STATE_REVIEW, STATE_RELEARNING: STATE_RELEARNING,
     SRCD_FORMAT: SRCD_FORMAT, SRCD_VERSION: SRCD_VERSION, STATE_SCHEMA: STATE_SCHEMA,
     makeId: makeId, nowIso: nowIso, dateKey: dateKey, clamp: clamp,
+    DAY_GOAL: DAY_GOAL, CHECKIN_BADGES: CHECKIN_BADGES, dayCheckin: dayCheckin,
+    weekCheckins: weekCheckins, checkinStreak: checkinStreak, startOfWeek: startOfWeek,
     defaultScheduling: defaultScheduling, newCard: newCard, emptyCard: emptyCard, newDeck: newDeck,
     defaultSettings: defaultSettings, defaultParameters: defaultParameters, defaultState: defaultState,
     copyState: copyState, copyDeck: copyDeck, copyCard: copyCard, copySettings: copySettings,
