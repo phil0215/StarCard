@@ -7224,7 +7224,6 @@
     const st = app.state || {};
     if (Array.isArray(st.decks)) {
       decks = st.decks.length;
-      const now = Date.now();
       for (let i = 0; i < st.decks.length; i++) {
         const cs = st.decks[i].cards;
         if (!Array.isArray(cs)) continue;
@@ -7235,38 +7234,43 @@
         }
       }
     }
-    const row = function (ico, act, label, sub, extraCls) {
-      return '<button class="am-item' + (extraCls ? ' ' + extraCls : '') + '" data-act="' + act + '">' +
-        '<span class="am-ico">' + icon(ico, 'i18') + '</span>' +
-        '<span class="am-txt"><b>' + label + '</b>' + (sub ? '<small>' + sub + '</small>' : '') + '</span>' +
+    // 豆包风菜单行：线性图标 + 文字 + 右侧数值/箭头
+    const item = function (ico, act, label, val, cls) {
+      return '<button class="am-item' + (cls ? ' ' + cls : '') + '" data-act="' + act + '">' +
+        '<span class="am-ico">' + icon(ico, 'i20') + '</span>' +
+        '<span class="am-txt"><b>' + label + '</b></span>' +
+        (val ? '<span class="am-val">' + val + '</span>' : '') +
         icon('chevronRight', 'i14') + '</button>';
     };
     const cloudCfg = (window.FC && FC.CLOUD_SYNC_CONFIG && FC.CLOUD_SYNC_CONFIG.anonKey);
-    let html = '<div class="acct-menu-mask" data-act="account-menu-close"></div>' +
+    return '<div class="acct-menu-mask" data-act="account-menu-close"></div>' +
       '<div class="acct-menu" role="dialog" aria-label="账户菜单">' +
       '<div class="am-head">' +
       '<button class="am-head-acct" data-act="account-open">' + avatarFace(acc, 'ava-lg') +
       '<span class="am-head-txt"><b>' + esc(on ? name : '登录 / 注册') + '</b>' +
-      '<small>' + esc(on ? provider : '登录后进度可跨设备同步') + '</small></span></button>' +
-      '<div class="am-stats">' +
-      '<div><b>' + decks + '</b><span>牌组</span></div>' +
-      '<div><b>' + cards + '</b><span>卡片</span></div>' +
-      '<div><b>' + mastered + '</b><span>已掌握</span></div>' +
-      '</div></div>' +
+      '<small>' + esc(on ? provider : '登录后进度可跨设备同步') + '</small></span>' +
+      icon('chevronRight', 'i14') + '</button>' +
+      '<div class="am-head-meta">' + decks + ' 牌组 · ' + cards + ' 卡片 · 已掌握 ' + mastered + '</div>' +
+      '</div>' +
       '<div class="am-list">' +
-      row('user', 'account-open', '个人中心', '资料 · 登录 · 隐私') +
-      row('settings', 'goto-settings', '设置', '学习参数 · 数据 · 外观') +
-      row('shield', 'privacy-info', '隐私说明', '数据只留本机') +
-      (cloudCfg ? row('cloud', 'account-open', '云同步', '换设备进度不丢') : '') +
-      row('sparkles', 'ai-toggle', '小星助手', '离线智能问答') +
+      '<div class="am-group">' +
+      item('user', 'account-open', '个人中心') +
+      item('settings', 'goto-settings', '设置') +
+      '</div>' +
+      '<div class="am-group">' +
+      item('shield', 'privacy-info', '隐私说明') +
+      (cloudCfg ? item('cloud', 'account-open', '云同步', '已开启') : '') +
+      item('sparkles', 'ai-toggle', '小星助手') +
+      '</div>' +
       '</div>' +
       '<div class="am-foot">' +
       (on
-        ? row('logout', 'account-logout', '退出登录', '', 'am-item-danger')
-        : row('lock', 'account-open', '登录 / 注册', '开启云同步', 'am-item-primary')) +
+        ? item('logout', 'account-logout', '退出登录', '', 'am-item-danger')
+        : '<button class="am-item am-item-primary" data-act="account-open">' +
+          '<span class="am-ico">' + icon('lock', 'i20') + '</span>' +
+          '<span class="am-txt"><b>登录 / 注册</b></span></button>') +
       '<div class="am-sign">闪星卡 StarCard · 小李工作室</div>' +
       '</div></div>';
-    return html;
   }
 
   // 命令面板结果行（供完整页面 CmdPage 初始渲染与实时过滤复用）
