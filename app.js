@@ -5059,7 +5059,7 @@
     const name = (app && app.accountDisplayName) ? app.accountDisplayName() : (acc.nickname || '学习者');
     const children = [];
     children.push(new A.El('div').cls('brand').children([
-      new A.El('span').cls('logo').html('<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M12 3.2c.5 4.5 2.3 6.3 6.8 6.8-4.5.5-6.3 2.3-6.8 6.8-.5-4.5-2.3-6.3-6.8-6.8 4.5-.5 6.3-2.3 6.8-6.8Z"/><path d="M18.6 15.6c.22 1.8.9 2.48 2.7 2.7-1.8.22-2.48.9-2.7 2.7-.22-1.8-.9-2.48-2.7-2.7 1.8-.22 2.48-.9 2.7-2.7Z"/></svg>'),
+      new A.El('span').cls('logo').html('<img src="icon-192.png" alt="" />'),
       new A.El('span').cls('brand-txt').children([
         new A.El('span', '闪星卡').cls('brand-cn'),
         new A.El('span', 'StarCard').cls('brand-en')
@@ -5189,11 +5189,8 @@
   ];
 
   function logo() {
-    // 闪星卡：一大一小双星标记，跟随 currentColor
-    return '<span class="logo"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">' +
-      '<path d="M12 3.2c.5 4.5 2.3 6.3 6.8 6.8-4.5.5-6.3 2.3-6.8 6.8-.5-4.5-2.3-6.3-6.8-6.8 4.5-.5 6.3-2.3 6.8-6.8Z"/>' +
-      '<path d="M18.6 15.6c.22 1.8.9 2.48 2.7 2.7-1.8.22-2.48.9-2.7 2.7-.22-1.8-.9-2.48-2.7-2.7 1.8-.22 2.48-.9 2.7-2.7Z"/>' +
-      '</svg></span>';
+    // 闪星卡：直接显示应用图标（与 favicon 同源，原样呈现）
+    return '<span class="logo"><img src="icon-192.png" alt="" /></span>';
   }
 
   function tabbar(active, app) {
