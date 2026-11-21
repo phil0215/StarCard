@@ -2325,11 +2325,14 @@
       for (let ci = 0; ci < CATS.length; ci++) { if (CATS[ci].k === pane) curCat = CATS[ci]; }
   
       // —— 标题栏：单层「设置」，分类切换在左栏完成 ——
-      let html = titlebar('设置', '左侧选分类，右侧改设置');
+      let html = titlebar('设置', '');
       html += '<div class="content set-content"><div class="set-layout">';
 
       // ================= 左栏：分类导航 =================
       html += '<aside class="set-side">';
+      html += '<div class="ss-search">' + icon('search', 'i15') +
+        '<input id="setSearch" type="text" placeholder="搜索设置项" autocomplete="off"' +
+        ' value="' + esc(app.settingsQuery || '') + '" oninput="window.scFilterSettings && window.scFilterSettings(this.value)" /></div>';
       html += '<div class="ss-acct"><span class="ss-ava">' + avatarFace(a, 'ava-sm') + '</span>' +
         '<div class="ss-main"><b>' + esc(on ? name : '匿名用户') + '</b>' +
         '<small>' + esc(idt.ready ? idt.code : (on ? '' : '点击登录')) + '</small></div></div>';
@@ -2339,12 +2342,13 @@
         for (let ci = 0; ci < CATS.length; ci++) {
           const c = CATS[ci];
           if (c.g !== navGroups[gi]) continue;
-          html += '<button class="ss-item' + (pane === c.k ? ' on' : '') + '" data-act="set-pane" data-pane="' + c.k + '">' +
+          html += '<button class="ss-item' + (pane === c.k ? ' on' : '') + '" data-act="set-pane" data-pane="' + c.k + '" data-kw="' + esc(c.t + ' ' + (c.d || '')) + '">' +
             '<span class="ss-ico">' + icon(c.ico, 'i18') + '</span>' +
             '<span class="ss-label">' + esc(c.t) + '</span>' +
             '</button>';
         }
       }
+      html += '<div class="ss-empty" id="ssEmpty" style="display:none">没有匹配的设置项</div>';
       html += '<div class="set-ver">闪星卡 1.6.0 · 数据在本机</div>';
       html += '</aside>';
 

@@ -87,6 +87,33 @@
     wb: null,
     accountOpen: false,
     accountMenuOpen: false,
+    settingsQuery: '',         // 设置页左栏搜索关键词
+    // 左栏搜索：纯 DOM 过滤，不重渲染（避免输入时掉焦点）
+    filterSettings(q) {
+      this.settingsQuery = q || '';
+      const needle = String(this.settingsQuery).trim().toLowerCase();
+      const items = document.querySelectorAll('.set-side .ss-item');
+      let visible = 0;
+      for (let i = 0; i < items.length; i++) {
+        const el = items[i];
+        const kw = (el.getAttribute('data-kw') || '').toLowerCase();
+        const hit = !needle || kw.indexOf(needle) >= 0;
+        el.style.display = hit ? '' : 'none';
+        if (hit) visible += 1;
+      }
+      const groups = document.querySelectorAll('.set-side .ss-group');
+      for (let gi = 0; gi < groups.length; gi++) {
+        const g = groups[gi];
+        let any = false, n = g.nextElementSibling;
+        while (n && n.classList.contains('ss-item')) {
+          if (n.style.display !== 'none') any = true;
+          n = n.nextElementSibling;
+        }
+        g.style.display = any ? '' : 'none';
+      }
+      const empty = document.getElementById('ssEmpty');
+      if (empty) empty.style.display = visible ? 'none' : '';
+    },
     settingsPane: 'account',   // 设置页当前分类：account / level / plan / fsrs / study / appearance / data / privacy / keys / about
     noticePageOpen: false,
     backupPageOpen: false,
@@ -3809,6 +3836,9 @@
     const boot = document.getElementById('boot');
     if (boot && boot.parentNode) boot.parentNode.removeChild(boot);
   } catch (e) {}
+  // 设置页左栏搜索：内联 oninput 在闭包外，拿不到 App，这里挂一个薄桥
+  window.scFilterSettings = function (q) { try { App.filterSettings(q); } catch (e) {} };
+
   // 在线环境下异步校验云端登录会话（离线不触发网络请求）
   App.restoreCloudSession();
 })();

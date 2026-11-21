@@ -7684,3 +7684,73 @@ html[data-theme="light"] .ss-item.on { background: #EFEFF1; }
 .series-group .deck-item .btn-more { width: 28px; padding: 0; }
 @media (max-width: 900px) { .series-group { grid-template-columns: 1fr; } }
 @media (max-width: 420px) { .series-group { grid-template-columns: 1fr; } }
+
+/* ============================================================
+   设置页 · WorkBuddy 版式：
+   左 = 搜索框 + 分组导航；右 = 分区标题 + 整块行列表（行内扁平、控件贴右）
+   ============================================================ */
+.set-content { max-width: 1320px !important; padding: 8px 30px 30px !important; }
+.set-layout { grid-template-columns: 186px minmax(0, 1fr); gap: 26px; }
+
+/* —— 左栏搜索框 —— */
+.ss-search { position: relative; margin: 0 0 10px; }
+.ss-search .ic { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: var(--ink-4); pointer-events: none; }
+.ss-search input {
+  width: 100%; height: 34px; padding: 0 10px 0 30px;
+  border-radius: 8px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink-1);
+  font: inherit; font-size: 12.5px; outline: none;
+}
+.ss-search input::placeholder { color: var(--ink-4); }
+.ss-search input:focus { border-color: var(--brand); }
+.ss-group { padding: 15px 8px 5px; font-size: 11.5px; font-weight: 600; letter-spacing: .02em; }
+.ss-item { padding: 8px 10px; font-size: 13px; }
+.ss-item .ss-label { font-weight: 500; }
+.ss-item.on .ss-label { font-weight: 600; }
+.ss-empty { padding: 10px; font-size: 12px; color: var(--ink-4); }
+
+/* —— 账号行移到左栏底部并弱化（WorkBuddy 左栏顶部只有搜索框） —— */
+.ss-acct { display: none; }  /* 账号信息由左侧全局导航底部承担（灰头像 + 匿名用户），左栏顶部只留搜索框 */
+.ss-acct .ava-sm { width: 26px; height: 26px; }
+.ss-main b { font-size: 12.5px; }
+.ss-main small { font-size: 11px; }
+.set-ver { margin-top: 18px; }
+
+/* —— 右栏：不重复分类大标题，直接分区块 —— */
+.set-main-head { display: none; }
+.set-grp-title { margin: 20px 2px 8px; font-size: 12px; font-weight: 600; color: var(--ink-3); }
+.set-grp-title:first-child { margin-top: 2px; }
+.set-card { border-radius: 12px; box-shadow: none; padding: 0; }
+.set-row { padding: 11px 16px; }
+.set-block { padding: 14px 16px; }
+.set-block .set-row { padding: 11px 0; }
+.set-block-h { font-size: 12px; font-weight: 600; color: var(--ink-3); margin-bottom: 6px; }
+
+/* —— 行：扁平化，左侧标题+描述，右侧控件贴边 —— */
+.set-row { padding: 11px 0; min-height: 54px; gap: 16px; }
+.set-ico { display: none !important; }
+.set-label { gap: 3px; font-size: 13.5px; font-weight: 600; }
+.set-label small { font-size: 11.5px; font-weight: 500; color: var(--ink-3); line-height: 1.5; }
+.set-ctl { margin-left: auto; }
+
+@media (max-width: 900px) {
+  .set-content { padding: 4px 12px 20px !important; }
+  .ss-search { display: none; }
+  .ss-acct { display: none; }
+  .set-card { padding: 0 12px; }
+}
+
+/* 设置页右栏：所有分块统一底色（含没有 set-block 行列表类的卡片），浅色 #F6F6F7 / 深色 #232323 */
+html[data-theme="light"][data-look="plain"] .set-main .set-card { background: #F6F6F7 !important; border-color: transparent !important; }
+html[data-theme="dark"][data-look="plain"] .set-main .set-card { background: #232323 !important; border-color: transparent !important; }
+
+/* 设置页 · 窄屏：两栏收成「分类 chips 一行行堆叠 + 内容在下」 */
+@media (max-width: 900px) {
+  .set-layout { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .set-side { position: static; flex-direction: row; flex-wrap: wrap; gap: 6px; padding-bottom: 8px; }
+  .ss-item { width: auto; }
+  .ss-group, .set-ver, .ss-empty { display: none; }
+  .set-card { border-radius: 12px; }
+  .set-row { padding: 10px 12px; }
+  .set-block { padding: 12px; }
+}
