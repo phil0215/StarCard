@@ -5088,7 +5088,7 @@
         children.push(pe);
       }
     }
-    children.push(new A.El('div').cls('side-account' + (on ? ' on' : '')).attr('act', 'account-open').title('个人中心').children([
+    children.push(new A.El('div').cls('side-account' + (on ? ' on' : '')).attr('act', 'account-menu').title('账户菜单').children([
       avatarEl(acc, 'ava-sm'),
       new A.El('span').cls('sa-txt').children([
         new A.El('span', on ? name : '登录 / 注册').cls('sa-name'),
@@ -5184,8 +5184,8 @@
     { kind: 'tab', tab: 5, label: '数据', ico: 'chart', group: '工具' },
     { kind: 'page', act: 'ai-toggle', label: '小星', ico: 'sparkles', group: '工具' },
     { kind: 'page', act: 'cmd-open', label: '面板', ico: 'cmd', group: '工具' },
-    { kind: 'page', act: 'notice-open', label: '通知', ico: 'bell', group: '工具', badge: true },
-    { kind: 'tab', tab: 6, label: '设置', ico: 'settings', group: '工具' }
+    { kind: 'page', act: 'notice-open', label: '通知', ico: 'bell', group: '工具', badge: true }
+    // 「设置」已移入左下角头像弹出的账户菜单（见 accountMenuLayer）
   ];
 
   function logo() {
@@ -5231,7 +5231,7 @@
           (n.badge && unread > 0 ? '<span class="side-badge">' + unread + '</span>' : '') + '</div>';
       }
     }
-    html += '<div class="side-account' + (on ? ' on' : '') + '" data-act="account-open" title="个人中心">' +
+    html += '<div class="side-account' + (on ? ' on' : '') + '" data-act="account-menu" title="账户菜单">' +
       avatarFace(acc, 'ava-sm') +
       '<span class="sa-txt"><span class="sa-name">' + esc(on ? name : '登录 / 注册') + '</span>' +
       '<span class="sa-sub">' + (on ? '查看个人中心' : '个人中心 · 未登录') + '</span></span>' +
@@ -7078,6 +7078,65 @@
       (app.aiUnread ? '<span class="ai-fab-dot"></span>' : '') + '</button>';
   }
 
+  // 账户菜单：点头像弹出，参照 WorkBuddy 的账户面板（高面板 + 账户卡 + 功能入口）
+  function accountMenuLayer(app) {
+    if (!app.accountMenuOpen) return '';
+    const acc = app.account || {};
+    const on = !!acc.loggedIn;
+    const name = app.accountDisplayName ? app.accountDisplayName() : (acc.nickname || '学习者');
+    const provider = acc.provider === 'phone' ? '手机号验证码登录'
+      : acc.provider === 'huawei' ? '华为账号'
+      : acc.provider === 'email' ? '邮箱验证码登录' : '本机账户';
+    // 学习概览统计
+    let decks = 0, cards = 0, mastered = 0;
+    const st = app.state || {};
+    if (Array.isArray(st.decks)) {
+      decks = st.decks.length;
+      const now = Date.now();
+      for (let i = 0; i < st.decks.length; i++) {
+        const cs = st.decks[i].cards;
+        if (!Array.isArray(cs)) continue;
+        cards += cs.length;
+        for (let j = 0; j < cs.length; j++) {
+          const sc = cs[j] && cs[j].scheduling;
+          if (sc && ((Number(sc.stability) || 0) >= 21 || sc.state === 2)) mastered++;
+        }
+      }
+    }
+    const row = function (ico, act, label, sub, extraCls) {
+      return '<button class="am-item' + (extraCls ? ' ' + extraCls : '') + '" data-act="' + act + '">' +
+        '<span class="am-ico">' + icon(ico, 'i18') + '</span>' +
+        '<span class="am-txt"><b>' + label + '</b>' + (sub ? '<small>' + sub + '</small>' : '') + '</span>' +
+        icon('chevronRight', 'i14') + '</button>';
+    };
+    const cloudCfg = (window.FC && FC.CLOUD_SYNC_CONFIG && FC.CLOUD_SYNC_CONFIG.anonKey);
+    let html = '<div class="acct-menu-mask" data-act="account-menu-close"></div>' +
+      '<div class="acct-menu" role="dialog" aria-label="账户菜单">' +
+      '<div class="am-head">' +
+      '<button class="am-head-acct" data-act="account-open">' + avatarFace(acc, 'ava-lg') +
+      '<span class="am-head-txt"><b>' + esc(on ? name : '登录 / 注册') + '</b>' +
+      '<small>' + esc(on ? provider : '登录后进度可跨设备同步') + '</small></span></button>' +
+      '<div class="am-stats">' +
+      '<div><b>' + decks + '</b><span>牌组</span></div>' +
+      '<div><b>' + cards + '</b><span>卡片</span></div>' +
+      '<div><b>' + mastered + '</b><span>已掌握</span></div>' +
+      '</div></div>' +
+      '<div class="am-list">' +
+      row('user', 'account-open', '个人中心', '资料 · 登录 · 隐私') +
+      row('settings', 'goto-settings', '设置', '学习参数 · 数据 · 外观') +
+      row('shield', 'privacy-info', '隐私说明', '数据只留本机') +
+      (cloudCfg ? row('cloud', 'account-open', '云同步', '换设备进度不丢') : '') +
+      row('sparkles', 'ai-toggle', '小星助手', '离线智能问答') +
+      '</div>' +
+      '<div class="am-foot">' +
+      (on
+        ? row('logout', 'account-logout', '退出登录', '', 'am-item-danger')
+        : row('lock', 'account-open', '登录 / 注册', '开启云同步', 'am-item-primary')) +
+      '<div class="am-sign">闪星卡 StarCard · 小李工作室</div>' +
+      '</div></div>';
+    return html;
+  }
+
   // 命令面板结果行（供完整页面 CmdPage 初始渲染与实时过滤复用）
   function cmdRowsHtml(app) {
     if (!FC.AI) return '';
@@ -7122,7 +7181,7 @@
 
   // 覆盖层：悬浮入口（小星按钮等），附加到所有页面根节点之后
   function overlays(app) {
-    return aiLayer(app);
+    return aiLayer(app) + accountMenuLayer(app);
   }
 
   // ============================================================
@@ -8213,6 +8272,7 @@
     studyRevealed: false,
     wb: null,
     accountOpen: false,
+    accountMenuOpen: false,
     noticePageOpen: false,
     backupPageOpen: false,
     activeClassId: '',
@@ -9432,9 +9492,38 @@
     },
     exitBattle: function () { this.battle = null; this.render(); },
 
+    // ---- 账户菜单（点头像弹出，参照 WorkBuddy 账户面板）----
+    toggleAccountMenu: function () {
+      this.accountMenuOpen = !this.accountMenuOpen;
+      if (this.accountMenuOpen) {
+        // 与其他浮层互斥
+        this.aiOpen = false; this.cmdOpen = false;
+        this.noticePageOpen = false; this.backupPageOpen = false;
+        this.modal = null;
+      }
+      this.render();
+    },
+    closeAccountMenu: function () {
+      if (!this.accountMenuOpen) return;
+      this.accountMenuOpen = false;
+      this.render();
+    },
+    gotoSettings: function () {
+      this.accountMenuOpen = false;
+      this.accountOpen = false;
+      this.aiOpen = false; this.cmdOpen = false;
+      this.noticePageOpen = false; this.backupPageOpen = false;
+      this.modal = null;
+      this.seriesId = ''; this.cardManageDeckId = ''; this.activeClassId = '';
+      this.study = null; this.wb = null; this.battle = null;
+      this.tab = 6;
+      this.render();
+    },
+
     // ---- 账户 / 个人中心：云端验证码登录 + 本机学习数据 ----
     openAccount: function () {
       // 账户页与通知 / 备份 / 小星 / 命令面板互斥：否则从这些页面点「我的」看不到反应
+      this.accountMenuOpen = false;
       this.aiOpen = false;
       this.cmdOpen = false;
       this.noticePageOpen = false;
@@ -10869,6 +10958,9 @@
       case 'battle-choose': App.battleChoose(parseInt(d.i, 10)); break;
       case 'battle-next': App.battleNext(); break;
       case 'battle-exit': App.exitBattle(); break;
+      case 'account-menu': App.toggleAccountMenu(); break;
+      case 'account-menu-close': App.closeAccountMenu(); break;
+      case 'goto-settings': App.gotoSettings(); break;
       case 'account-open': App.openAccount(); break;
       case 'account-login': App.openAccount(); break;
       case 'login-tab': App.setLoginMode(d.mode); break;
