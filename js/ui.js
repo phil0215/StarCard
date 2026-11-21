@@ -41,6 +41,7 @@
     key: '<circle cx="8.2" cy="15.6" r="4.1"/><path d="m11.3 12.5 8.2-8.2"/><path d="m15.9 5.5 3 3"/><path d="m18.4 3 3 3"/>',
     trophy: '<path d="M8 4h8v5.1a4 4 0 0 1-8 0z"/><path d="M8 5.2H4.8v1.6a3.4 3.4 0 0 0 3.4 3.3"/><path d="M16 5.2h3.2v1.6a3.4 3.4 0 0 1-3.4 3.3"/><path d="M12 13.2V17"/><path d="M8.4 21h7.2"/>',
     zap: '<path d="M13.4 2.4 5 13.6h5.4L10.2 21.6 18.8 10.4h-5.5z"/>',
+    flame: '<path d="M8.6 14.4A2.4 2.4 0 0 0 11 12c0-1.3-.5-1.9-1-2.9-1-2.1-.2-3.9 2-5.7.5 2.4 1.9 4.7 3.8 6.2 1.9 1.5 2.9 3.4 2.9 5.3a6.7 6.7 0 1 1-13.4 0c0-1.1.4-2.2 1-2.9a2.4 2.4 0 0 0 2.3 2.4z"/>',
     rotate: '<path d="M20.2 12a8.2 8.2 0 1 1-2.5-5.9"/><path d="M20.2 4v4.6h-4.6"/>',
     sparkles: '<path d="M11 3.4 12.7 8l4.6 1.7-4.6 1.7L11 16l-1.7-4.6L4.7 9.7 9.3 8z"/><path d="m18.4 15.2.9 2.3 2.3.9-2.3.9-.9 2.3-.9-2.3-2.3-.9 2.3-.9z"/>',
     empty: '<rect x="3.2" y="5.6" width="17.6" height="14.2" rx="3.4"/><path d="M8 3v2.6"/><path d="M16 3v2.6"/><path d="M8.4 13.6h7.2"/>',
@@ -191,13 +192,16 @@
     const tabActive = pageActive ? -999 : active;
     const name = (app && app.accountDisplayName) ? app.accountDisplayName() : (acc.nickname || '学习者');
     const children = [];
-    children.push(new A.El('div').cls('brand').children([
-      new A.El('span').cls('logo').html('<img src="' + pageHref(0) + 'icon-192.png" alt="" />'),
-      new A.El('span').cls('brand-txt').children([
-        new A.El('span', '闪星卡').cls('brand-cn'),
-        new A.El('span', 'StarCard').cls('brand-en')
-      ])
-    ]));
+    const sd = streakStat(app);
+    children.push(new A.El('div').cls('streak-mini' + (sd.doneToday ? ' lit' : ''))
+      .title('连续打卡 ' + sd.days + ' 天')
+      .children([
+        new A.El('span').cls('sm-flame').children([iconEl('flame', 'i18')]),
+        new A.El('span').cls('sm-txt').children([
+          new A.El('b', (sd.days > 0 ? sd.days : 0) + ' 天'),
+          new A.El('small', sd.doneToday ? '今日已打卡' : '连续打卡')
+        ])
+      ]));
     const unread = noticeUnread(app);
     let lastGroup = '';
     for (let i = 0; i < NAV.length; i++) {
@@ -317,7 +321,7 @@
     if (at >= 0) return cur.slice(0, at + mark.length);
     const seg = cur.split('/').filter(function (x) { return !!x; });
     const known = { books: 1, 'class': 1, deskmate: 1, battle: 1, stats: 1, settings: 1, browse: 1 };
-    while (seg.length && (known[seg[seg.length - 1]] || /\.[a-z0-9]+$/i.test(seg[seg.length - 1]))) seg.pop();
+    if (seg.length && (known[seg[seg.length - 1]] || /\.[a-z0-9]+$/i.test(seg[seg.length - 1]))) seg.pop();
     return '/' + seg.join('/') + (seg.length ? '/' : '');
   }
   // 生成某页签的地址；tab 6（设置）也在其中，但没有侧栏高亮
@@ -343,6 +347,37 @@
     return '<span class="logo"><img src="' + pageHref(0) + 'icon-192.png" alt="" /></span>';
   }
 
+  // 连续打卡天数：今天有学从今天起算，今天没学但昨天学过仍算在连击里
+  function streakStat(app) {
+    const st = (app && app.state) || {};
+    const by = {};
+    const stats = Array.isArray(st.stats) ? st.stats : [];
+    for (let i = 0; i < stats.length; i++) {
+      const e = stats[i];
+      if (!e || !e.date) continue;
+      by[e.date] = (by[e.date] || 0) + (e.reviews || 0);
+    }
+    const now = Date.now();
+    const doneToday = (by[FC.dateKey(now)] || 0) > 0;
+    let days = 0;
+    const cur = new Date(now);
+    if (!doneToday) cur.setDate(cur.getDate() - 1);
+    while ((by[FC.dateKey(cur.getTime())] || 0) > 0) {
+      days++;
+      cur.setDate(cur.getDate() - 1);
+    }
+    return { days: days, doneToday: doneToday };
+  }
+
+  // 侧栏顶部：火苗 + 连续打卡天数
+  function streakMiniHtml(app) {
+    const sd = streakStat(app);
+    return '<div class="streak-mini' + (sd.doneToday ? ' lit' : '') + '" title="连续打卡 ' + sd.days + ' 天">' +
+      '<span class="sm-flame">' + icon('flame', 'i18') + '</span>' +
+      '<span class="sm-txt"><b>' + (sd.days > 0 ? sd.days : 0) + ' 天</b>' +
+      '<small>' + (sd.doneToday ? '今日已打卡' : '连续打卡') + '</small></span></div>';
+  }
+
   function tabbar(active, app) {
     const acc = (app && app.account) || {};
     const on = !!acc.loggedIn;
@@ -355,9 +390,7 @@
     }
     const tabActive = pageActive ? -999 : active;
     const name = (app && app.accountDisplayName) ? app.accountDisplayName() : (acc.nickname || '学习者');
-    let html = '<nav class="tabbar">' +
-      '<div class="brand">' + logo() +
-      '<span class="brand-txt"><span class="brand-cn">闪星卡</span><span class="brand-en">StarCard</span></span></div>';
+    let html = '<nav class="tabbar">' + streakMiniHtml(app);
     const unread = noticeUnread(app);
     let lastGroup = '';
     for (let i = 0; i < NAV.length; i++) {
