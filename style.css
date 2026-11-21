@@ -6324,3 +6324,39 @@ html[data-look="plain"] .ww-ico {
   box-shadow: none !important;
   border: 1px solid var(--line);
 }
+
+/* ===== 豆包尺度：字号 / 行距 / 圆角 / 层级对比 ===== */
+body { font-size: 15px; line-height: 1.6; }
+html[data-theme="dark"][data-look="plain"] {
+  --surface: #1F1F1F;
+  --surface-2: #262626;
+  --line: rgba(255,255,255,.055);
+  --line-2: rgba(255,255,255,.10);
+  --r-sm: 8px; --r-md: 12px; --r-lg: 14px; --r-xl: 16px;
+}
+html[data-theme="dark"][data-look="plain"] .tab { height: 40px; font-size: 14.5px; gap: 11px; }
+html[data-theme="dark"][data-look="plain"] .tab .ico { width: 20px; height: 20px; }
+html[data-theme="dark"][data-look="plain"] .nav-label { font-size: 12.5px; font-weight: 500; margin-top: 20px; margin-bottom: 8px; letter-spacing: 0; color: var(--ink-4); }
+html[data-theme="dark"][data-look="plain"] .tab.active { background: #2A2A2A !important; }
+html[data-theme="dark"][data-look="plain"] .card { border-radius: 14px; }
+
+/* 豆包式宽松列宽：两列，卡片不过窄 */
+html[data-theme="dark"][data-look="plain"] .content { grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 14px; }
+/* 悬浮不再顶起/投影，只微亮 */
+html[data-theme="dark"][data-look="plain"] .deck-item:hover,
+html[data-theme="dark"][data-look="plain"] .list-item:hover {
+  transform: none !important;
+  box-shadow: none !important;
+  background: #232323 !important;
+  border-color: rgba(255,255,255,.10) !important;
+}
+
+/* 列宽统一：主内容两列（大屏），中小屏降级为 1 列，避免字号上调后挤压 */
+.content { grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 14px; }
+@media (max-width: 1120px) { .content { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); } }
+@media (max-width: 720px) { .content { grid-template-columns: 1fr; } }
+
+/* 用更高优先级确保列宽在所有主题下一致 */
+#app .content { grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); }
+@media (max-width: 1120px) { #app .content { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); } }
+@media (max-width: 720px) { #app .content { grid-template-columns: minmax(0, 1fr); } }
