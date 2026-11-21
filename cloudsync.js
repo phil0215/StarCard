@@ -341,7 +341,7 @@
     if (!slot) return; // 账户页未打开
 
     var s = getSession();
-    var tip = _panelMsg ? '<div class="subtle" style="color:#8b5cf6;margin-bottom:8px">' + esc(_panelMsg) + '</div>' : '';
+    var tip = _panelMsg ? '<div class="subtle" style="color:#4E7BF5;margin-bottom:8px">' + esc(_panelMsg) + '</div>' : '';
     var html = '<div class="card"><div class="card-head"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M6.5 19a4.5 4.5 0 0 1-.5-8.97A6 6 0 0 1 17.9 9.2A4 4 0 0 1 17.5 19h-11z"/></svg><span>云同步</span></div>';
 
     if (s) {
