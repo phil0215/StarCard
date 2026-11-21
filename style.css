@@ -6376,3 +6376,146 @@ html[data-theme="dark"][data-look="plain"] .streak-mini.lit {
   border-color: transparent !important;
 }
 html[data-look="plain"] .streak-mini.lit .sm-txt b { color: var(--ink-2); }
+
+/* ============================================================
+   连续打卡 · 本周进度（橙红 = 达标，黑 = 未达标）+ 目标 / 勋章 / 补签
+   ============================================================ */
+.streak-mini {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+}
+.streak-mini .sm-top {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-width: 0;
+}
+.streak-mini .sm-week {
+  display: flex;
+  gap: 4px;
+}
+.streak-mini .sm-week i {
+  flex: 1 1 0;
+  height: 5px;
+  border-radius: 2px;
+  background: #1B1B1E;
+  transition: background .2s ease, box-shadow .2s ease;
+}
+.streak-mini .sm-week i.on {
+  background: linear-gradient(90deg, #FF8A3D, #FF3B30);
+}
+.streak-mini .sm-week i.today {
+  box-shadow: 0 0 0 2px var(--brand-soft);
+}
+[data-theme="dark"] .streak-mini .sm-week i { background: #34343A; }
+
+/* 数据页打卡卡：右侧目标进度 / 本周 / 勋章 */
+.sk-side {
+  flex: 1 1 320px;
+  min-width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.sk-goals { display: flex; flex-direction: column; gap: 6px; }
+.sk-goal-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+.sk-goal-ico { display: inline-flex; color: var(--ink-4); }
+.sk-goal-lab { flex: none; }
+.sk-goal-val {
+  margin-left: auto;
+  color: var(--ink-2);
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+.sk-meter {
+  flex: 0 0 78px;
+  height: 5px;
+  border-radius: 3px;
+  background: #1B1B1E;
+  overflow: hidden;
+}
+.sk-meter i {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #FF8A3D, #FF3B30);
+  transition: width .3s ease;
+}
+[data-theme="dark"] .sk-meter { background: #34343A; }
+
+.sk-dot.on i { background: linear-gradient(90deg, #FF8A3D, #FF3B30); }
+.streak-card.done .sk-dot.on i { background: linear-gradient(90deg, #FF8A3D, #FF3B30); }
+
+.sk-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.sk-medals { display: flex; flex-wrap: wrap; gap: 5px; }
+.sk-medal {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1px;
+  padding: 3px 7px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-2);
+  color: var(--ink-4);
+  font-size: 10.5px;
+  line-height: 1.1;
+}
+.sk-medal b { font-size: 11.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.sk-medal.on {
+  border-color: transparent;
+  background: linear-gradient(135deg, #FF9A3D, #FF5A34);
+  color: #fff;
+}
+.sk-makeup {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+.sk-makeup-btn {
+  padding: 4px 10px;
+  border: 1px solid var(--line-2);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-1);
+  font: inherit;
+  font-size: 11.5px;
+  cursor: pointer;
+  transition: border-color .16s ease, background .16s ease;
+}
+.sk-makeup-btn:hover { border-color: var(--brand); background: var(--brand-soft); }
+.sk-makeup-btn:active { transform: translateY(1px); }
+
+/* 素白主题：打卡色保持橙红（用户指定），仅图标容器去掉渐变底 */
+html[data-look="plain"] .sk-badge,
+html[data-look="plain"] .streak-card.done .sk-badge {
+  background: var(--surface-2) !important;
+  color: #FF7A1A !important;
+  border: 1px solid var(--line) !important;
+  box-shadow: none !important;
+}
+html[data-look="plain"] .sk-dot.on i,
+html[data-look="plain"] .streak-card.done .sk-dot.on i {
+  background: linear-gradient(90deg, #FF8A3D, #FF3B30) !important;
+}
+
+@media (max-width: 600px) {
+  .streak-mini .sm-week { gap: 2px; }
+  .streak-mini .sm-week i { height: 4px; }
+  .sk-side { min-width: 0; }
+  .sk-makeup { margin-left: 0; }
+}
