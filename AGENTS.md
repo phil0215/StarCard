@@ -36,6 +36,7 @@
 
 ## 已知坑
 
+- `cloudsync-config.js` 必须排在 `app.js` 之前：班级/云同步模块在首屏渲染时就要读到配置，排在后面会误报「云同步还没配置」。
 - 子目录站点的资源根路径有两处实现，改动要同步：`js/ui.js` 的 `siteRootPath()` 与 `js/cloud-config.js` 的 `FC.siteRoot()`，两边的 `known` 目录表都要包含新增子目录（如 `store`）。
 - `.content` 是 grid 多列容器，需要单列块布局的页面用 `display:block` 覆盖（设置页、商铺页）。
 - 侧栏 `.streak-mini` 是 flex column 容器，里面用 `flex: 0 0 Npx` 会变成高度，细条要用 `flex: 0 0 5px` + `height:5px`。
