@@ -7869,3 +7869,19 @@ html[data-theme="dark"][data-look="plain"] .am-item-danger .am-ico {
 html[data-look="plain"] .am-item-danger .am-txt b {
   color: var(--ink-1) !important;
 }
+
+   侧栏收紧：232 → 186，项内边距与字号同步压缩（内容宽 170）
+   ============================================================ */
+:root { --side-w: 186px; }
+.tabbar { padding: 14px 8px 10px; }
+.tab { height: 32px; padding: 0 9px; gap: 9px; font-size: 13px; border-radius: 8px; }
+.tab .ico { flex: 0 0 18px; display: flex; justify-content: center; }
+.tab .ico .ic, .tab .ico svg { width: 18px; height: 18px; }
+.tab .lab { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nav-label { margin-top: 16px; margin-bottom: 6px; font-size: 12px; }
+.side-account { width: 100%; padding: 7px 8px; gap: 8px; }
+.side-account .sa-txt { min-width: 0; }
+@media (max-width: 1100px) { :root { --side-w: 178px; } }
+
+/* 设置页左栏跟着收，避免两层 186 叠加显得笨重 */
+.set-layout { grid-template-columns: 170px minmax(0, 1fr); }
