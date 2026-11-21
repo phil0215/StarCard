@@ -7785,3 +7785,87 @@ html[data-theme][data-look="plain"] .set-main .set-card:has(.set-block) {
   padding: 0 !important;
   margin-bottom: 0 !important;
 }
+
+/* ============================================================
+   账户菜单 v3 · 豆包同款（素色细行 + 细分隔线，整体窄瘦）
+   ============================================================ */
+.acct-menu {
+  width: 196px;
+  border-radius: 12px;
+}
+.acct-menu-mask { background: rgba(12, 8, 32, .35); backdrop-filter: blur(1px); }
+.am-head { padding: 7px 9px; }
+.am-head-acct { gap: 8px; }
+.am-head-acct .ava-lg { width: 24px; height: 24px; border-radius: 7px; font-size: 10px; }
+.am-head-txt { gap: 1px; }
+.am-head-txt b { font-size: 11px; font-weight: 650; }
+.am-head-txt small { font-size: 9px; }
+
+.am-list { padding: 2px 0; flex: initial; }
+.am-group { padding: 2px 4px; }
+.am-group + .am-group {
+  border-top: 1px solid var(--line);
+  margin: 0; padding-top: 3px;
+}
+.am-list > .am-group:first-child { padding-top: 2px; }
+.am-item {
+  gap: 9px;
+  min-height: 26px;
+  padding: 3px 8px;
+  margin: 0;
+  border-radius: 7px;
+}
+.am-ico { width: 14px; height: 14px; background: none; color: var(--ink-2); }
+.am-ico svg { width: 13px; height: 13px; }
+.am-txt b { font-size: 11px; font-weight: 550; letter-spacing: 0; }
+.am-txt small { font-size: 9px; }
+.am-item > .ic:last-child { display: none; }
+.am-val { font-size: 9.5px; color: var(--ink-4); flex: none; }
+.am-item:hover { background: var(--surface-2); }
+
+.am-foot {
+  padding: 2px 4px;
+  border-top: 1px solid var(--line);
+  background: transparent;
+}
+.am-foot .am-item { min-height: 26px; }
+/* 特殊项不再换颜色：只靠分隔线区分 */
+.am-item-danger .am-ico { background: none; color: var(--ink-2); }
+.am-item-danger .am-txt b { color: var(--ink-1); font-weight: 550; }
+.am-item-primary {
+  background: none;
+  justify-content: flex-start;
+  box-shadow: none;
+  border-radius: 7px;
+  color: var(--ink-1);
+  min-height: 26px;
+}
+.am-item-primary .am-ico { background: none; color: var(--ink-2); }
+.am-item-primary .am-txt { flex: 1; }
+.am-item-primary .am-txt b { font-size: 11px; font-weight: 550; color: var(--ink-1); }
+.am-item-primary > .ic:last-child { display: none; }
+[data-theme="dark"] .am-item-primary { background: none; color: var(--ink-1); }
+[data-theme="dark"] .am-item-primary .am-txt b { color: var(--ink-1); }
+[data-theme="dark"] .am-item-danger .am-txt b { color: var(--ink-1); }
+[data-theme="dark"] .am-item-danger .am-ico { color: var(--ink-2); }
+
+/* 豆包同款：plain 外观下登录项也不刷色，保持素色细行 */
+html[data-look="plain"] .am-item-primary,
+html[data-theme="dark"][data-look="plain"] .am-item-primary {
+  background: none !important;
+  background-image: none !important;
+  color: var(--ink-1) !important;
+  box-shadow: none !important;
+}
+html[data-look="plain"] .am-item-primary .am-ico {
+  background: none !important;
+  color: var(--ink-2) !important;
+}
+html[data-look="plain"] .am-item-danger .am-ico,
+html[data-theme="dark"][data-look="plain"] .am-item-danger .am-ico {
+  background: none !important;
+  color: var(--ink-2) !important;
+}
+html[data-look="plain"] .am-item-danger .am-txt b {
+  color: var(--ink-1) !important;
+}
