@@ -193,14 +193,25 @@
     const name = (app && app.accountDisplayName) ? app.accountDisplayName() : (acc.nickname || '学习者');
     const children = [];
     const sd = streakStat(app);
+    const wk = Array.isArray(sd.week) ? sd.week : [];
+    const goal = FC.DAY_GOAL || { minutes: 10, words: 100 };
+    const weekCells = [];
+    for (let wi = 0; wi < wk.length; wi++) {
+      weekCells.push(new A.El('i').cls((wk[wi].ok ? 'on' : '') + (wk[wi].isToday ? ' today' : ''))
+        .title(weekBarTitles(wk[wi], goal)));
+    }
+    const weekBars = new A.El('div').cls('sm-week').children(weekCells);
     children.push(new A.El('div').cls('streak-mini' + (sd.doneToday ? ' lit' : ''))
-      .title('连续打卡 ' + sd.days + ' 天')
+      .title('连续打卡 ' + (sd.days > 0 ? sd.days : 0) + ' 天 · 每天 10 分钟 + 100 词')
       .children([
-        new A.El('span').cls('sm-flame').children([iconEl('flame', 'i18')]),
-        new A.El('span').cls('sm-txt').children([
-          new A.El('b', (sd.days > 0 ? sd.days : 0) + ' 天'),
-          new A.El('small', sd.doneToday ? '今日已打卡' : '连续打卡')
-        ])
+        new A.El('div').cls('sm-top').children([
+          new A.El('span').cls('sm-flame').children([iconEl('flame', 'i18')]),
+          new A.El('span').cls('sm-txt').children([
+            new A.El('b', (sd.days > 0 ? sd.days : 0) + ' 天'),
+            new A.El('small', sd.doneToday ? '今日已打卡' : '连续打卡')
+          ])
+        ]),
+        weekBars
       ]));
     const unread = noticeUnread(app);
     let lastGroup = '';
@@ -347,35 +358,41 @@
     return '<span class="logo"><img src="' + pageHref(0) + 'icon-192.png" alt="" /></span>';
   }
 
-  // 连续打卡天数：今天有学从今天起算，今天没学但昨天学过仍算在连击里
+  // 连续打卡：标准为「每天 10 分钟 + 100 词」，统一走 FC.checkinStreak
   function streakStat(app) {
-    const st = (app && app.state) || {};
-    const by = {};
-    const stats = Array.isArray(st.stats) ? st.stats : [];
-    for (let i = 0; i < stats.length; i++) {
-      const e = stats[i];
-      if (!e || !e.date) continue;
-      by[e.date] = (by[e.date] || 0) + (e.reviews || 0);
-    }
-    const now = Date.now();
-    const doneToday = (by[FC.dateKey(now)] || 0) > 0;
-    let days = 0;
-    const cur = new Date(now);
-    if (!doneToday) cur.setDate(cur.getDate() - 1);
-    while ((by[FC.dateKey(cur.getTime())] || 0) > 0) {
-      days++;
-      cur.setDate(cur.getDate() - 1);
-    }
-    return { days: days, doneToday: doneToday };
+    const state = (app && app.state) || {};
+    if (FC.checkinStreak) return FC.checkinStreak(state, Date.now());
+    return { days: 0, doneToday: false, longest: 0, week: [] };
   }
 
-  // 侧栏顶部：火苗 + 连续打卡天数
+  const WEEK_CN = ['一', '二', '三', '四', '五', '六', '日'];
+  function weekBarTitles(day, goal) {
+    return day.key + '（周' + WEEK_CN[(new Date(day.ts).getDay() + 6) % 7] + '）' +
+      Math.round(day.minutes) + '/' + goal.minutes + ' 分钟 · ' +
+      day.words + '/' + goal.words + ' 词' + (day.makeup ? ' · 补签' : '');
+  }
+  function weekBarsHtml(sd) {
+    const goal = FC.DAY_GOAL || { minutes: 10, words: 100 };
+    const week = Array.isArray(sd.week) ? sd.week : [];
+    let out = '';
+    for (let i = 0; i < week.length; i++) {
+      const d = week[i];
+      out += '<i class="' + (d.ok ? 'on' : '') + (d.isToday ? ' today' : '') +
+        '" title="' + esc(weekBarTitles(d, goal)) + '"></i>';
+    }
+    return out;
+  }
+
+  // 侧栏顶部：火苗 + 连续打卡天数 + 本周进度（橙红 = 达标，黑 = 未达标）
   function streakMiniHtml(app) {
     const sd = streakStat(app);
-    return '<div class="streak-mini' + (sd.doneToday ? ' lit' : '') + '" title="连续打卡 ' + sd.days + ' 天">' +
+    const days = sd.days > 0 ? sd.days : 0;
+    return '<div class="streak-mini' + (sd.doneToday ? ' lit' : '') + '" title="连续打卡 ' + days + ' 天 · 每天 10 分钟 + 100 词">' +
+      '<div class="sm-top">' +
       '<span class="sm-flame">' + icon('flame', 'i18') + '</span>' +
-      '<span class="sm-txt"><b>' + (sd.days > 0 ? sd.days : 0) + ' 天</b>' +
-      '<small>' + (sd.doneToday ? '今日已打卡' : '连续打卡') + '</small></span></div>';
+      '<span class="sm-txt"><b>' + days + ' 天</b>' +
+      '<small>' + (sd.doneToday ? '今日已打卡' : '连续打卡') + '</small></span></div>' +
+      '<div class="sm-week">' + weekBarsHtml(sd) + '</div></div>';
   }
 
   function tabbar(active, app) {
@@ -1603,91 +1620,74 @@
 
   // —— 连续打卡卡：天数 + 本周打卡 + 最近 7 天复习折线 ——
   function streakCardHtml(st, now) {
-    const by = {};
+    const ck = FC.checkinStreak ? FC.checkinStreak(st, now) : { days: 0, doneToday: false, longest: 0, week: [] };
+    const goal = FC.DAY_GOAL || { minutes: 10, words: 100 };
+    const map = {};
     const stats = Array.isArray(st.stats) ? st.stats : [];
-    for (let i = 0; i < stats.length; i++) {
-      const e = stats[i];
-      if (!e || !e.date) continue;
-      by[e.date] = (by[e.date] || 0) + (e.reviews || 0);
-    }
-    const key = function (ts) { return FC.dateKey(ts); };
-    const todayKey = key(now);
-    const doneToday = (by[todayKey] || 0) > 0;
+    for (let i = 0; i < stats.length; i++) if (stats[i] && stats[i].date) map[stats[i].date] = stats[i];
+    const todayC = FC.dayCheckin ? FC.dayCheckin(map[FC.dateKey(now)])
+      : { ok: false, makeup: false, minutes: 0, words: 0, timePct: 0, wordPct: 0 };
 
-    // 连续天数：今天有学从今天起算；今天还没学但昨天学过，仍算在连击中
-    let streak = 0;
-    const cur = new Date(now);
-    if (!doneToday) cur.setDate(cur.getDate() - 1);
-    while ((by[key(cur.getTime())] || 0) > 0) {
-      streak++;
-      cur.setDate(cur.getDate() - 1);
-    }
-
-    // 历史最长连续
-    const keys = [];
-    for (const k in by) if (by[k] > 0) keys.push(k);
-    keys.sort();
-    let longest = 0, run = 0, prevT = null;
-    for (let i = 0; i < keys.length; i++) {
-      const t = Date.parse(keys[i] + 'T00:00:00');
-      if (isNaN(t)) continue;
-      run = (prevT !== null && Math.round((t - prevT) / FC.DAY_MS) === 1) ? run + 1 : 1;
-      if (run > longest) longest = run;
-      prevT = t;
-    }
-
-    // 最近 7 天
-    const WK = ['日', '一', '二', '三', '四', '五', '六'];
-    let dots = '';
-    const vals = [];
+    const week = Array.isArray(ck.week) ? ck.week : [];
     let weekOn = 0;
-    for (let i = 6; i >= 0; i--) {
-      const d = new Date(now - i * FC.DAY_MS);
-      const k = key(d.getTime());
-      const n = by[k] || 0;
-      vals.push(n);
-      if (n > 0) weekOn++;
-      dots += '<span class="sk-dot' + (n > 0 ? ' on' : '') + (i === 0 ? ' today' : '') +
-        '" title="' + esc(k) + '：' + n + ' 次复习"><i></i><small>' +
-        (i === 0 ? '今' : WK[d.getDay()]) + '</small></span>';
+    let dots = '';
+    for (let i = 0; i < week.length; i++) {
+      const d = week[i];
+      if (d.ok) weekOn++;
+      dots += '<span class="sk-dot' + (d.ok ? ' on' : '') + (d.isToday ? ' today' : '') +
+        '" title="' + esc(weekBarTitles(d, goal)) + '"><i></i><small>' + WEEK_CN[i] + '</small></span>';
     }
 
-    // 迷你折线
-    const maxV = Math.max(1, Math.max.apply(null, vals));
-    const cw = 200, ch = 46, stp = cw / 6;
-    let line = '';
-    for (let i = 0; i < 7; i++) {
-      const x = (i * stp).toFixed(1);
-      const y = (ch - 6 - (vals[i] / maxV) * (ch - 14)).toFixed(1);
-      line += (i ? 'L' : 'M') + x + ' ' + y + ' ';
+    const meter = function (ico, label, val, need, pct) {
+      return '<div class="sk-goal-row">' +
+        '<span class="sk-goal-ico">' + icon(ico, 'i14') + '</span>' +
+        '<span class="sk-goal-lab">' + esc(label) + '</span>' +
+        '<span class="sk-goal-val">' + val + ' / ' + need + '</span>' +
+        '<span class="sk-meter"><i style="width:' + Math.round(Math.max(0, Math.min(1, pct)) * 100) + '%"></i></span>' +
+        '</div>';
+    };
+
+    const owned = Array.isArray(st.badges) ? st.badges : [];
+    const list = FC.CHECKIN_BADGES || [];
+    let medals = '';
+    for (let i = 0; i < list.length; i++) {
+      const b = list[i];
+      const on = owned.indexOf('d' + b.days) >= 0;
+      medals += '<span class="sk-medal' + (on ? ' on' : '') +
+        '" title="连续 ' + b.days + ' 天 · ' + esc(b.name) + '勋章 · 奖励补签卡 ×' + b.cards + '">' +
+        '<b>' + b.days + '</b><small>天</small></span>';
     }
-    const area = line + 'L ' + cw + ' ' + ch + ' L 0 ' + ch + ' Z';
+
+    const cards = Math.max(0, Number(st.makeupCards) || 0);
+    const makeup = cards > 0
+      ? '<span class="sk-makeup"><span>补签卡 ×' + cards + '</span>' +
+        '<button class="sk-makeup-btn" data-act="checkin-makeup">补签漏掉的一天</button></span>'
+      : '';
 
     let tip;
-    if (doneToday) tip = '今天已打卡，保持住';
-    else if (streak > 0) tip = '今天还没打卡 · 学一张就续上';
-    else tip = '学完一张卡就算打卡';
+    if (todayC.ok) tip = todayC.makeup ? '今天已补签，连击保住了' : '今天已达标，保持住';
+    else if (ck.days > 0) {
+      const leftMin = Math.max(0, Math.ceil(goal.minutes - todayC.minutes));
+      const leftWord = Math.max(0, goal.words - todayC.words);
+      tip = '今天还差 ' + leftMin + ' 分钟 / ' + leftWord + ' 词';
+    } else tip = '每天满 10 分钟 + 100 词算一次打卡';
 
-    return '<div class="streak-card' + (doneToday ? ' done' : '') + '">' +
+    return '<div class="streak-card' + (todayC.ok ? ' done' : '') + '">' +
       '<div class="sk-main">' +
-      '<span class="sk-badge">' + icon('zap', 'i22') + '</span>' +
+      '<span class="sk-badge">' + icon('flame', 'i22') + '</span>' +
       '<div class="sk-body">' +
-      '<div class="sk-num"><b>' + streak + '</b><span>天</span></div>' +
-      '<div class="sk-txt"><b>' + (streak > 0 ? '连续打卡' : '开始打卡') + '</b>' +
+      '<div class="sk-num"><b>' + ck.days + '</b><span>天</span></div>' +
+      '<div class="sk-txt"><b>' + (ck.days > 0 ? '连续打卡' : '开始打卡') + '</b>' +
       '<small>' + esc(tip) + '</small>' +
-      '<small>本周 ' + weekOn + ' 天 · 最长 ' + longest + ' 天</small></div>' +
+      '<small>本周 ' + weekOn + '/7 · 最长 ' + ck.longest + ' 天</small></div>' +
       '</div></div>' +
-      '<div class="sk-chart">' +
-      '<svg class="sk-spark" viewBox="0 0 ' + cw + ' ' + ch + '" preserveAspectRatio="none" aria-hidden="true">' +
-      '<defs><linearGradient id="skLineGrad" x1="0" y1="0" x2="0" y2="1">' +
-      '<stop offset="0" stop-color="#8B6BFF" stop-opacity=".30"/>' +
-      '<stop offset="1" stop-color="#8B6BFF" stop-opacity="0"/></linearGradient></defs>' +
-      '<path d="' + area + '" fill="url(#skLineGrad)"/>' +
-      '<path d="' + line.trim() + '" fill="none" stroke="#8B6BFF" stroke-width="2" ' +
-      'stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>' +
-      '</svg>' +
+      '<div class="sk-side">' +
+      '<div class="sk-goals">' +
+      meter('clock', '今日学习', Math.round(todayC.minutes), goal.minutes + ' 分', todayC.timePct) +
+      meter('book', '今日单词', todayC.words, goal.words + ' 词', todayC.wordPct) +
+      '</div>' +
       '<div class="sk-dots">' + dots + '</div>' +
-      '<div class="sk-axis"><small>7 天前</small><small>今天</small></div>' +
+      '<div class="sk-foot"><div class="sk-medals">' + medals + '</div>' + makeup + '</div>' +
       '</div></div>';
   }
 
