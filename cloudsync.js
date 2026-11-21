@@ -214,6 +214,16 @@
   function writeAccountObj(a) {
     try { localStorage.setItem(ACCOUNT_KEY, JSON.stringify(a)); } catch (e) {}
   }
+  // 与本机一致的公开 ID 拼装规则：字母代号 + 年份 + 手机尾号 + __ + 6 位后缀
+  function calcPublicId(acc, year) {
+    var suf = String(acc.idSuffix || '').replace(/[^A-Za-z0-9]/g, '');
+    if (suf.length !== 6) return '';
+    var tail = String(acc.phoneTail || '').replace(/\D/g, '').slice(-4);
+    if (tail.length !== 4) return '';
+    var no = Math.max(1, Math.floor(Number(acc.regNo) || 1));
+    var letter = 'ABCDEFG'.charAt(Math.min(6, Math.max(0, String(no).length - 3)));
+    return letter + year + tail + '__' + suf;
+  }
   function syncProfile(sess) {
     var s = sess || getSession();
     var uid = s && s.user && (s.user.id || s.user.sub);
@@ -226,6 +236,9 @@
     var year = parseInt(acc.regYear, 10);
     if (!(year >= 2000 && year <= 2200)) year = new Date().getFullYear();
     row.reg_year = year;
+    // 公开账户 ID（A20265186__9aK2z3）：数据库上有唯一约束，撞号会写入失败
+    var pid = calcPublicId(acc, year);
+    if (pid) row.public_id = pid;
     return request('/rest/v1/user_profile?on_conflict=user_id', {
       method: 'POST',
       headers: buildHeaders({ 'Prefer': 'resolution=merge-duplicates,return=representation' }, s),
@@ -240,6 +253,21 @@
       writeAccountObj(acc);
       return r;
     }).catch(function () { return null; });
+  }
+
+  // 公开 ID 查重：user_profile 的 RLS 只允许读自己那行，
+  // 所以走 SECURITY DEFINER 的 public_id_taken(text) 函数，只回答「有没有被占用」。
+  function checkPublicId(code) {
+    if (!configured() || !online()) return Promise.resolve({ ok: true, offline: true });
+    var s = getSession();
+    if (!s) return Promise.resolve({ ok: true, guest: true });
+    return request('/rest/v1/rpc/public_id_taken', {
+      method: 'POST',
+      headers: buildHeaders({}, s),
+      body: JSON.stringify({ p_id: String(code || '') })
+    }).then(function (v) {
+      return { ok: v !== true, taken: v === true };
+    }).catch(function () { return { ok: true, error: true }; });
   }
 
   // ---- 自动上传：包装 setItem，捕获进度写入 ----
@@ -404,6 +432,7 @@
     pull: pull,
     push: push,
     syncProfile: syncProfile,
+    checkPublicId: checkPublicId,
     boot: boot,
     mount: renderPanel
   };
