@@ -39,7 +39,7 @@
     var at = cur.indexOf(mark);
     if (at >= 0) return cur.slice(0, at + mark.length);
     var seg = cur.split('/').filter(function (x) { return !!x; });
-    var known = { books: 1, 'class': 1, deskmate: 1, battle: 1, stats: 1, settings: 1, browse: 1, store: 1 };
+    var known = { books: 1, 'class': 1, deskmate: 1, battle: 1, stats: 1, settings: 1, browse: 1, store: 1, community: 1 };
     while (seg.length && (known[seg[seg.length - 1]] || /\.[a-z0-9]+$/i.test(seg[seg.length - 1]))) seg.pop();
     return '/' + seg.join('/') + (seg.length ? '/' : '');
   };

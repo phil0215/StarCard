@@ -87,7 +87,7 @@
     wb: null,
     accountOpen: false,
     accountMenuOpen: false,
-    settingsPane: 'account',   // 设置页当前分类：account / level / plan / fsrs / study / appearance / data / privacy / keys / about
+    settingsPane: 'root',      // 设置页二级分类：root / account / plan / fsrs / study / appearance / data / privacy / keys / about / level
     noticePageOpen: false,
     backupPageOpen: false,
     activeClassId: '',
@@ -622,6 +622,280 @@
       const all = this.allBooks();
       for (let i = 0; i < all.length; i++) if (all[i].id === id) return all[i];
       return null;
+    },
+
+    // ---------------------------------------------------------------- 社区
+    // 数据全部在云端（Supabase），本机只做缓存；未登录时社区页显示登录卡。
+    communityLoginState: function () {
+      if (!this.communityLogin) this.communityLogin = { email: '', code: '', msg: '', error: false };
+      return this.communityLogin;
+    },
+    communityReady: function () {
+      return !!(window.FC && FC.Community && FC.Community.session && FC.Community.session());
+    },
+    openCommunity: function () {
+      var page = String((typeof window !== 'undefined' && window.SC_PAGE) || '');
+      if (page && page !== 'community') { window.location.href = FC.siteRoot() + 'community/'; return; }
+      this.tab = 8;
+      this.accountOpen = false;
+      this.communityPostId = '';
+      this.render();
+      this.loadCommunity();
+      this.loadInvites();
+    },
+    // 同桌页 / 社区页共用的 uid 集合：判断「已是同桌」「已发邀请」
+    syncDeskmateSets: function () {
+      var mates = this.state.deskmates || [];
+      var set = {};
+      for (var i = 0; i < mates.length; i++) if (mates[i].cloudUid) set[mates[i].cloudUid] = true;
+      this.deskmateUidSet = set;
+    },
+    loadCommunity: function (more) {
+      if (!this.communityReady()) return;
+      var self = this;
+      if (!this.community) this.community = { items: [], loading: false, error: '', loaded: false };
+      var c = this.community;
+      if (more && !c.items.length) return;
+      c.loading = true;
+      if (!more) c.error = '';
+      this.render();
+      var before = more && c.items.length ? c.items[c.items.length - 1].createdAt : '';
+      FC.Community.feed(20, before).then(function (rows) {
+        c.items = more ? c.items.concat(rows) : rows;
+        c.loading = false; c.error = ''; c.loaded = true;
+        // 点赞状态与「已发邀请」状态一并刷新
+        var liked = {};
+        var me = FC.Community.uid();
+        for (var i = 0; i < c.items.length; i++) {
+          if ((c.items[i].likeUsers || []).indexOf(me) >= 0) liked[c.items[i].id] = true;
+        }
+        self.communityLiked = liked;
+        self.syncDeskmateSets();
+        self.render();
+      }).catch(function (e) {
+        c.loading = false;
+        c.error = FC.Community.humanError(e);
+        self.render();
+      });
+    },
+    openPost: function (id) {
+      this.communityPostId = id;
+      this.communityDetail = { loading: true, post: null, comments: [], error: '' };
+      this.render();
+      this.loadCommunityDetail();
+    },
+    loadCommunityDetail: function () {
+      var id = this.communityPostId;
+      if (!id || !this.communityReady()) return;
+      var self = this;
+      var d = this.communityDetail || (this.communityDetail = {});
+      var post = null;
+      var list = (this.community && this.community.items) || [];
+      for (var i = 0; i < list.length; i++) if (list[i].id === id) post = list[i];
+      FC.Community.comments(id).then(function (rows) {
+        d.comments = rows || [];
+        d.post = post;
+        d.loading = false; d.error = '';
+        self.render();
+      }).catch(function (e) {
+        d.loading = false;
+        d.post = post;
+        d.error = FC.Community.humanError(e);
+        self.render();
+      });
+    },
+    // 收到的同桌邀请（同桌页顶部显示）
+    loadInvites: function () {
+      var self = this;
+      if (!this.inviteInbox) this.inviteInbox = { items: [], loading: false, error: '' };
+      if (!this.communityReady()) { this.inviteInbox = { items: [], loading: false, error: '' }; return; }
+      var box = this.inviteInbox;
+      box.loading = true;
+      var done = function () { if (self.tab === 3 || self.tab === 8) self.render(); };
+      FC.Community.inbox().then(function (rows) {
+        box.items = rows || []; box.loading = false; box.error = ''; done();
+      }).catch(function (e) {
+        box.loading = false; box.error = FC.Community.humanError(e); done();
+      });
+      FC.Community.outbox().then(function (rows) {
+        var set = {};
+        for (var i = 0; i < (rows || []).length; i++) set[rows[i].to_user] = true;
+        self.communityOutSet = set;
+        self.syncDeskmateSets();
+        done();
+      }).catch(function () {});
+    },
+    // ---- 社区登录（与云同步共用同一个 Supabase 会话）----
+    communitySendCode: function () {
+      var st = this.communityLoginState();
+      var el = byId('ccEmail');
+      st.email = el ? el.value.trim() : st.email;
+      st.msg = ''; st.error = false;
+      if (!st.email) { this.toast('先填邮箱'); return; }
+      var self = this;
+      st.msg = '正在发送…';
+      this.render();
+      FC.Community.sendCode(st.email).then(function () {
+        st.msg = '验证码已发到 ' + st.email + '，去邮箱看一下';
+        self.render();
+      }).catch(function (e) {
+        st.error = true;
+        st.msg = '发送失败：' + FC.Community.humanError(e);
+        self.render();
+      });
+    },
+    communitySubmitLogin: function () {
+      var st = this.communityLoginState();
+      var em = byId('ccEmail'), cd = byId('ccCode');
+      st.email = em ? em.value.trim() : st.email;
+      st.code = cd ? cd.value.trim() : st.code;
+      st.msg = ''; st.error = false;
+      if (!st.email || !st.code) { this.toast('邮箱和验证码都要填'); return; }
+      var self = this;
+      st.msg = '正在登录…';
+      this.render();
+      FC.Community.verifyCode(st.email, st.code).then(function () {
+        st.code = ''; st.msg = '';
+        self.toast('已登录，可以发帖了');
+        self.loadCommunity();
+        self.loadInvites();
+        self.render();
+      }).catch(function (e) {
+        st.error = true;
+        st.msg = '登录失败：' + FC.Community.humanError(e);
+        self.render();
+      });
+    },
+    // ---- 发帖 ----
+    openPostComposer: function () {
+      if (!this.communityReady()) { this.toast('请先登录'); return; }
+      this.openModal({ type: 'community-post' });
+    },
+    publishPost: function () {
+      var g = function (id) { var e = byId(id); return e ? e.value : ''; };
+      var title = String(g('cpTitle') || '').trim();
+      var body = String(g('cpBody') || '').trim();
+      var deckId = String(g('cpDeck') || '');
+      if (!body && !deckId) { this.toast('写点内容，或选一个要分享的词库'); return; }
+      var deck = null;
+      var decks = this.state.decks || [];
+      for (var i = 0; i < decks.length; i++) if (decks[i].id === deckId) deck = decks[i];
+      var self = this;
+      var author = { authorName: this.accountDisplayName(), avatarColor: this.account.avatarColor };
+      this.modal = null;
+      this.render();
+      this.toast(deck ? '正在打包词库并发布…' : '正在发布…');
+      var task;
+      if (deck) {
+        task = FC.Community.uploadDeck(deck).then(function (r) {
+          return FC.Community.createPost({
+            authorName: author.authorName, avatarColor: author.avatarColor,
+            kind: 'resource', title: title, body: body,
+            deckName: deck.name, deckWords: r.words,
+            resourcePath: r.path, resourceSize: r.size
+          });
+        });
+      } else {
+        task = FC.Community.createPost({
+          authorName: author.authorName, avatarColor: author.avatarColor,
+          kind: 'post', title: title, body: body
+        });
+      }
+      task.then(function () {
+        self.toast('已发布');
+        self.loadCommunity();
+      }).catch(function (e) {
+        self.toast('发布失败：' + FC.Community.humanError(e));
+      });
+    },
+    togglePostLike: function (id) {
+      if (!this.communityReady()) { this.toast('请先登录'); return; }
+      var self = this;
+      var liked = !!(this.communityLiked && this.communityLiked[id]);
+      if (!this.communityLiked) this.communityLiked = {};
+      this.communityLiked[id] = !liked;
+      var item = null;
+      var list = (this.community && this.community.items) || [];
+      for (var i = 0; i < list.length; i++) if (list[i].id === id) item = list[i];
+      if (item) item.likeCount = Math.max(0, (item.likeCount || 0) + (liked ? -1 : 1));
+      if (this.communityDetail && this.communityDetail.post && this.communityDetail.post.id === id && item) {
+        this.communityDetail.post = item;
+      }
+      this.render();
+      FC.Community.like(id, !liked).catch(function (e) {
+        self.communityLiked[id] = liked;
+        if (item) item.likeCount = Math.max(0, (item.likeCount || 0) + (liked ? 1 : -1));
+        self.render();
+        self.toast('点赞失败：' + FC.Community.humanError(e));
+      });
+    },
+    deletePost: function (id) {
+      var self = this;
+      FC.Community.removePost(id).then(function () {
+        self.toast('已删除');
+        self.communityPostId = '';
+        self.loadCommunity();
+      }).catch(function (e) { self.toast('删除失败：' + FC.Community.humanError(e)); });
+    },
+    // ---- 评论 ----
+    addPostComment: function () {
+      var el = byId('cmtInput');
+      var text = el ? el.value.trim() : '';
+      if (!text) { this.toast('写点什么再发'); return; }
+      var self = this;
+      var id = this.communityPostId;
+      FC.Community.addComment(id, text, this.accountDisplayName()).then(function () {
+        if (el) el.value = '';
+        self.loadCommunityDetail();
+      }).catch(function (e) { self.toast('评论失败：' + FC.Community.humanError(e)); });
+    },
+    // ---- 邀请 / 接受同桌 ----
+    inviteDeskmate: function (uid, name) {
+      if (!this.communityReady()) { this.toast('请先登录'); return; }
+      var self = this;
+      FC.Community.invite(uid, '', this.communityPostId, this.accountDisplayName()).then(function () {
+        if (!self.communityOutSet) self.communityOutSet = {};
+        self.communityOutSet[uid] = true;
+        self.render();
+        self.toast('已邀请「' + (name || '对方') + '」做同桌，等他/她在同桌页点接受');
+      }).catch(function (e) {
+        var m = FC.Community.humanError(e);
+        self.toast(e.status === 409 ? '已经发过邀请，等对方接受' : '邀请失败：' + m);
+      });
+    },
+    acceptInvite: function (id, name, fromUid) {
+      var self = this;
+      FC.Community.respond(id, 'accepted').then(function () {
+        var mates = self.state.deskmates || (self.state.deskmates = []);
+        var exists = false;
+        for (var i = 0; i < mates.length; i++) if (fromUid && mates[i].cloudUid === fromUid) exists = true;
+        if (!exists) {
+          mates.push({ id: FC.makeId(), name: name || '同桌', note: '来自社区', score: 0, days: 0, cloudUid: fromUid || '' });
+          self.save();
+        }
+        self.syncDeskmateSets();
+        self.loadInvites();
+        self.render();
+        self.toast('已和「' + (name || '对方') + '」成为同桌');
+      }).catch(function (e) { self.toast('接受失败：' + FC.Community.humanError(e)); });
+    },
+    declineInvite: function (id) {
+      var self = this;
+      FC.Community.respond(id, 'declined').then(function () {
+        self.loadInvites();
+        self.render();
+      }).catch(function (e) { self.toast('操作失败：' + FC.Community.humanError(e)); });
+    },
+    // ---- 导入别人分享的词库 ----
+    importSharedDeck: function (path, name) {
+      var self = this;
+      if (!path) { this.toast('这个帖子没有附词库'); return; }
+      this.toast('正在下载「' + (name || '词库') + '」…');
+      FC.Community.importShared(path, name).then(function () {
+        self.loadCommunity();
+      }).catch(function (e) {
+        self.toast('导入失败：' + FC.Community.humanError(e));
+      });
     },
 
     // ---- 渲染 ----
@@ -1411,7 +1685,7 @@
     gotoSettings: function () {
       this.accountMenuOpen = false;
       this.accountOpen = false;
-      this.settingsPane = 'account';
+      this.settingsPane = 'root';
       this.aiOpen = false; this.cmdOpen = false;
       this.noticePageOpen = false; this.backupPageOpen = false;
       this.modal = null;
@@ -1811,6 +2085,7 @@
       const m = this.modal;
       if (!m) return;
       const id = function (x) { return document.getElementById(x); };
+      if (m.type === 'community-post') { this.publishPost(); return; }
       if (m.type === 'deck') {
         const name = id('mName').value.trim();
         if (!name) { this.toast('请填写名称'); return; }
@@ -3065,6 +3340,22 @@
         if (dt) { dt.score += 5; App.save(); App.render(); App.toast('已督促 ' + dt.name + ' +5 分'); }
         break;
       }
+      // ---- 社区 ----
+      case 'community-open': App.openCommunity(); break;
+      case 'community-refresh': App.loadCommunity(false); break;
+      case 'community-more': App.loadCommunity(true); break;
+      case 'community-post': App.openPostComposer(); break;
+      case 'community-login-send': App.communitySendCode(); break;
+      case 'community-login-submit': App.communitySubmitLogin(); break;
+      case 'post-like': App.togglePostLike(d.id); break;
+      case 'post-open': App.openPost(d.id); break;
+      case 'post-back': App.communityPostId = ''; App.render(); break;
+      case 'post-del': App.deletePost(d.id); break;
+      case 'post-invite': App.inviteDeskmate(d.id, d.name); break;
+      case 'post-import': App.importSharedDeck(d.path, d.name); break;
+      case 'comment-add': App.addPostComment(); break;
+      case 'invite-accept': App.acceptInvite(d.id, d.name, d.uid); break;
+      case 'invite-decline': App.declineInvite(d.id); break;
       case 'battle-config': App.tab = 4; App.accountOpen = false; App.render(); break;
       case 'battle-begin':
         App.battleBookId = (byId('battleBook') ? byId('battleBook').value : App.battleBookId);
@@ -3102,8 +3393,8 @@
       case 'save-settings': App.saveSettings(); break;
       case 'checkin-makeup': App.useMakeupCard(); break;
       // 设置页二级分类：点分类进参数页，返回回到目录
-      case 'set-pane': App.settingsPane = d.pane || 'account'; App.render(); try { window.scrollTo(0, 0); } catch (err) {} break;
-      case 'set-pane-back': App.settingsPane = 'account'; App.render(); try { window.scrollTo(0, 0); } catch (err) {} break;
+      case 'set-pane': App.settingsPane = d.pane || 'root'; App.render(); try { window.scrollTo(0, 0); } catch (err) {} break;
+      case 'set-pane-back': App.settingsPane = 'root'; App.render(); try { window.scrollTo(0, 0); } catch (err) {} break;
       case 'id-regen': App.regenPublicId(); break;
       // 设置页顶部锚点：只滚动，不重绘（重绘会打断正在编辑的输入框）
       case 'set-jump': {
@@ -3432,7 +3723,7 @@
   // 多页面入口：各页 HTML 用 window.SC_PAGE 声明首屏显示哪一块，避免每次都从卡片页开始
   (function applyPageEntry() {
     var page = String((typeof window !== 'undefined' && window.SC_PAGE) || '').toLowerCase();
-    var TABS = { cards: 0, books: 1, 'class': 2, deskmate: 3, battle: 4, stats: 5, settings: 6, store: 7 };
+    var TABS = { cards: 0, books: 1, 'class': 2, deskmate: 3, battle: 4, stats: 5, settings: 6, store: 7, community: 8 };
     if (Object.prototype.hasOwnProperty.call(TABS, page)) {
       App.tab = TABS[page];
       App.accountOpen = false;
@@ -3455,6 +3746,18 @@
   // 恢复会话后按绝对到期时间补算（静默，由紧随的 render 统一呈现，避免二次重绘闪烁）
   if (App.study && App.studyActive) App.resumeStudyRuntime({ silent: true });
   App.render();
+  // 社区：首屏按需拉数据（未登录 / 离线时自动跳过，不产生任何请求）
+  // 必须等 cloudsync.js / community.js 解析完（它们在 app.js 之后引入），
+  // 所以挂到 DOMContentLoaded 上，而不是在这里立即执行。
+  function bootCommunity() {
+    if (!window.FC || !FC.Community) return;
+    var page = String((typeof window !== 'undefined' && window.SC_PAGE) || '').toLowerCase();
+    App.syncDeskmateSets();
+    App.loadInvites();
+    if (page === 'community') App.loadCommunity();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', bootCommunity);
+  else setTimeout(bootCommunity, 0);
 
   // 首次启动自动载入随包词库：仅当本地完全没有牌组、且从未自动载入过时执行。
   // 逐个 fetch 同目录的 .srcd（不内嵌进 HTML，避免单文件过大卡顿），全部成功后一次性合并。

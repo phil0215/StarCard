@@ -38,6 +38,11 @@
     chevronLeft: '<path d="m14.8 5.2-7 6.8 7 6.8"/>',
     users: '<circle cx="9.2" cy="8" r="3.4"/><path d="M2.9 20a6.3 6.3 0 0 1 12.6 0"/><path d="M16.2 5.3a3.4 3.4 0 0 1 0 5.9"/><path d="M17.5 14.7A6.3 6.3 0 0 1 21.1 20"/>',
     link: '<path d="M10.1 13.6a4.2 4.2 0 0 0 6.1.4l2.2-2.2a4.2 4.2 0 0 0-5.9-5.9L11.3 7.1"/><path d="M13.9 10.4a4.2 4.2 0 0 0-6.1-.4l-2.2 2.2a4.2 4.2 0 0 0 5.9 5.9l1.2-1.2"/>',
+    chat: '<path d="M4.4 5.6h15.2a1.6 1.6 0 0 1 1.6 1.6v8.2a1.6 1.6 0 0 1-1.6 1.6H9.6L5 20.6v-3.6H4.4a1.6 1.6 0 0 1-1.6-1.6V7.2a1.6 1.6 0 0 1 1.6-1.6z"/><path d="M8 10.2h8"/><path d="M8 13.4h5"/>',
+    heart: '<path d="M12 20.2s-7.6-4.6-7.6-9.4A4.2 4.2 0 0 1 12 8.4a4.2 4.2 0 0 1 7.6 2.4c0 4.8-7.6 9.4-7.6 9.4z"/>',
+    userPlus: '<circle cx="9.4" cy="8" r="3.6"/><path d="M2.8 20a6.6 6.6 0 0 1 13.2 0"/><path d="M18.4 8.4v5.6"/><path d="M15.6 11.2h5.6"/>',
+    package: '<path d="m12 3.2 8 4.4v8.8L12 20.8 4 16.4V7.6z"/><path d="m4 7.6 8 4.4 8-4.4"/><path d="M12 12v8.8"/>',
+    comment: '<path d="M4.4 4.8h15.2a1.6 1.6 0 0 1 1.6 1.6v8a1.6 1.6 0 0 1-1.6 1.6H10l-4.4 3.6V16h-1.2a1.6 1.6 0 0 1-1.6-1.6v-8a1.6 1.6 0 0 1 1.6-1.6z"/>',
     key: '<circle cx="8.2" cy="15.6" r="4.1"/><path d="m11.3 12.5 8.2-8.2"/><path d="m15.9 5.5 3 3"/><path d="m18.4 3 3 3"/>',
     trophy: '<path d="M8 4h8v5.1a4 4 0 0 1-8 0z"/><path d="M8 5.2H4.8v1.6a3.4 3.4 0 0 0 3.4 3.3"/><path d="M16 5.2h3.2v1.6a3.4 3.4 0 0 1-3.4 3.3"/><path d="M12 13.2V17"/><path d="M8.4 21h7.2"/>',
     zap: '<path d="M13.4 2.4 5 13.6h5.4L10.2 21.6 18.8 10.4h-5.5z"/>',
@@ -349,14 +354,14 @@
   // ---------------------------------------------------------------- 导航
   // 侧栏导航：统一页签(tab)与完整页面(page)，tab 序号 0-6 保持稳定
   // 多页面：每个页签对应站点里的一个目录（真实网址，刷新/分享都能直达）
-  const PAGE_DIRS = ['', 'books/', 'class/', 'deskmate/', 'battle/', 'stats/', 'settings/', 'store/'];
+  const PAGE_DIRS = ['', 'books/', 'class/', 'deskmate/', 'battle/', 'stats/', 'settings/', 'store/', 'community/'];
   function siteRootPath() {
     const cur = (typeof location !== 'undefined' && location.pathname) ? location.pathname : '/';
     const mark = '/StarCard/';
     const at = cur.indexOf(mark);
     if (at >= 0) return cur.slice(0, at + mark.length);
     const seg = cur.split('/').filter(function (x) { return !!x; });
-    const known = { books: 1, 'class': 1, deskmate: 1, battle: 1, stats: 1, settings: 1, browse: 1, store: 1 };
+    const known = { books: 1, 'class': 1, deskmate: 1, battle: 1, stats: 1, settings: 1, browse: 1, store: 1, community: 1 };
     while (seg.length && (known[seg[seg.length - 1]] || /\.[a-z0-9]+$/i.test(seg[seg.length - 1]))) seg.pop();
     return '/' + seg.join('/') + (seg.length ? '/' : '');
   }
@@ -370,6 +375,7 @@
     { kind: 'tab', tab: 1, label: '词书', ico: 'book', group: '学习' },
     { kind: 'tab', tab: 2, label: '班级', ico: 'users', group: '一起学' },
     { kind: 'tab', tab: 3, label: '同桌', ico: 'link', group: '一起学' },
+    { kind: 'tab', tab: 8, label: '社区', ico: 'chat', group: '一起学' },
     { kind: 'tab', tab: 4, label: '比赛', ico: 'zap', group: '一起学' },
     { kind: 'tab', tab: 7, label: '商铺', ico: 'grid', group: '工具' },
     { kind: 'tab', tab: 5, label: '数据', ico: 'chart', group: '工具' },
@@ -1500,14 +1506,46 @@
     return html + tabbar(2, app);
   }
   function deskmatePage(app) {
+    const mates = app.state.deskmates || [];
+    const inbox = app.inviteInbox || { items: [], loading: false, error: '' };
     let html = titlebar('同桌', '互相看一眼进度', {
-      actions: '<button class="btn btn-sm btn-primary" data-act="deskmate-add">' + icon('plus', 'i14') + '添加同桌</button>'
+      actions: '<button class="btn btn-sm" data-act="community-open">' + icon('chat', 'i14') + '去社区</button>' +
+        (mates.length ? '<button class="btn btn-sm btn-primary" data-act="deskmate-add">' + icon('plus', 'i14') + '添加同桌</button>' : '')
     }) + '<div class="content">';
-    if (app.state.deskmates.length === 0) {
-      html += emptyBox('link', '加上同桌，就能看到彼此今天学了多少。');
+
+    // 收到的邀请（来自社区里别人的「加为同桌」）
+    if (inbox.items.length) {
+      html += '<div class="section-title">' + icon('userPlus', 'i14') + '收到的邀请</div>';
+      for (let i = 0; i < inbox.items.length; i++) {
+        const inv = inbox.items[i];
+        html += '<div class="card wide invite-card">' +
+          '<span class="ava ava-c0">' + esc(String(inv.from_name || '学').slice(0, 1)) + '</span>' +
+          '<div class="li-main"><div class="name">' + esc(inv.from_name || '学习者') + '</div>' +
+          '<div class="meta">' + (inv.message ? esc(inv.message) : '想和你做同桌，一起打卡') + '</div></div>' +
+          '<div class="invite-acts">' +
+          '<button class="btn btn-sm btn-primary" data-act="invite-accept" data-id="' + esc(inv.id) + '" data-uid="' + esc(inv.from_user || '') + '" data-name="' + esc(inv.from_name || '同桌') + '">接受</button>' +
+          '<button class="btn btn-sm" data-act="invite-decline" data-id="' + esc(inv.id) + '">忽略</button>' +
+          '</div></div>';
+      }
+    } else if (inbox.loading) {
+      html += '<div class="subtle" style="padding:4px 2px 10px">正在查看有没有人邀请你…</div>';
+    } else if (inbox.error) {
+      html += '<div class="subtle" style="padding:4px 2px 10px;color:var(--red)">' + esc(inbox.error) + '</div>';
+    }
+
+    if (mates.length === 0) {
+      // 没有同桌：主路径是去社区找人，手动添加作为兜底
+      html += '<div class="card wide empty-mate">' +
+        '<div class="empty-ico">' + icon('link', 'i32') + '</div>' +
+        '<div class="empty-t">还没有同桌</div>' +
+        '<div class="subtle" style="margin-top:8px;max-width:320px">社区里都是正在背单词的人。看到合适的，点一下「加为同桌」，对方同意后就能互相看到每天的进度。</div>' +
+        '<div class="row-gap" style="justify-content:center;margin-top:18px">' +
+        '<button class="btn btn-primary" data-act="community-open">' + icon('chat', 'i16') + '去社区找人</button>' +
+        '<button class="btn" data-act="deskmate-add">' + icon('plus', 'i16') + '手动添加</button>' +
+        '</div></div>';
     } else {
-      for (let i = 0; i < app.state.deskmates.length; i++) {
-        const d = app.state.deskmates[i];
+      for (let i = 0; i < mates.length; i++) {
+        const d = mates[i];
         html += '<div class="list-item">' +
           '<div class="avatar">' + icon('link', 'i18') + '</div>' +
           '<div class="li-main"><div class="name" style="font-size:14.5px">' + esc(d.name) + '</div>' +
@@ -1518,9 +1556,159 @@
           icon('trash', 'i14') + '</button>' +
           '</div></div>';
       }
+      html += '<button class="btn btn-sm btn-block" style="margin-top:12px" data-act="community-open">' +
+        icon('chat', 'i14') + '去社区再加几个同桌</button>';
     }
     html += '</div>';
     return html + tabbar(3, app);
+  }
+
+  // ---------------------------------------------------------------- 社区
+  // 时间：社区里只写「刚刚 / 12 分钟前 / 3 小时前 / 11-19」，不显示具体秒
+  function agoText(iso) {
+    const t = Date.parse(iso);
+    if (!t) return '';
+    const s = Math.max(0, (Date.now() - t) / 1000);
+    if (s < 60) return '刚刚';
+    if (s < 3600) return Math.floor(s / 60) + ' 分钟前';
+    if (s < 86400) return Math.floor(s / 3600) + ' 小时前';
+    if (s < 86400 * 7) return Math.floor(s / 86400) + ' 天前';
+    const d = new Date(t);
+    return (d.getMonth() + 1) + '-' + d.getDate();
+  }
+  function sizeText(n) {
+    const b = Number(n) || 0;
+    if (b >= 1024 * 1024) return (b / 1024 / 1024).toFixed(1) + ' MB';
+    if (b >= 1024) return Math.round(b / 1024) + ' KB';
+    return b + ' B';
+  }
+
+  function communityLoginCard(app) {
+    const l = app.communityLogin || {};
+    return '<div class="card wide community-login">' +
+      '<div class="empty-ico">' + icon('chat', 'i32') + '</div>' +
+      '<div class="empty-t">登录后进社区</div>' +
+      '<div class="subtle" style="margin-top:8px;max-width:340px">社区里的帖子、评论和同桌邀请都要有一个身份，用邮箱验证码登录即可，不需要密码。</div>' +
+      (l.msg ? '<div class="cs-msg" style="color:' + (l.error ? 'var(--red)' : 'var(--brand)') + '">' + esc(l.msg) + '</div>' : '') +
+      '<div class="field" style="margin-top:14px"><label>邮箱</label>' +
+      '<input id="ccEmail" type="email" value="' + esc(l.email || '') + '" placeholder="name@example.com" autocomplete="email" /></div>' +
+      '<div class="field"><label>验证码</label><div class="otp-row">' +
+      '<input id="ccCode" type="text" inputmode="numeric" maxlength="6" value="' + esc(l.code || '') + '" placeholder="收到的验证码" autocomplete="one-time-code" />' +
+      '<button class="btn btn-sm" data-act="community-login-send">发验证码</button></div></div>' +
+      '<button class="btn btn-primary btn-block" data-act="community-login-submit">登录</button>' +
+      '</div>';
+  }
+
+  function postCard(app, p) {
+    const me = (FC.Community && FC.Community.uid) ? FC.Community.uid() : '';
+    const mine = !!me && p.authorId === me;
+    const liked = !!(app.communityLiked && app.communityLiked[p.id]);
+    const mateUids = app.deskmateUidSet || {};
+    const outSet = app.communityOutSet || {};
+    let mateBtn = '';
+    if (!mine) {
+      if (mateUids[p.authorId]) {
+        mateBtn = '<button class="btn btn-sm" disabled>已是同桌</button>';
+      } else if (outSet[p.authorId]) {
+        mateBtn = '<button class="btn btn-sm" disabled>已发邀请</button>';
+      } else {
+        mateBtn = '<button class="btn btn-sm btn-soft" data-act="post-invite" data-id="' + esc(p.authorId) + '" data-name="' + esc(p.authorName) + '">' +
+          icon('userPlus', 'i14') + '加为同桌</button>';
+      }
+    }
+    let res = '';
+    if (p.kind === 'resource' && p.resourcePath) {
+      res = '<div class="post-res">' +
+        '<span class="pr-ico">' + icon('package', 'i16') + '</span>' +
+        '<div class="pr-main"><b>' + esc(p.deckName || '分享的词库') + '</b>' +
+        '<small>' + p.deckWords + ' 张卡 · ' + sizeText(p.resourceSize) + '</small></div>' +
+        '<button class="btn btn-sm btn-primary" data-act="post-import" data-id="' + esc(p.id) + '" data-path="' + esc(p.resourcePath) + '" data-name="' + esc(p.deckName || 'shared') + '">导入</button>' +
+        '</div>';
+    }
+    return '<article class="post card wide" data-id="' + esc(p.id) + '">' +
+      '<header class="post-head">' +
+      '<span class="ava ava-c' + (Number(p.avatarColor) % 6) + '">' + esc(String(p.authorName || '学').slice(0, 1)) + '</span>' +
+      '<div class="post-who"><b>' + esc(p.authorName || '学习者') + '</b><small>' + esc(agoText(p.createdAt)) +
+      (p.kind === 'resource' ? ' · 分享了词库' : '') + '</small></div>' +
+      mateBtn +
+      '</header>' +
+      (p.title ? '<h3 class="post-title">' + esc(p.title) + '</h3>' : '') +
+      (p.body ? '<p class="post-body">' + esc(p.body) + '</p>' : '') +
+      res +
+      '<footer class="post-acts">' +
+      '<button class="post-act' + (liked ? ' on' : '') + '" data-act="post-like" data-id="' + esc(p.id) + '">' +
+      icon('heart', 'i16') + '<span>' + (p.likeCount || 0) + '</span></button>' +
+      '<button class="post-act" data-act="post-open" data-id="' + esc(p.id) + '">' +
+      icon('comment', 'i16') + '<span>' + (p.commentCount || 0) + '</span></button>' +
+      (mine ? '<button class="post-act del" data-act="post-del" data-id="' + esc(p.id) + '">' + icon('trash', 'i16') + '</button>' : '') +
+      '</footer></article>';
+  }
+
+  function communityDetail(app) {
+    const d = app.communityDetail || { loading: true };
+    let html = titlebar('帖子', '评论与回复', {
+      back: { act: 'post-back' },
+      actions: '<button class="btn btn-sm" data-act="community-open">' + icon('chat', 'i14') + '回社区</button>'
+    }) + '<div class="content">';
+    if (d.loading) return html + '<div class="subtle" style="padding:16px 2px">正在打开…</div></div>' + tabbar(8, app);
+    if (d.error) return html + '<div class="subtle" style="padding:16px 2px;color:var(--red)">' + esc(d.error) + '</div></div>' + tabbar(8, app);
+    if (!d.post) return html + emptyBox('comment', '这个帖子已经不在了') + '</div>' + tabbar(8, app);
+    html += postCard(app, d.post);
+    html += '<div class="section-title">' + icon('comment', 'i14') + '评论 ' + (d.comments || []).length + '</div>';
+    if (!(d.comments || []).length) {
+      html += '<div class="subtle" style="padding:2px 2px 12px">还没有人说话，你可以先留一句。</div>';
+    } else {
+      for (let i = 0; i < d.comments.length; i++) {
+        const c = d.comments[i];
+        html += '<div class="cmt">' +
+          '<span class="ava ava-c0 ava-xs">' + esc(String(c.authorName || '学').slice(0, 1)) + '</span>' +
+          '<div class="cmt-main"><div class="cmt-who"><b>' + esc(c.authorName || '学习者') + '</b>' +
+          '<small>' + esc(agoText(c.createdAt)) + '</small></div>' +
+          '<div class="cmt-body">' + esc(c.body) + '</div></div></div>';
+      }
+    }
+    html += '<div class="cmt-form">' +
+      '<textarea id="cmtInput" rows="2" maxlength="500" placeholder="说点什么，别只发「111」"></textarea>' +
+      '<button class="btn btn-primary btn-sm" data-act="comment-add">发送</button></div>';
+    html += '</div>';
+    return html + tabbar(8, app);
+  }
+
+  function communityPage(app) {
+    const logged = !!(FC.Community && FC.Community.session && FC.Community.session());
+    if (!logged) {
+      return titlebar('社区', '发帖 · 分享词库 · 找同桌') + '<div class="content">' +
+        communityLoginCard(app) + '</div>' + tabbar(8, app);
+    }
+    if (app.communityPostId) return communityDetail(app);
+
+    const c = app.community || { items: [], loading: false, error: '', loaded: false };
+    let html = titlebar('社区', '发帖 · 分享词库 · 找同桌', {
+      actions: '<button class="btn btn-sm btn-primary" data-act="community-post">' + icon('plus', 'i14') + '发帖</button>'
+    }) + '<div class="content">';
+
+    if (c.error) {
+      html += '<div class="card wide" style="border-color:var(--red-soft)">' +
+        '<div class="post-body" style="color:var(--red)">' + esc(c.error) + '</div>' +
+        '<button class="btn btn-sm" style="margin-top:10px" data-act="community-refresh">重试</button></div>';
+    }
+    if (c.loading && !c.items.length) {
+      html += '<div class="subtle" style="padding:16px 2px">正在加载社区…</div>';
+    } else if (!c.loading && !c.items.length && !c.error) {
+      html += '<div class="card wide empty-mate">' +
+        '<div class="empty-ico">' + icon('chat', 'i32') + '</div>' +
+        '<div class="empty-t">还没有人发帖</div>' +
+        '<div class="subtle" style="margin-top:8px">你可以第一个：说说今天背了多少，或者把整理好的词库分享出来。</div>' +
+        '<button class="btn btn-primary" style="margin-top:16px" data-act="community-post">' + icon('plus', 'i16') + '发第一条</button>' +
+        '</div>';
+    } else {
+      for (let i = 0; i < c.items.length; i++) html += postCard(app, c.items[i]);
+      if (c.items.length >= 20) {
+        html += '<button class="btn btn-sm btn-block" style="margin-top:10px" data-act="community-more">加载更早的帖子</button>';
+      }
+    }
+    html += '</div>';
+    return html + tabbar(8, app);
   }
 
   // ---------------------------------------------------------------- PK
@@ -2076,7 +2264,7 @@
       const on = !!a.loggedIn;
       const name = app.accountDisplayName ? app.accountDisplayName() : (a.nickname || '匿名用户');
       const idt = accountIdentity(app);
-      const pane = (app.settingsPane && app.settingsPane !== 'root') ? app.settingsPane : 'account';
+      const pane = app.settingsPane || 'root';
   
       // 行 / 组 / 块 三个基础构件：一行 = 彩色圆角图标 + 标题 + 右侧控件
       const row = function (ico, tone, label, right, sub) {
@@ -2136,32 +2324,38 @@
       let curCat = null;
       for (let ci = 0; ci < CATS.length; ci++) { if (CATS[ci].k === pane) curCat = CATS[ci]; }
   
-      // —— 标题栏 ——
-      let html = titlebar('设置', '左侧选分类，右侧改设置');
-      html += '<div class="content set-content"><div class="set-layout"><aside class="set-side">';
-
-      // 左栏：账户缩略 + 分类导航（照 WorkBuddy：左边是选项，右边是设置）
-      html += '<div class="ss-acct">' +
-        '<span class="ss-ava">' + avatarFace(a, 'ava-sm') + '</span>' +
-        '<span class="ss-main"><b>' + esc(on ? name : '匿名用户') + '</b>' +
-        '<small>' + esc(on ? (idt.code || '已登录') : '点击登录') + '</small></span></div>';
+      // —— 标题栏：一级是「设置」，二级是分类名 + 返回 ——
+      let html = curCat
+        ? titlebar(curCat.t, curCat.d, { back: { act: 'set-pane-back' } })
+        : titlebar('设置', '账户 · 学习 · 外观 · 数据');
+      html += '<div class="content set-content"><div class="set-win">';
+  
+      // ================= 一级：目录 =================
+      let root = '';
+      root += '<div class="set-acct">' +
+        '<div class="set-acct-ava">' + avatarFace(a, 'ava-lg') + '</div>' +
+        '<div class="set-acct-name">' + esc(on ? name : '匿名用户') + '</div>' +
+        '<div class="set-acct-id' + (idt.ready ? '' : ' is-empty') + '" title="账户 ID">' + esc(idt.code || '待填手机尾号') + '</div>' +
+        '<button class="set-acct-btn" data-act="set-pane" data-pane="account">' + icon('user', 'i15') + (on ? '账户管理' : '登录 / 注册') + '</button>' +
+        '</div>';
       const navGroups = ['账户', '学习', '个性化', '系统'];
       for (let gi = 0; gi < navGroups.length; gi++) {
-        html += '<div class="ss-group">' + esc(navGroups[gi]) + '</div>';
+        let rows = '';
         for (let ci = 0; ci < CATS.length; ci++) {
           const c = CATS[ci];
           if (c.g !== navGroups[gi]) continue;
-          html += '<button class="ss-item' + (pane === c.k ? ' on' : '') + '" data-act="set-pane" data-pane="' + c.k + '">' +
-            '<span class="ss-ico">' + icon(c.ico, 'i18') + '</span>' +
-            '<span class="ss-label">' + esc(c.t) + '</span>' +
+          rows += '<button class="set-nav-row" data-act="set-pane" data-pane="' + c.k + '">' +
+            '<span class="set-ico t-' + c.tone + '">' + icon(c.ico, 'i16') + '</span>' +
+            '<span class="set-nav-txt"><span class="set-nav-t">' + esc(c.t) + '</span>' +
+            '<span class="set-nav-s">' + esc(c.d) + '</span></span>' +
+            (c.val ? '<span class="set-nav-val">' + esc(c.val) + '</span>' : '') +
+            '<span class="set-nav-arrow">' + icon('chevronRight', 'i14') + '</span>' +
             '</button>';
         }
+        root += '<div class="set-grp-title">' + esc(navGroups[gi]) + '</div><div class="set-card set-nav">' + rows + '</div>';
       }
-      html += '<div class="set-ver">闪星卡 1.6.0 · 数据在本机</div>';
-      html += '</aside><div class="set-main">';
-      if (curCat) {
-        html += '<div class="set-main-head"><h2>' + esc(curCat.t) + '</h2><p>' + esc(curCat.d) + '</p></div>';
-      }
+      root += '<div class="set-ver">闪星卡 StarCard 1.6.0 · 数据都在本机</div>';
+      html += paneBox('root', root);
   
       // ================= 二级：各类参数 =================
   
@@ -2388,7 +2582,7 @@
         '</div></div>'
       );
   
-      html += '</div></div></div>';
+      html += '</div></div>';
       return html + tabbar(6, app);
     }
 
@@ -2715,6 +2909,21 @@
         '<div class="field"><label>备注（可选）</label><input id="mDNote" value="' + esc(m.note || '') + '" placeholder="每天一起背 20 词" /></div>' +
         '<div class="dialog-actions"><button class="btn" data-act="modal-cancel">取消</button>' +
         '<button class="btn btn-primary" data-act="modal-ok">添加</button></div>';
+    } else if (m.type === 'community-post') {
+      const decks = (app.state.decks || []).filter(function (d) { return (d.cards || []).length > 0; });
+      let opts = '<option value="">不附带词库</option>';
+      for (let i = 0; i < decks.length; i++) {
+        opts += '<option value="' + esc(decks[i].id) + '">' + esc(decks[i].name) +
+          '（' + (decks[i].cards || []).length + ' 张）</option>';
+      }
+      inner = '<h3>发到社区</h3>' +
+        '<div class="field"><label>标题（可选）</label><input id="cpTitle" maxlength="60" placeholder="如：SAT800 第 3 遍，整理了一份易混词" /></div>' +
+        '<div class="field"><label>说点什么</label><textarea id="cpBody" rows="5" maxlength="2000" placeholder="今天背了多少、卡在哪里、想找什么样的同桌。"></textarea></div>' +
+        '<div class="field"><label>附上词库（可选，别人可以一键导入）</label><select id="cpDeck">' + opts + '</select>' +
+        (decks.length ? '<div class="hint">会打包成 .srcd 上传，单次上限 5MB。</div>' : '<div class="hint">还没有可分享的牌组。</div>') +
+        '</div>' +
+        '<div class="dialog-actions"><button class="btn" data-act="modal-cancel">取消</button>' +
+        '<button class="btn btn-primary" data-act="modal-ok">发布</button></div>';
     } else if (m.type === 'account') {
       inner = '<h3>登录 / 创建账户</h3>' +
         '<div class="subtle" style="margin-bottom:4px">当前为本地账户，信息只保存在本机浏览器。</div>' +
@@ -3467,6 +3676,7 @@
       else if (app.tab === 4) body = battleConfig(app);
       else if (app.tab === 5) body = statsPage(app);
       else if (app.tab === 7 && window.SCShopUI) body = window.SCShopUI.render(app);
+      else if (app.tab === 8) body = communityPage(app);
       else body = settingsPage(app);
 
       let html = '<div id="root">' + body + '</div>';

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#FFFFFF" />
+  <meta name="description" content="社区 · 发帖交流、分享词库、找一位同桌" />
+  <meta name="author" content="小李工作室 XiaoLi Studio" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+  <title>社区 · 闪星卡 StarCard</title>
+  <link rel="stylesheet" href="../style.css?v=20261121k" />
+</head>
+<body>
+  <div id="boot" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#FFFFFF;color:#6B6B73;font:14px/1.6 -apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">
+    <div style="text-align:center">
+      <div style="font-size:22px;font-weight:700;color:#141416;letter-spacing:-.5px">闪星卡</div>
+      <div style="margin-top:6px">正在加载社区…</div>
+      <div id="bootErr" style="display:none;margin-top:14px;max-width:300px;font-size:12px;line-height:1.6;color:#F2557C;word-break:break-all"></div>
+    </div>
+  </div>
+  <div id="app"></div>
+
+  <!-- 隐藏的文件选择器：导入 .srcd（兼容旧 .fscd）/ Anki .apkg -->
+  <input type="file" id="srcdFile" accept=".srcd,.fscd,.json,application/json" style="display:none" />
+  <input type="file" id="apkgFile" accept=".apkg,.colpkg,.zip" style="display:none" />
+  <script>window.SC_PAGE = 'community';</script>
+  <script src="../js/boot-guard.js?v=20261121k"></script>
+  <script src="../js/core.js?v=20261121k"></script>
+  <script src="../js/arkui.js?v=20261121k"></script>
+  <script src="../js/cloud-config.js?v=20261121k"></script>
+  <script src="../cloudsync-config.js?v=20261121k"></script>
+  <script src="../js/cloud-auth.js?v=20261121k"></script>
+  <script src="../js/series.js?v=20261121k"></script>
+  <script src="../js/zip.js?v=20261121k"></script>
+  <script src="../js/sqlite.js?v=20261121k"></script>
+  <script src="../js/apkg.js?v=20261121k"></script>
+  <script src="../js/anki.js?v=20261121k"></script>
+  <script src="../js/ai.js?v=20261121k"></script>
+  <script src="../js/ui.js?v=20261121k"></script>
+  <script src="../js/anki-ui.js?v=20261121k"></script>
+  <script src="../js/classroom.js?v=20261121k"></script>
+  <script src="../js/shop.js?v=20261121k"></script>
+  <script src="../js/app.js?v=20261121k"></script>
+  <script src="../cloudsync.js?v=20261121k"></script>
+  <script src="../js/community.js?v=20261121k"></script>
+</body>
+</html>

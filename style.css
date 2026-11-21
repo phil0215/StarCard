@@ -7266,3 +7266,60 @@ html[data-theme="light"] .ss-item.on { background: #EFEFF1; }
   .ss-acct, .ss-group, .set-ver { display: none; }
   .ss-item { width: auto; font-size: 13px; padding: 7px 10px; }
 }
+
+/* ============================================================
+   社区（帖子 / 评论 / 点赞 / 同桌邀请）· 2026-11-21
+   ============================================================ */
+.btn-soft { background: var(--brand-soft); color: var(--brand-strong); border: 0; }
+.btn-soft:hover { filter: brightness(.97); }
+.ava-xs { width: 26px; height: 26px; font-size: 12px; border-radius: 50%; }
+
+.community-login { text-align: center; padding: 30px 22px; }
+.community-login .field { text-align: left; margin-top: 12px; }
+.cs-msg { margin-top: 10px; font-size: 13px; text-align: left; }
+
+.empty-mate { text-align: center; padding: 34px 22px; }
+
+.invite-card { display: flex; align-items: center; gap: 12px; padding: 13px 16px; margin-top: 10px; }
+.invite-card .li-main { flex: 1; min-width: 0; }
+.invite-acts { display: flex; gap: 6px; flex: none; }
+
+.post { padding: 16px; margin-top: 12px; }
+.post-head { display: flex; align-items: center; gap: 10px; }
+.post-head .btn { flex: none; }
+.post-who { flex: 1; min-width: 0; line-height: 1.35; }
+.post-who b { font-size: 14px; color: var(--ink-1); }
+.post-who small { display: block; font-size: 12px; color: var(--ink-3); }
+.post-title { margin: 10px 0 0; font-size: 15.5px; font-weight: 700; color: var(--ink-1); }
+.post-body { margin: 8px 0 0; font-size: 14px; line-height: 1.7; color: var(--ink-2); white-space: pre-wrap; word-break: break-word; }
+.post-res { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding: 11px 13px; background: var(--surface-2); border: 1px dashed var(--line-2); border-radius: var(--r-sm); }
+.pr-ico { color: var(--brand); display: flex; flex: none; }
+.pr-main { flex: 1; min-width: 0; line-height: 1.4; }
+.pr-main b { display: block; font-size: 13.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pr-main small { color: var(--ink-3); font-size: 12px; }
+.post-acts { display: flex; align-items: center; gap: 18px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--line); }
+.post-act { display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; padding: 0; font: inherit; font-size: 13px; color: var(--ink-3); cursor: pointer; }
+.post-act:hover { color: var(--ink-2); }
+.post-act.on { color: var(--red); }
+.post-act.del { margin-left: auto; color: var(--ink-4); }
+.post-act.del:hover { color: var(--red); }
+.post-act:disabled { opacity: .55; cursor: default; }
+
+.cmt { display: flex; gap: 10px; padding: 12px 2px; border-bottom: 1px solid var(--line); }
+.cmt-main { flex: 1; min-width: 0; }
+.cmt-who b { font-size: 13px; color: var(--ink-2); margin-right: 8px; }
+.cmt-who small { font-size: 12px; color: var(--ink-4); }
+.cmt-body { margin-top: 3px; font-size: 13.5px; line-height: 1.6; color: var(--ink-1); white-space: pre-wrap; word-break: break-word; }
+.cmt-form { display: flex; gap: 8px; align-items: flex-end; margin-top: 10px; }
+.cmt-form textarea {
+  flex: 1; min-height: 44px; resize: vertical; font: inherit; color: var(--ink-1);
+  background: var(--surface); border: 1px solid var(--line-2); border-radius: var(--r-sm);
+  padding: 9px 11px; line-height: 1.6; outline: none;
+}
+.cmt-form textarea:focus { border-color: var(--brand); box-shadow: 0 0 0 3px var(--brand-ring); }
+.cmt-form textarea::placeholder { color: var(--ink-4); }
+
+@media (max-width: 600px) {
+  .post-head .btn { padding: 6px 10px; }
+  .invite-acts .btn { padding: 6px 10px; }
+}
