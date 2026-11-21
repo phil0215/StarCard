@@ -7885,3 +7885,42 @@ html[data-look="plain"] .am-item-danger .am-txt b {
 
 /* 设置页左栏跟着收，避免两层 186 叠加显得笨重 */
 .set-layout { grid-template-columns: 170px minmax(0, 1fr); }
+
+/* ============================================================
+   边栏 v2 · 豆包同款（平铺无边界、素色行、灰胶囊选中、小灰分类标）
+   注：尺寸沿用上面的收窄规则，这里只改视觉层
+   ============================================================ */
+.tabbar { border-right: none; }
+html[data-theme="dark"] .tabbar,
+html[data-look="plain"] .tabbar { border-right: none; }
+
+.nav-label { color: var(--ink-4); font-weight: 500; letter-spacing: .3px; }
+.nav-label::before { display: none; }
+
+.tab { color: var(--ink-2); }
+.tab .ico { color: var(--ink-4); }
+.tab:hover { background: var(--surface-2); color: var(--ink-1); }
+.tab:hover .ico { color: var(--ink-2); }
+.tab.active { background: var(--surface-2); color: var(--ink-1); font-weight: 650; }
+.tab.active .ico { color: var(--ink-1); }
+
+[data-theme="dark"] .tab:hover,
+[data-theme="dark"] .tab.active { background: rgba(255, 255, 255, .07); }
+[data-theme="dark"] .tab:hover .ico,
+[data-theme="dark"] .tab.active .ico { color: var(--ink-2); }
+
+/* 顶部火苗拍平：一行素色，不再做卡片 */
+.streak-mini { border: none; background: transparent; padding: 4px 9px; margin: 0 4px 12px; }
+
+/* 底部账户行：去卡片边框，hover 灰胶囊 */
+.side-account { border: none; }
+.side-account:hover { background: var(--surface-2); border: none; box-shadow: none; }
+[data-theme="dark"] .side-account:hover { background: rgba(255, 255, 255, .07); }
+[data-theme="dark"] .side-account .sa-ava,
+[data-theme="dark"] .side-account:hover .sa-ava { background: rgba(255, 255, 255, .08); }
+
+/* plain 外观下同样保持素色 */
+html[data-look="plain"] .tab:hover,
+html[data-look="plain"] .tab.active { background: var(--surface-2) !important; color: var(--ink-1) !important; }
+html[data-look="plain"] .side-account:hover { background: var(--surface-2) !important; }
+html[data-look="plain"] .streak-mini { background: transparent !important; border: none !important; }
