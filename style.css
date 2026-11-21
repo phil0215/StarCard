@@ -5970,3 +5970,32 @@ html[data-look="plain"] .ai-brief { background: var(--surface) !important; backg
 html[data-look="plain"] .ai-brief-ico { background: var(--surface-2) !important; color: var(--ink-2) !important; box-shadow: none !important; }
 html[data-look="plain"] .hc-head em { background: var(--surface-2) !important; color: var(--ink-3) !important; }
 html[data-look="plain"] .hc-head .ic { color: var(--ink-3) !important; }
+
+/* ---- 回调：素白保留品牌紫与彩色图标点缀，不再全黑白 ---- */
+html[data-look="plain"] {
+  --brand: #6E5BE6;
+  --brand-strong: #5C49D6;
+  --brand-soft: #EFECFC;
+  --brand-ring: rgba(110, 91, 230, .16);
+  --brand-ink: #FFFFFF;
+}
+html[data-look="plain"] .tab.active { background: var(--brand-soft) !important; color: var(--ink-1) !important; }
+html[data-look="plain"] .tab.active .ico { color: var(--brand) !important; }
+html[data-look="plain"] .tab:hover { background: var(--surface-2) !important; }
+/* 牌组图标：柔和彩色（淡彩底 + 彩线图标），不渐变不发光 */
+html[data-look="plain"] .av-tone-0 { background: #F1EBFF !important; color: #6B48FF !important; }
+html[data-look="plain"] .av-tone-1 { background: #E0F7FA !important; color: #00A3BD !important; }
+html[data-look="plain"] .av-tone-2 { background: #FFF3E8 !important; color: #E56A00 !important; }
+html[data-look="plain"] .av-tone-3 { background: #FFF4E5 !important; color: #E88400 !important; }
+html[data-look="plain"] .av-tone-4 { background: #E8FFEA !important; color: #009A22 !important; }
+html[data-look="plain"] .av-tone-5 { background: #E0F7F7 !important; color: #0AA8A8 !important; }
+html[data-look="plain"] .av-tone-6 { background: #EFE8FF !important; color: #6B48FF !important; }
+html[data-look="plain"] .av-tone-7 { background: #F3EAFF !important; color: #6A22C9 !important; }
+/* 小星简报图标回品牌色 */
+html[data-look="plain"] .ai-brief-ico { background: var(--brand-soft) !important; color: var(--brand) !important; }
+/* 速览卡徽标回到柔和品牌色 */
+html[data-look="plain"] .hc-head em { background: var(--brand-soft) !important; color: var(--brand-strong) !important; }
+
+/* ---- 素白再补一点气色：主卡极淡品牌底 + 分组圆点品牌色 ---- */
+html[data-look="plain"] .overview-hero { background: #FAF8FF !important; border-color: #ECE7FB !important; }
+html[data-look="plain"] .nav-label::before { background: var(--brand) !important; opacity: .55; }
