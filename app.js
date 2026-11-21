@@ -5059,7 +5059,7 @@
     const name = (app && app.accountDisplayName) ? app.accountDisplayName() : (acc.nickname || '学习者');
     const children = [];
     children.push(new A.El('div').cls('brand').children([
-      new A.El('span').cls('logo').html('<img src="icon-192.png" alt="" />'),
+      new A.El('span').cls('logo').html('<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M12 3.2c.5 4.5 2.3 6.3 6.8 6.8-4.5.5-6.3 2.3-6.8 6.8-.5-4.5-2.3-6.3-6.8-6.8 4.5-.5 6.3-2.3 6.8-6.8Z"/><path d="M18.6 15.6c.22 1.8.9 2.48 2.7 2.7-1.8.22-2.48.9-2.7 2.7-.22-1.8-.9-2.48-2.7-2.7 1.8-.22 2.48-.9 2.7-2.7Z"/></svg>'),
       new A.El('span').cls('brand-txt').children([
         new A.El('span', '闪星卡').cls('brand-cn'),
         new A.El('span', 'StarCard').cls('brand-en')
@@ -5189,8 +5189,11 @@
   ];
 
   function logo() {
-    // 闪星卡：直接使用应用图标（与 favicon 同源，原样显示）
-    return '<span class="logo"><img src="icon-192.png" alt="" /></span>';
+    // 闪星卡：一大一小双星标记，跟随 currentColor
+    return '<span class="logo"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">' +
+      '<path d="M12 3.2c.5 4.5 2.3 6.3 6.8 6.8-4.5.5-6.3 2.3-6.8 6.8-.5-4.5-2.3-6.3-6.8-6.8 4.5-.5 6.3-2.3 6.8-6.8Z"/>' +
+      '<path d="M18.6 15.6c.22 1.8.9 2.48 2.7 2.7-1.8.22-2.48.9-2.7 2.7-.22-1.8-.9-2.48-2.7-2.7 1.8-.22 2.48-.9 2.7-2.7Z"/>' +
+      '</svg></span>';
   }
 
   function tabbar(active, app) {
@@ -7109,8 +7112,25 @@
         '<input type="file" id="avatarFile" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none" />' +
         (m.data ? '<button class="btn btn-sm btn-block" style="margin-top:8px" data-act="avatar-clear">' + icon('rotate', 'i14') + '移除图片</button>' : '') +
         '</div></div>' +
-        '<div class="subtle" style="margin-top:10px">上传的图片会压缩为 160×160 并只保存在本机，不会写入 .srcd 文件。</div>' +
+        '<div class="subtle" style="margin-top:10px">上传后可拖动、缩放，选好圆形区域再保存；图片只保存在本机。</div>' +
         '<div class="dialog-actions"><button class="btn" data-act="modal-cancel">关闭</button></div>';
+    } else if (m.type === 'avatar-crop') {
+      const c = app._crop || {};
+      inner = '<h3>调整头像</h3>' +
+        '<div class="crop-wrap">' +
+        '<div class="crop-stage" id="avaCropStage">' +
+        '<img class="crop-img" id="avaCropImg" src="' + esc(c.src || '') + '" alt="" draggable="false" />' +
+        '<span class="crop-ring"></span>' +
+        '</div>' +
+        '<div class="crop-zoom">' +
+        '<button class="crop-btn" data-act="crop-zoom" data-dir="-1" aria-label="缩小">−</button>' +
+        '<input type="range" id="avaCropZoom" min="100" max="320" step="1" value="100" aria-label="缩放" />' +
+        '<button class="crop-btn" data-act="crop-zoom" data-dir="1" aria-label="放大">+</button>' +
+        '</div>' +
+        '<div class="crop-tip">拖动图片调整位置 · 滑杆或滚轮缩放 · <b id="avaCropPct">100%</b></div>' +
+        '</div>' +
+        '<div class="dialog-actions"><button class="btn" data-act="crop-cancel">取消</button>' +
+        '<button class="btn btn-primary" data-act="crop-apply">' + icon('check', 'i15') + '使用这张</button></div>';
     } else if (m.type === 'privacy') {
       inner = '<h3>隐私说明</h3>' +
         '<div class="privacy-doc">' +
@@ -9001,6 +9021,8 @@
       }
       // 自动翻面：出题后到点自动翻到背面（仅在未翻面、设置开启时）
       this.scheduleAutoReveal();
+      // 头像裁剪：渲染后按舞台实际尺寸计算基准缩放
+      if (this.modal && this.modal.type === 'avatar-crop') this.mountAvatarCrop();
     },
     // 数字滚动：切页时把关键指标从 0 数到目标值（只改写文本，不动结构）
     animateNumbers: function (root) {
@@ -10001,25 +10023,108 @@
       reader.onload = function () {
         const img = new Image();
         img.onload = function () {
-          try {
-            const size = 160;
-            const cv = document.createElement('canvas');
-            cv.width = size; cv.height = size;
-            const ctx = cv.getContext('2d');
-            const side = Math.min(img.width, img.height);
-            ctx.drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, size, size);
-            const data = cv.toDataURL('image/jpeg', 0.82);
-            self.account.avatarData = data;
-            self.saveAccount();
-            self.modal = null;
-            self.render();
-            self.toast('头像已更新');
-          } catch (err) { self.toast('图片处理失败，请换一张'); }
+          const w = img.naturalWidth || img.width;
+          const h = img.naturalHeight || img.height;
+          if (!w || !h) { self.toast('图片读取失败，请换一张'); return; }
+          // 进入裁剪：拖动 / 缩放后取圆形区域
+          self._crop = {
+            src: String(reader.result || ''),
+            w: w, h: h,
+            base: 1, stage: 240,
+            scale: 1, x: 0, y: 0
+          };
+          self.modal = { type: 'avatar-crop' };
+          self.render();
         };
         img.onerror = function () { self.toast('图片读取失败，请换一张'); };
         img.src = String(reader.result || '');
       };
       reader.readAsDataURL(file);
+    },
+    // 裁剪舞台：按实际尺寸算基准缩放，短边铺满圆形裁切框
+    mountAvatarCrop: function () {
+      const c = this._crop;
+      const stage = document.getElementById('avaCropStage');
+      if (!c || !stage) return;
+      const S = stage.clientWidth || 240;
+      c.stage = S;
+      c.base = S / Math.min(c.w, c.h);
+      c.x = 0; c.y = 0;
+      if (!(c.scale >= 1)) c.scale = 1;
+      this.syncAvatarCrop();
+      const rg = document.getElementById('avaCropZoom');
+      if (rg) rg.value = String(Math.round(c.scale * 100));
+    },
+    clampAvatarCrop: function () {
+      const c = this._crop;
+      if (!c) return;
+      const S = c.stage || 240;
+      const W = c.w * c.base * c.scale;
+      const H = c.h * c.base * c.scale;
+      const mx = Math.max(0, (W - S) / 2);
+      const my = Math.max(0, (H - S) / 2);
+      c.x = Math.max(-mx, Math.min(mx, c.x));
+      c.y = Math.max(-my, Math.min(my, c.y));
+    },
+    syncAvatarCrop: function () {
+      const c = this._crop;
+      const img = document.getElementById('avaCropImg');
+      if (!c || !img) return;
+      this.clampAvatarCrop();
+      const W = c.w * c.base;
+      const H = c.h * c.base;
+      img.style.width = W + 'px';
+      img.style.height = H + 'px';
+      img.style.marginLeft = (-W / 2) + 'px';
+      img.style.marginTop = (-H / 2) + 'px';
+      img.style.transform = 'translate(' + c.x.toFixed(1) + 'px,' + c.y.toFixed(1) + 'px) scale(' + c.scale.toFixed(3) + ')';
+      const pct = document.getElementById('avaCropPct');
+      if (pct) pct.textContent = Math.round(c.scale * 100) + '%';
+    },
+    zoomAvatarCrop: function (dir) {
+      const c = this._crop;
+      if (!c) return;
+      c.scale = Math.max(1, Math.min(3.2, c.scale + (dir > 0 ? 0.12 : -0.12)));
+      const rg = document.getElementById('avaCropZoom');
+      if (rg) rg.value = String(Math.round(c.scale * 100));
+      this.syncAvatarCrop();
+    },
+    setAvatarCropScale: function (v) {
+      const c = this._crop;
+      if (!c) return;
+      const n = Number(v);
+      c.scale = Math.max(1, Math.min(3.2, (isNaN(n) ? 100 : n) / 100));
+      this.syncAvatarCrop();
+    },
+    cancelAvatarCrop: function () {
+      this._crop = null;
+      this.modal = { type: 'avatar', color: this.account.avatarColor, data: this.account.avatarData };
+      this.render();
+    },
+    commitAvatarCrop: function () {
+      const c = this._crop;
+      if (!c) return;
+      const img = document.getElementById('avaCropImg');
+      if (!img) { this.toast('图片未就绪，请重试'); return; }
+      try {
+        const SIZE = 320; // 输出清晰度：320×320
+        const k = c.base * c.scale;
+        const side = (c.stage || 240) / k;
+        const cx = c.w / 2 - c.x / k;
+        const cy = c.h / 2 - c.y / k;
+        const cv = document.createElement('canvas');
+        cv.width = SIZE; cv.height = SIZE;
+        const ctx = cv.getContext('2d');
+        ctx.drawImage(img, cx - side / 2, cy - side / 2, side, side, 0, 0, SIZE, SIZE);
+        this.account.avatarData = cv.toDataURL('image/jpeg', 0.86);
+        this._crop = null;
+        this.saveAccount();
+        this.modal = { type: 'avatar', color: this.account.avatarColor, data: this.account.avatarData };
+        this.render();
+        this.toast('头像已更新');
+      } catch (err) {
+        this.toast('图片处理失败，请换一张');
+      }
     },
     // ---- 隐私设置 ----
     togglePrivacy: function (key) {
@@ -11205,6 +11310,9 @@
       case 'login-inline': App.loginInline(); break;
       case 'profile-open': App.openModal({ type: 'profile', nickname: App.account.nickname, email: App.account.email }); break;
       case 'avatar-open': App.openAvatar(); break;
+      case 'crop-apply': App.commitAvatarCrop(); break;
+      case 'crop-cancel': App.cancelAvatarCrop(); break;
+      case 'crop-zoom': App.zoomAvatarCrop(Number(d.dir) || 1); break;
       case 'avatar-color': App.setAvatarColor(d.color); break;
       case 'avatar-clear': App.clearAvatarImage(); break;
       case 'privacy-toggle': App.togglePrivacy(d.key); break;
@@ -11277,6 +11385,46 @@
       App.cmdQuery = e.target.value;
       App.refreshCmdList();
     }
+  });
+
+  // 头像裁剪：拖动 / 滚轮 / 滑杆（document 级委托，避免每次渲染重复绑定）
+  let _cropDrag = null;
+  document.addEventListener('pointerdown', function (e) {
+    if (!App.modal || App.modal.type !== 'avatar-crop' || !App._crop) return;
+    const stage = byId('avaCropStage');
+    if (!stage || !(stage === e.target || stage.contains(e.target))) return;
+    _cropDrag = { id: e.pointerId, x: e.clientX, y: e.clientY, ox: App._crop.x, oy: App._crop.y };
+    try { stage.setPointerCapture(e.pointerId); } catch (err) {}
+    e.preventDefault();
+  });
+  document.addEventListener('pointermove', function (e) {
+    if (!_cropDrag || e.pointerId !== _cropDrag.id) return;
+    const c = App._crop;
+    if (!c) { _cropDrag = null; return; }
+    c.x = _cropDrag.ox + (e.clientX - _cropDrag.x);
+    c.y = _cropDrag.oy + (e.clientY - _cropDrag.y);
+    App.syncAvatarCrop();
+    e.preventDefault();
+  });
+  document.addEventListener('pointerup', function (e) {
+    if (_cropDrag && e.pointerId === _cropDrag.id) _cropDrag = null;
+  });
+  document.addEventListener('pointercancel', function (e) {
+    if (_cropDrag && e.pointerId === _cropDrag.id) _cropDrag = null;
+  });
+  document.addEventListener('wheel', function (e) {
+    if (!App.modal || App.modal.type !== 'avatar-crop' || !App._crop) return;
+    const stage = byId('avaCropStage');
+    if (!stage || !stage.contains(e.target)) return;
+    e.preventDefault();
+    const c = App._crop;
+    c.scale = Math.max(1, Math.min(3.2, c.scale * (e.deltaY < 0 ? 1.08 : 0.925)));
+    const rg = byId('avaCropZoom');
+    if (rg) rg.value = String(Math.round(c.scale * 100));
+    App.syncAvatarCrop();
+  }, { passive: false });
+  document.addEventListener('input', function (e) {
+    if (e.target && e.target.id === 'avaCropZoom') App.setAvatarCropScale(e.target.value);
   });
 
   // 编辑器：类型切换 / 媒体文件
