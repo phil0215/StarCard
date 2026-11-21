@@ -5059,7 +5059,7 @@
     const name = (app && app.accountDisplayName) ? app.accountDisplayName() : (acc.nickname || '学习者');
     const children = [];
     children.push(new A.El('div').cls('brand').children([
-      new A.El('span').cls('logo').html('<img src="icon-192.png" alt="" />'),
+      new A.El('span').cls('logo').html('<svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M12 3.2c.5 4.5 2.3 6.3 6.8 6.8-4.5.5-6.3 2.3-6.8 6.8-.5-4.5-2.3-6.3-6.8-6.8 4.5-.5 6.3-2.3 6.8-6.8Z"/><path d="M18.6 15.6c.22 1.8.9 2.48 2.7 2.7-1.8.22-2.48.9-2.7 2.7-.22-1.8-.9-2.48-2.7-2.7 1.8-.22 2.48-.9 2.7-2.7Z"/></svg>'),
       new A.El('span').cls('brand-txt').children([
         new A.El('span', '闪星卡').cls('brand-cn'),
         new A.El('span', 'StarCard').cls('brand-en')
@@ -5189,8 +5189,11 @@
   ];
 
   function logo() {
-    // 闪星卡：直接使用应用图标（与 favicon 同源，原样显示）
-    return '<span class="logo"><img src="icon-192.png" alt="" /></span>';
+    // 闪星卡：一大一小双星标记，跟随 currentColor
+    return '<span class="logo"><svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">' +
+      '<path d="M12 3.2c.5 4.5 2.3 6.3 6.8 6.8-4.5.5-6.3 2.3-6.8 6.8-.5-4.5-2.3-6.3-6.8-6.8 4.5-.5 6.3-2.3 6.8-6.8Z"/>' +
+      '<path d="M18.6 15.6c.22 1.8.9 2.48 2.7 2.7-1.8.22-2.48.9-2.7 2.7-.22-1.8-.9-2.48-2.7-2.7 1.8-.22 2.48-.9 2.7-2.7Z"/>' +
+      '</svg></span>';
   }
 
   function tabbar(active, app) {
@@ -6548,6 +6551,31 @@
     };
   }
 
+  // 等级：暂按累计学习天数展示，正式规则（学习天数 + 学习数据）后续上线
+  function levelInfo(app) {
+    const st = (app && app.state) || {};
+    const list = Array.isArray(st.stats) ? st.stats : [];
+    const seen = {};
+    let days = 0;
+    for (let i = 0; i < list.length; i++) {
+      const e = list[i];
+      if (!e || !e.date) continue;
+      if ((Number(e.reviews) || 0) <= 0) continue;
+      if (seen[e.date]) continue;
+      seen[e.date] = 1;
+      days++;
+    }
+    const PER = 7;
+    const cur = days % PER;
+    return {
+      days: days,
+      level: Math.floor(days / PER) + 1,
+      per: PER,
+      left: PER - cur,
+      pct: Math.round(cur / PER * 100)
+    };
+  }
+
   // ---------------------------------------------------------------- 设置页
   function settingsPage(app) {
     const s = app.state.settings;
@@ -6730,6 +6758,22 @@
       row('key', 'slate', 'E / S / F / I / R', '<span class="set-val">编辑 / 暂停 / 标记 / 信息 / 重置</span>') +
       row('key', 'slate', 'Ctrl + Z / B / Esc', '<span class="set-val">撤销 / 浏览器 / 退出</span>') +
       acts('<button class="btn btn-sm" data-act="shortcuts-help">' + icon('keyboard', 'i14') + '查看完整快捷键</button>')
+    );
+
+    // —— 等级 ——
+    const lv = levelInfo(app);
+    html += grp('等级',
+      '<div class="set-block set-level">' +
+      '<div class="lv-top"><span class="lv-badge">Lv.' + lv.level + '</span>' +
+      '<span class="lv-title">' + (lv.days > 0 ? '已学习 ' + lv.days + ' 天' : '还没开始学习') + '</span>' +
+      '<span class="lv-pct">' + lv.pct + '%</span></div>' +
+      '<div class="lv-bar"><i style="width:' + lv.pct + '%"></i></div>' +
+      '<div class="lv-sub">' +
+      (lv.days > 0
+        ? '再学习 ' + lv.left + ' 天可升到 Lv.' + (lv.level + 1)
+        : '完成第一次学习，就能拿到 Lv.1 的第一格进度') +
+      '。等级由学习天数与学习数据综合决定，正式规则后续上线。</div>' +
+      '</div>'
     );
 
     // —— 关于 ——
