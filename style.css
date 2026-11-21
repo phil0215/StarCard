@@ -6655,3 +6655,29 @@ html[data-look="plain"] .set-nav-row { min-height: 44px !important; padding: 9px
 html[data-look="plain"] .set-row { min-height: 44px !important; padding: 8px 12px !important; }
 html[data-look="plain"] .set-ico { width: 26px !important; height: 26px !important; flex: 0 0 26px !important; border-radius: 7px; }
 html[data-look="plain"] .set-nav-t { font-size: 14px; }
+
+/* 恢复豆包式分组：每类一块独立卡片，组间留白 16px（仍不显示分类名） */
+html[data-theme="dark"][data-look="plain"] .set-pane .set-card.set-nav {
+  margin-bottom: 16px !important;
+  border-radius: 12px !important;
+}
+html[data-theme="dark"][data-look="plain"] .set-pane .set-card.set-nav:first-of-type {
+  margin-top: 20px !important;
+  border-radius: 12px !important;
+}
+html[data-theme="dark"][data-look="plain"] .set-pane .set-card.set-nav:last-of-type {
+  border-radius: 12px !important;
+}
+
+/* 浅色：分组卡用浅灰底，才能分出组 */
+html[data-theme="light"][data-look="plain"] .set-pane .set-card.set-nav {
+  background: #F6F6F7 !important;
+  border: 0 !important;
+}
+html[data-theme="light"][data-look="plain"] .set-pane .set-block { background: #F6F6F7; border-bottom: 0; border-radius: 12px; }
+html[data-theme="light"] .ava-anon { background: linear-gradient(180deg, #DDDDDD, #ADADAD) !important; }
+
+/* 侧栏打卡小条：浅色下改浅灰，选中态用低饱和橙，不再黑条/橙红渐变 */
+html[data-theme="light"] .streak-mini .sm-week i { background: #E8E8EB; }
+html[data-look="plain"] .streak-mini .sm-week i.on { background: #D98A4E; background-image: none; }
+html[data-look="plain"] .streak-mini .sm-week i.today { box-shadow: none; }
