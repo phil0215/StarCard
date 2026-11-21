@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#FFFFFF" />
+  <meta name="description" content="限时答题比赛，比比谁记得更牢" />
+  <meta name="author" content="小李工作室 XiaoLi Studio" />
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+  <title>比赛 · 闪星卡 StarCard</title>
+  <link rel="stylesheet" href="../style.css" />
+</head>
+<body>
+  <div id="boot" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#FFFFFF;color:#6B6B73;font:14px/1.6 -apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">
+    <div style="text-align:center">
+      <div style="font-size:22px;font-weight:700;color:#141416;letter-spacing:-.5px">闪星卡</div>
+      <div style="margin-top:6px">正在加载比赛…</div>
+      <div id="bootErr" style="display:none;margin-top:14px;max-width:300px;font-size:12px;line-height:1.6;color:#F2557C;word-break:break-all"></div>
+    </div>
+  </div>
+  <div id="app"></div>
+
+  <!-- 隐藏的文件选择器：导入 .srcd（兼容旧 .fscd）/ Anki .apkg -->
+  <input type="file" id="srcdFile" accept=".srcd,.fscd,.json,application/json" style="display:none" />
+  <input type="file" id="apkgFile" accept=".apkg,.colpkg,.zip" style="display:none" />
+  <script>window.SC_PAGE = 'battle';</script>
+  <script src="../js/boot-guard.js"></script>
+  <script src="../js/core.js"></script>
+  <script src="../js/arkui.js"></script>
+  <script src="../js/cloud-config.js"></script>
+  <script src="../js/cloud-auth.js"></script>
+  <script src="../js/series.js"></script>
+  <script src="../js/zip.js"></script>
+  <script src="../js/sqlite.js"></script>
+  <script src="../js/apkg.js"></script>
+  <script src="../js/anki.js"></script>
+  <script src="../js/ai.js"></script>
+  <script src="../js/ui.js"></script>
+  <script src="../js/anki-ui.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="../cloudsync-config.js"></script>
+  <script src="../cloudsync.js"></script>
+</body>
+</html>
