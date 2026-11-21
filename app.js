@@ -6577,223 +6577,291 @@
   }
 
   // ---------------------------------------------------------------- 设置页
-  function settingsPage(app) {
-    const s = app.state.settings;
-    const a = app.account || {};
-    const on = !!a.loggedIn;
-    const name = app.accountDisplayName ? app.accountDisplayName() : (a.nickname || '未登录');
-    const idt = accountIdentity(app);
-
-    // 行 / 组 / 块 三个基础构件：一行 = 彩色圆角图标 + 标题 + 右侧控件
-    const row = function (ico, tone, label, right, sub) {
-      return '<div class="set-row">' +
-        '<span class="set-ico t-' + tone + '">' + icon(ico, 'i16') + '</span>' +
-        '<span class="set-label">' + esc(label) + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span>' +
-        '<span class="set-ctl">' + right + '</span></div>';
-    };
-    const num = function (id, val, ph, w) {
-      return '<input class="set-num" id="' + id + '" value="' + esc(val) + '" placeholder="' + esc(ph) +
-        '" inputmode="decimal"' + (w ? ' style="width:' + w + 'px"' : '') + ' />';
-    };
-    const sel = function (id, opts) {
-      let o = '';
-      for (let i = 0; i < opts.length; i++) {
-        o += '<option value="' + esc(opts[i].v) + '"' + (opts[i].on ? ' selected' : '') + '>' + esc(opts[i].label) + '</option>';
+    function settingsPage(app) {
+      const s = app.state.settings;
+      const a = app.account || {};
+      const on = !!a.loggedIn;
+      const name = app.accountDisplayName ? app.accountDisplayName() : (a.nickname || '未登录');
+      const idt = accountIdentity(app);
+      const pane = app.settingsPane || 'root';
+  
+      // 行 / 组 / 块 三个基础构件：一行 = 彩色圆角图标 + 标题 + 右侧控件
+      const row = function (ico, tone, label, right, sub) {
+        return '<div class="set-row">' +
+          '<span class="set-ico t-' + tone + '">' + icon(ico, 'i16') + '</span>' +
+          '<span class="set-label">' + esc(label) + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span>' +
+          '<span class="set-ctl">' + right + '</span></div>';
+      };
+      const num = function (id, val, ph, w) {
+        return '<input class="set-num" id="' + id + '" value="' + esc(val) + '" placeholder="' + esc(ph) +
+          '" inputmode="decimal"' + (w ? ' style="width:' + w + 'px"' : '') + ' />';
+      };
+      const sel = function (id, opts) {
+        let o = '';
+        for (let i = 0; i < opts.length; i++) {
+          o += '<option value="' + esc(opts[i].v) + '"' + (opts[i].on ? ' selected' : '') + '>' + esc(opts[i].label) + '</option>';
+        }
+        return '<select class="set-select" id="' + id + '">' + o + '</select>';
+      };
+      const grp = function (title, inner) {
+        return '<div class="set-grp-title">' + esc(title) + '</div><div class="set-card">' + inner + '</div>';
+      };
+      const block = function (title, inner, sub) {
+        return '<div class="set-block"><div class="set-block-h">' + esc(title) + '</div>' + inner +
+          (sub ? '<div class="set-block-sub">' + sub + '</div>' : '') + '</div>';
+      };
+      const acts = function (inner) { return '<div class="set-actions">' + inner + '</div>'; };
+      const saveBar = '<div class="set-save"><span class="set-save-hint">改完点保存，全部立即生效</span>' +
+        '<button class="btn btn-primary" data-act="save-settings">' + icon('check', 'i16') + '保存设置</button></div>';
+      // 二级页容器：所有页都渲染进 DOM，只显示当前这一页（保证保存时能读到全部输入框）
+      const paneBox = function (key, inner) {
+        return '<div class="set-pane' + (pane === key ? ' on' : '') + '" data-pane="' + key + '">' + inner + '</div>';
+      };
+  
+      // 一级目录：每个分类点进去才是具体参数
+      const themeName = (function () {
+        const m = s.theme || 'light';
+        return m === 'dark' ? '深色' : (m === 'auto' ? '跟随系统' : '浅色');
+      })();
+      const presetNow = (function () {
+        for (let i = 0; i < THEME_PRESETS.length; i++) { if (THEME_PRESETS[i].id === s.preset) return THEME_PRESETS[i].name; }
+        return '自定义';
+      })();
+      const lvNow = levelInfo(app);
+      const CATS = [
+        { k: 'account', t: '账户与身份', d: '昵称、头像与账户 ID', ico: 'user', tone: 'blue', g: '账户', val: (on ? name : '未登录') },
+        { k: 'level', t: '等级', d: '学习天数换来的成长进度', ico: 'trophy', tone: 'amber', g: '账户', val: 'Lv.' + lvNow.level },
+        { k: 'plan', t: '学习计划', d: '每日新卡与复习上限', ico: 'target', tone: 'blue', g: '学习', val: s.newCardsPerDay + ' / ' + s.reviewCardsPerDay },
+        { k: 'fsrs', t: '记忆算法', d: 'FSRS-5 留存率与间隔', ico: 'zap', tone: 'purple', g: '学习', val: '' },
+        { k: 'study', t: '学习行为', d: '顺序、Leech、提示音与字号', ico: 'bell', tone: 'orange', g: '学习', val: '' },
+        { k: 'appearance', t: '外观与个性化', d: '明暗模式、主题、强调色与底纹', ico: 'palette', tone: 'pink', g: '个性化', val: presetNow + ' · ' + themeName },
+        { k: 'data', t: '数据与备份', d: '备份提醒与本机数据', ico: 'cloud', tone: 'cyan', g: '系统', val: '' },
+        { k: 'privacy', t: '隐私与安全', d: '数据存在哪、怎么清除', ico: 'shield', tone: 'indigo', g: '系统', val: '' },
+        { k: 'keys', t: '快捷键', d: '键盘操作一览', ico: 'key', tone: 'slate', g: '系统', val: '' },
+        { k: 'about', t: '关于', d: '版本与开发团队', ico: 'info', tone: 'gray', g: '系统', val: '' }
+      ];
+      let curCat = null;
+      for (let ci = 0; ci < CATS.length; ci++) { if (CATS[ci].k === pane) curCat = CATS[ci]; }
+  
+      // —— 标题栏：一级是「设置」，二级是分类名 + 返回 ——
+      let html = curCat
+        ? titlebar(curCat.t, curCat.d, { back: { act: 'set-pane-back' } })
+        : titlebar('设置', '账户 · 学习 · 外观 · 数据');
+      html += '<div class="content set-content"><div class="set-win">';
+  
+      // ================= 一级：目录 =================
+      let root = '';
+      root += '<div class="set-acct">' +
+        '<div class="set-acct-ava">' + avatarFace(a, 'ava-lg') + '</div>' +
+        '<div class="set-acct-name">' + esc(on ? name : '未登录') + '</div>' +
+        '<div class="set-acct-id' + (idt.ready ? '' : ' is-empty') + '" title="账户 ID">' + esc(idt.code || '待填手机尾号') + '</div>' +
+        '<button class="set-acct-btn" data-act="account-open">' + icon('user', 'i15') + (on ? '账户管理' : '登录 / 注册') + '</button>' +
+        '</div>';
+      const navGroups = ['账户', '学习', '个性化', '系统'];
+      for (let gi = 0; gi < navGroups.length; gi++) {
+        let rows = '';
+        for (let ci = 0; ci < CATS.length; ci++) {
+          const c = CATS[ci];
+          if (c.g !== navGroups[gi]) continue;
+          rows += '<button class="set-nav-row" data-act="set-pane" data-pane="' + c.k + '">' +
+            '<span class="set-ico t-' + c.tone + '">' + icon(c.ico, 'i16') + '</span>' +
+            '<span class="set-nav-txt"><span class="set-nav-t">' + esc(c.t) + '</span>' +
+            '<span class="set-nav-s">' + esc(c.d) + '</span></span>' +
+            (c.val ? '<span class="set-nav-val">' + esc(c.val) + '</span>' : '') +
+            '<span class="set-nav-arrow">' + icon('chevronRight', 'i14') + '</span>' +
+            '</button>';
+        }
+        root += '<div class="set-grp-title">' + esc(navGroups[gi]) + '</div><div class="set-card set-nav">' + rows + '</div>';
       }
-      return '<select class="set-select" id="' + id + '">' + o + '</select>';
-    };
-    const grp = function (title, inner) {
-      return '<div class="set-grp-title">' + esc(title) + '</div><div class="set-card">' + inner + '</div>';
-    };
-    const block = function (title, inner, sub) {
-      return '<div class="set-block"><div class="set-block-h">' + esc(title) + '</div>' + inner +
-        (sub ? '<div class="set-block-sub">' + sub + '</div>' : '') + '</div>';
-    };
-    const acts = function (inner) { return '<div class="set-actions">' + inner + '</div>'; };
-
-    let html = titlebar('设置', '学习 · 外观 · 数据 · 隐私') + '<div class="content set-content"><div class="set-win">';
-
-    // —— 账户头部：头像 + 昵称 + 账户 ID + 账户管理 ——
-    html += '<div class="set-acct">' +
-      '<div class="set-acct-ava">' + avatarFace(a, 'ava-lg') + '</div>' +
-      '<div class="set-acct-name">' + esc(on ? name : '未登录') + '</div>' +
-      '<div class="set-acct-id' + (idt.ready ? '' : ' is-empty') + '" title="账户 ID">' + esc(idt.code || '待填手机尾号') + '</div>' +
-      '<button class="set-acct-btn" data-act="account-open">' + icon('user', 'i15') + (on ? '账户管理' : '登录 / 注册') + '</button>' +
-      '</div>';
-
-    // —— 账户与身份 ——
-    html += grp('账户与身份',
-      row('user', 'blue', '昵称与头像',
-        '<button class="set-link" data-act="' + (on ? 'profile-open' : 'account-open') + '">' + esc(on ? name : '登录 / 注册') + icon('chevronRight', 'i12') + '</button>',
-        '点击修改') +
-      row('phone', 'blue', '手机尾号',
-        '<input class="set-num" id="setPhoneTail" value="' + esc(accountPhoneTail(app)) + '" placeholder="5186" maxlength="4" inputmode="numeric" />',
-        '账户 ID 的后四位') +
-      '<div class="set-tip">账户 ID 由 <b>注册序号代号 + 注册年份 + 手机尾号</b> 组成：前 1000 位为 A，1 万以内 B，10 万以内 C，依次到 G。例：第 1 位注册、2026 年、尾号 5186 → <b>A20265186</b>。</div>'
-    );
-
-    // —— 学习计划 ——
-    html += grp('学习计划',
-      row('target', 'blue', '每日新卡上限', num('setNew', String(s.newCardsPerDay), '20', 78)) +
-      row('rotate', 'blue', '每日复习上限', num('setReview', String(s.reviewCardsPerDay), '200', 78)) +
-      '<div class="set-tip">所有牌组统一按这里执行。想让一套牌组一次全部出现（例如 50 张牌组学 50 张），把新卡上限设为 <b>999</b> 再保存。</div>' +
-      acts('<button class="btn btn-sm btn-accent" data-act="set-unlimited">' + icon('layers', 'i14') + '取消上限（999）</button>' +
-        '<button class="btn btn-sm" data-act="set-standard">恢复推荐（20）</button>')
-    );
-
-    // —— 记忆算法 ——
-    html += grp('记忆算法 · FSRS-5',
-      row('zap', 'purple', '目标留存率', num('setRetention', String(s.requestRetention), '0.9', 78), '0.7 – 0.99') +
-      row('clock', 'purple', '最大间隔', num('setMaxInterval', String(s.maximumInterval), '36500', 92), '天') +
-      row('layers', 'purple', '学习步骤', num('setLearn', s.learningSteps.join(','), '1,10', 120), '分钟') +
-      row('rotate', 'purple', '重学步骤', num('setRelearn', s.relearningSteps.join(','), '10', 120), '分钟') +
-      row('trophy', 'purple', '毕业间隔', num('setGrad', String(s.graduatingInterval), '1', 78), '天') +
-      row('zap', 'purple', '简单间隔', num('setEasy', String(s.easyInterval), '4', 78), '天')
-    );
-
-    // —— 学习行为 ——
-    html += grp('学习行为',
-      row('bell', 'orange', 'Leech 阈值', num('setLeech', String(s.leechThreshold), '8', 78), '遗忘次数') +
-      row('shield', 'orange', 'Leech 动作', sel('setLeechAction', [
-        { v: 'tag', label: '标记并打标签', on: s.leechAction !== 'suspend' },
-        { v: 'suspend', label: '自动暂停卡片', on: s.leechAction === 'suspend' }
-      ])) +
-      row('layers', 'orange', '相关卡片搁置', sel('setBury', [
-        { v: '1', label: '开启', on: s.buryRelated !== false },
-        { v: '0', label: '关闭', on: s.buryRelated === false }
-      ]), '正反向当天只出一张') +
-      row('cards', 'orange', '新卡顺序', sel('setNewOrder', [
-        { v: 'mix', label: '交错', on: s.newOrder === 'mix' },
-        { v: 'order', label: '按创建顺序', on: s.newOrder === 'order' },
-        { v: 'random', label: '随机', on: s.newOrder === 'random' }
-      ])) +
-      row('rotate', 'orange', '复习顺序', sel('setReviewOrder', [
-        { v: 'due', label: '按到期时间', on: s.reviewOrder !== 'random' },
-        { v: 'random', label: '随机', on: s.reviewOrder === 'random' }
-      ])) +
-      row('clock', 'orange', '答题计时', sel('setTimer', [
-        { v: '1', label: '显示', on: s.showTimer !== false },
-        { v: '0', label: '隐藏', on: s.showTimer === false }
-      ])) +
-      row('speaker', 'orange', '翻面提示音', sel('setSound', [
-        { v: '1', label: '开启', on: s.sound !== false },
-        { v: '0', label: '关闭', on: s.sound === false }
-      ])) +
-      row('eye', 'orange', '自动翻面', sel('setAutoReveal', [
-        { v: '0', label: '关闭 · 手动', on: !s.autoRevealSeconds },
-        { v: '3', label: '3 秒', on: s.autoRevealSeconds === 3 },
-        { v: '5', label: '5 秒', on: s.autoRevealSeconds === 5 },
-        { v: '10', label: '10 秒', on: s.autoRevealSeconds === 10 }
-      ])) +
-      row('book', 'orange', '学习卡字号', sel('setFont', [
-        { v: 's', label: '小', on: s.studyFont === 's' },
-        { v: 'm', label: '标准', on: s.studyFont !== 's' && s.studyFont !== 'l' },
-        { v: 'l', label: '大', on: s.studyFont === 'l' }
-      ])) +
-      row('sparkles', 'orange', '界面动效', sel('setMotion', [
-        { v: '1', label: '开启', on: s.motion !== false },
-        { v: '0', label: '关闭 · 更省电', on: s.motion === false }
-      ]))
-    );
-
-    // —— 外观 ——
-    html += grp('外观与个性化',
-      block('明暗模式', themeModeBtns(s.theme || 'light'), '独立于主题配色，切到任何主题都会生效。') +
-      block('主题预设', presetGrid(s.preset || 'default'), '一套「配色 + 背景」的组合，点选立即生效。') +
-      block('强调色', '<div class="swatch-row" id="setAccent">' +
-        swatch('brand', '星空紫', s.accent, 'accent') +
-        swatch('green', '青绿', s.accent, 'accent') +
-        swatch('teal', '湖蓝', s.accent, 'accent') +
-        swatch('amber', '琥珀', s.accent, 'accent') +
-        swatch('red', '绯红', s.accent, 'accent') +
-        swatch('rose', '玫瑰', s.accent, 'accent') +
-        '</div>', '用于按钮、进度与选中态。') +
-      block('背景', '<div class="swatch-row" id="setBg">' +
-        swatch('default', '纯色', s.bg, 'bg') +
-        swatch('grid', '细网格', s.bg, 'bg') +
-        swatch('dots', '点阵', s.bg, 'bg') +
-        swatch('mist', '柔雾', s.bg, 'bg') +
-        swatch('paper', '纸感', s.bg, 'bg') +
-        swatch('aurora', '晕染', s.bg, 'bg') +
-        '</div>', '只改变底纹，不影响阅读。')
-    );
-
-    // —— 数据 ——
-    html += grp('数据与备份',
-      row('bell', 'cyan', '备份提醒', sel('setBackupRemind', (function () {
-        const remind = s.backupRemindDays === undefined ? 14 : s.backupRemindDays;
-        return [
-          { v: '0', label: '关闭', on: remind === 0 },
-          { v: '7', label: '每 7 天', on: remind === 7 },
-          { v: '14', label: '每 14 天', on: remind === 14 },
-          { v: '30', label: '每 30 天', on: remind === 30 }
-        ];
-      })())) +
-      (function () {
-        const last = app.lastBackupAt ? app.lastBackupAt() : 0;
-        const days = last ? Math.floor((Date.now() - last) / FC.DAY_MS) : -1;
-        const txt = last ? (days <= 0 ? '今天刚备份过' : '上次备份在 ' + days + ' 天前') : '还没有备份过';
-        const remind = s.backupRemindDays === undefined ? 14 : s.backupRemindDays;
-        const warn = remind > 0 && (!last || days >= remind);
-        return '<div class="set-tip' + (warn ? ' warn' : '') + '">' + esc(txt) +
-          '。本地数据只存在这台设备，建议定期导出 .srcd 存到别处，换设备或清缓存都不会丢。</div>';
-      })() +
-      acts('<button class="btn btn-sm btn-danger" data-act="reset-confirm">' + icon('trash', 'i14') + '清空数据</button>')
-    );
-
-    // —— 隐私与安全 ——
-    html += grp('隐私与安全',
-      row('shield', 'indigo', '学习数据存储', '<span class="set-val">本机浏览器</span>') +
-      row('cloud', 'indigo', '云端用途', '<span class="set-val">验证码登录 · 在线 AI</span>') +
-      row('download', 'indigo', '导出 .srcd', '<span class="set-val">不含账户资料</span>') +
-      '<div class="set-tip">账户、头像和隐私偏好只在这台设备上。清除后找不回来，但不会动你的牌组和学习记录。</div>' +
-      acts('<button class="btn btn-sm" data-act="account-clear">' + icon('trash', 'i14') + '清除账户数据</button>')
-    );
-
-    // —— 快捷键 ——
-    html += grp('快捷键',
-      row('key', 'slate', 'Ctrl + K', '<span class="set-val">命令面板</span>') +
-      row('key', 'slate', '空格', '<span class="set-val">翻面 / 良好</span>') +
-      row('key', 'slate', '1 / 2 / 3 / 4', '<span class="set-val">重来 / 困难 / 良好 / 简单</span>') +
-      row('key', 'slate', 'E / S / F / I / R', '<span class="set-val">编辑 / 暂停 / 标记 / 信息 / 重置</span>') +
-      row('key', 'slate', 'Ctrl + Z / B / Esc', '<span class="set-val">撤销 / 浏览器 / 退出</span>') +
-      acts('<button class="btn btn-sm" data-act="shortcuts-help">' + icon('keyboard', 'i14') + '查看完整快捷键</button>')
-    );
-
-    // —— 等级 ——
-    const lv = levelInfo(app);
-    html += grp('等级',
-      '<div class="set-block set-level">' +
-      '<div class="lv-top"><span class="lv-badge">Lv.' + lv.level + '</span>' +
-      '<span class="lv-title">' + (lv.days > 0 ? '已学习 ' + lv.days + ' 天' : '还没开始学习') + '</span>' +
-      '<span class="lv-pct">' + lv.pct + '%</span></div>' +
-      '<div class="lv-bar"><i style="width:' + lv.pct + '%"></i></div>' +
-      '<div class="lv-sub">' +
-      (lv.days > 0
-        ? '再学习 ' + lv.left + ' 天可升到 Lv.' + (lv.level + 1)
-        : '完成第一次学习，就能拿到 Lv.1 的第一格进度') +
-      '。等级由学习天数与学习数据综合决定，正式规则后续上线。</div>' +
-      '</div>'
-    );
-
-    // —— 关于 ——
-    html += grp('关于',
-      '<div class="set-block set-about">' +
-      '<div class="set-about-t">闪星卡 · StarCard</div>' +
-      '<div class="set-about-s">网页版 1.6.0 · 开发人 小李同学 · 小李工作室</div>' +
-      '<div class="set-about-d">一款比 Anki 更全面、更智能的间隔重复卡片学习软件。内置离线 AI 助手「小星」，基于 FSRS-5 科学记忆算法，数据与 .srcd 都在本机处理。</div>' +
-      '</div>'
-    );
-
-    // —— 保存条 ——
-    html += '<div class="set-save">' +
-      '<span class="set-save-hint">改完点保存，全部立即生效</span>' +
-      '<button class="btn btn-primary" data-act="save-settings">' + icon('check', 'i16') + '保存设置</button>' +
-      '</div>';
-
-    html += '</div></div>';
-    return html + tabbar(6, app);
-  }
+      root += '<div class="set-ver">闪星卡 StarCard 1.6.0 · 数据都在本机</div>';
+      html += paneBox('root', root);
+  
+      // ================= 二级：各类参数 =================
+  
+      // 账户与身份
+      html += paneBox('account',
+        '<div class="set-card">' +
+        row('user', 'blue', '昵称与头像',
+          '<button class="set-link" data-act="' + (on ? 'profile-open' : 'account-open') + '">' + esc(on ? name : '登录 / 注册') + icon('chevronRight', 'i12') + '</button>',
+          '点击修改') +
+        row('phone', 'blue', '手机尾号',
+          '<input class="set-num" id="setPhoneTail" value="' + esc(accountPhoneTail(app)) + '" placeholder="5186" maxlength="4" inputmode="numeric" />',
+          '账户 ID 的后四位') +
+        '</div>' +
+        '<div class="set-tip">账户 ID 由 <b>注册序号代号 + 注册年份 + 手机尾号</b> 组成：前 1000 位为 A，1 万以内 B，10 万以内 C，依次到 G。例：第 1 位注册、2026 年、尾号 5186 → <b>A20265186</b>。</div>' +
+        saveBar
+      );
+  
+      // 等级
+      const lv = lvNow;
+      html += paneBox('level',
+        '<div class="set-card"><div class="set-block set-level">' +
+        '<div class="lv-top"><span class="lv-badge">Lv.' + lv.level + '</span>' +
+        '<span class="lv-title">' + (lv.days > 0 ? '已学习 ' + lv.days + ' 天' : '还没开始学习') + '</span>' +
+        '<span class="lv-pct">' + lv.pct + '%</span></div>' +
+        '<div class="lv-bar"><i style="width:' + lv.pct + '%"></i></div>' +
+        '<div class="lv-sub">' +
+        (lv.days > 0
+          ? '再学习 ' + lv.left + ' 天可升到 Lv.' + (lv.level + 1)
+          : '完成第一次学习，就能拿到 Lv.1 的第一格进度') +
+        '。等级由学习天数与学习数据综合决定，正式规则后续上线。</div>' +
+        '</div></div>'
+      );
+  
+      // 学习计划
+      html += paneBox('plan',
+        '<div class="set-card">' +
+        row('target', 'blue', '每日新卡上限', num('setNew', String(s.newCardsPerDay), '20', 78)) +
+        row('rotate', 'blue', '每日复习上限', num('setReview', String(s.reviewCardsPerDay), '200', 78)) +
+        '<div class="set-tip">所有牌组统一按这里执行。想让一套牌组一次全部出现（例如 50 张牌组学 50 张），把新卡上限设为 <b>999</b> 再保存。</div>' +
+        acts('<button class="btn btn-sm btn-accent" data-act="set-unlimited">' + icon('layers', 'i14') + '取消上限（999）</button>' +
+          '<button class="btn btn-sm" data-act="set-standard">恢复推荐（20）</button>') +
+        '</div>' + saveBar
+      );
+  
+      // 记忆算法
+      html += paneBox('fsrs',
+        '<div class="set-card">' +
+        row('zap', 'purple', '目标留存率', num('setRetention', String(s.requestRetention), '0.9', 78), '0.7 – 0.99') +
+        row('clock', 'purple', '最大间隔', num('setMaxInterval', String(s.maximumInterval), '36500', 92), '天') +
+        row('layers', 'purple', '学习步骤', num('setLearn', s.learningSteps.join(','), '1,10', 120), '分钟') +
+        row('rotate', 'purple', '重学步骤', num('setRelearn', s.relearningSteps.join(','), '10', 120), '分钟') +
+        row('trophy', 'purple', '毕业间隔', num('setGrad', String(s.graduatingInterval), '1', 78), '天') +
+        row('zap', 'purple', '简单间隔', num('setEasy', String(s.easyInterval), '4', 78), '天') +
+        '</div>' + saveBar
+      );
+  
+      // 学习行为
+      html += paneBox('study',
+        '<div class="set-card">' +
+        row('bell', 'orange', 'Leech 阈值', num('setLeech', String(s.leechThreshold), '8', 78), '遗忘次数') +
+        row('shield', 'orange', 'Leech 动作', sel('setLeechAction', [
+          { v: 'tag', label: '标记并打标签', on: s.leechAction !== 'suspend' },
+          { v: 'suspend', label: '自动暂停卡片', on: s.leechAction === 'suspend' }
+        ])) +
+        row('layers', 'orange', '相关卡片搁置', sel('setBury', [
+          { v: '1', label: '开启', on: s.buryRelated !== false },
+          { v: '0', label: '关闭', on: s.buryRelated === false }
+        ]), '正反向当天只出一张') +
+        row('cards', 'orange', '新卡顺序', sel('setNewOrder', [
+          { v: 'mix', label: '交错', on: s.newOrder === 'mix' },
+          { v: 'order', label: '按创建顺序', on: s.newOrder === 'order' },
+          { v: 'random', label: '随机', on: s.newOrder === 'random' }
+        ])) +
+        row('rotate', 'orange', '复习顺序', sel('setReviewOrder', [
+          { v: 'due', label: '按到期时间', on: s.reviewOrder !== 'random' },
+          { v: 'random', label: '随机', on: s.reviewOrder === 'random' }
+        ])) +
+        row('clock', 'orange', '答题计时', sel('setTimer', [
+          { v: '1', label: '显示', on: s.showTimer !== false },
+          { v: '0', label: '隐藏', on: s.showTimer === false }
+        ])) +
+        row('speaker', 'orange', '翻面提示音', sel('setSound', [
+          { v: '1', label: '开启', on: s.sound !== false },
+          { v: '0', label: '关闭', on: s.sound === false }
+        ])) +
+        row('eye', 'orange', '自动翻面', sel('setAutoReveal', [
+          { v: '0', label: '关闭 · 手动', on: !s.autoRevealSeconds },
+          { v: '3', label: '3 秒', on: s.autoRevealSeconds === 3 },
+          { v: '5', label: '5 秒', on: s.autoRevealSeconds === 5 },
+          { v: '10', label: '10 秒', on: s.autoRevealSeconds === 10 }
+        ])) +
+        row('book', 'orange', '学习卡字号', sel('setFont', [
+          { v: 's', label: '小', on: s.studyFont === 's' },
+          { v: 'm', label: '标准', on: s.studyFont !== 's' && s.studyFont !== 'l' },
+          { v: 'l', label: '大', on: s.studyFont === 'l' }
+        ])) +
+        row('sparkles', 'orange', '界面动效', sel('setMotion', [
+          { v: '1', label: '开启', on: s.motion !== false },
+          { v: '0', label: '关闭 · 更省电', on: s.motion === false }
+        ])) +
+        '</div>' + saveBar
+      );
+  
+      // 外观与个性化
+      html += paneBox('appearance',
+        '<div class="set-card">' +
+        block('明暗模式', themeModeBtns(s.theme || 'light'), '独立于主题配色，切到任何主题都会生效。') +
+        block('主题预设', presetGrid(s.preset || 'default'), '一套「配色 + 背景」的组合，点选立即生效。') +
+        block('强调色', '<div class="swatch-row" id="setAccent">' +
+          swatch('brand', '星空紫', s.accent, 'accent') +
+          swatch('green', '青绿', s.accent, 'accent') +
+          swatch('teal', '湖蓝', s.accent, 'accent') +
+          swatch('amber', '琥珀', s.accent, 'accent') +
+          swatch('red', '绯红', s.accent, 'accent') +
+          swatch('rose', '玫瑰', s.accent, 'accent') +
+          '</div>', '用于按钮、进度与选中态。') +
+        block('背景', '<div class="swatch-row" id="setBg">' +
+          swatch('default', '纯色', s.bg, 'bg') +
+          swatch('grid', '细网格', s.bg, 'bg') +
+          swatch('dots', '点阵', s.bg, 'bg') +
+          swatch('mist', '柔雾', s.bg, 'bg') +
+          swatch('paper', '纸感', s.bg, 'bg') +
+          swatch('aurora', '晕染', s.bg, 'bg') +
+          '</div>', '只改变底纹，不影响阅读。') +
+        '</div>' + saveBar
+      );
+  
+      // 数据与备份
+      html += paneBox('data',
+        '<div class="set-card">' +
+        row('bell', 'cyan', '备份提醒', sel('setBackupRemind', (function () {
+          const remind = s.backupRemindDays === undefined ? 14 : s.backupRemindDays;
+          return [
+            { v: '0', label: '关闭', on: remind === 0 },
+            { v: '7', label: '每 7 天', on: remind === 7 },
+            { v: '14', label: '每 14 天', on: remind === 14 },
+            { v: '30', label: '每 30 天', on: remind === 30 }
+          ];
+        })())) +
+        (function () {
+          const last = app.lastBackupAt ? app.lastBackupAt() : 0;
+          const days = last ? Math.floor((Date.now() - last) / FC.DAY_MS) : -1;
+          const txt = last ? (days <= 0 ? '今天刚备份过' : '上次备份在 ' + days + ' 天前') : '还没有备份过';
+          const remind = s.backupRemindDays === undefined ? 14 : s.backupRemindDays;
+          const warn = remind > 0 && (!last || days >= remind);
+          return '<div class="set-tip' + (warn ? ' warn' : '') + '">' + esc(txt) +
+            '。本地数据只存在这台设备，建议定期导出 .srcd 存到别处，换设备或清缓存都不会丢。</div>';
+        })() +
+        acts('<button class="btn btn-sm btn-danger" data-act="reset-confirm">' + icon('trash', 'i14') + '清空数据</button>') +
+        '</div>' + saveBar
+      );
+  
+      // 隐私与安全
+      html += paneBox('privacy',
+        '<div class="set-card">' +
+        row('shield', 'indigo', '学习数据存储', '<span class="set-val">本机浏览器</span>') +
+        row('cloud', 'indigo', '云端用途', '<span class="set-val">验证码登录 · 在线 AI</span>') +
+        row('download', 'indigo', '导出 .srcd', '<span class="set-val">不含账户资料</span>') +
+        '<div class="set-tip">账户、头像和隐私偏好只在这台设备上。清除后找不回来，但不会动你的牌组和学习记录。</div>' +
+        acts('<button class="btn btn-sm" data-act="account-clear">' + icon('trash', 'i14') + '清除账户数据</button>') +
+        '</div>'
+      );
+  
+      // 快捷键
+      html += paneBox('keys',
+        '<div class="set-card">' +
+        row('key', 'slate', 'Ctrl + K', '<span class="set-val">命令面板</span>') +
+        row('key', 'slate', '空格', '<span class="set-val">翻面 / 良好</span>') +
+        row('key', 'slate', '1 / 2 / 3 / 4', '<span class="set-val">重来 / 困难 / 良好 / 简单</span>') +
+        row('key', 'slate', 'E / S / F / I / R', '<span class="set-val">编辑 / 暂停 / 标记 / 信息 / 重置</span>') +
+        row('key', 'slate', 'Ctrl + Z / B / Esc', '<span class="set-val">撤销 / 浏览器 / 退出</span>') +
+        acts('<button class="btn btn-sm" data-act="shortcuts-help">' + icon('keyboard', 'i14') + '查看完整快捷键</button>') +
+        '</div>'
+      );
+  
+      // 关于
+      html += paneBox('about',
+        '<div class="set-card"><div class="set-block set-about">' +
+        '<div class="set-about-t">闪星卡 · StarCard</div>' +
+        '<div class="set-about-s">网页版 1.6.0 · 开发人 小李同学 · 小李工作室</div>' +
+        '<div class="set-about-d">一款比 Anki 更全面、更智能的间隔重复卡片学习软件。内置离线 AI 助手「小星」，基于 FSRS-5 科学记忆算法，数据与 .srcd 都在本机处理。</div>' +
+        '</div></div>'
+      );
+  
+      html += '</div></div>';
+      return html + tabbar(6, app);
+    }
 
   function settingInput(label, id, value, ph) {
     return '<div class="field"><label>' + esc(label) + '</label>' +
@@ -8511,6 +8579,7 @@
     wb: null,
     accountOpen: false,
     accountMenuOpen: false,
+    settingsPane: 'root',      // 设置页二级分类：root / account / plan / fsrs / study / appearance / data / privacy / keys / about / level
     noticePageOpen: false,
     backupPageOpen: false,
     activeClassId: '',
@@ -9756,6 +9825,7 @@
     gotoSettings: function () {
       this.accountMenuOpen = false;
       this.accountOpen = false;
+      this.settingsPane = 'root';
       this.aiOpen = false; this.cmdOpen = false;
       this.noticePageOpen = false; this.backupPageOpen = false;
       this.modal = null;
@@ -11320,6 +11390,9 @@
       case 'account-logout': App.openModal({ type: 'confirm', title: '退出登录', message: '退出后本机学习数据仍会保留，重新登录即可继续使用。', action: 'logout' }); break;
       case 'account-clear': App.openModal({ type: 'confirm', title: '清除本机账户数据', message: '将删除昵称、邮箱、头像与隐私偏好，并退出登录。牌组与学习记录不受影响。', action: 'account-clear' }); break;
       case 'save-settings': App.saveSettings(); break;
+      // 设置页二级分类：点分类进参数页，返回回到目录
+      case 'set-pane': App.settingsPane = d.pane || 'root'; App.render(); try { window.scrollTo(0, 0); } catch (err) {} break;
+      case 'set-pane-back': App.settingsPane = 'root'; App.render(); try { window.scrollTo(0, 0); } catch (err) {} break;
       // 设置页顶部锚点：只滚动，不重绘（重绘会打断正在编辑的输入框）
       case 'set-jump': {
         const target = byId(d.target);
@@ -11342,7 +11415,7 @@
         App.toast('已恢复推荐上限（每日新卡 20）');
         break;
       case 'settings-open':
-        App.tab = 6; App.cardManageDeckId = ''; App.accountOpen = false; App.study = null; App.render();
+        App.settingsPane = 'plan'; App.tab = 6; App.cardManageDeckId = ''; App.accountOpen = false; App.study = null; App.render();
         break;
       case 'modal-ok': App.modalOk(); break;
       case 'modal-cancel': App.closeModal(); break;
