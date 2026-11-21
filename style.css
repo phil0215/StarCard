@@ -5999,3 +5999,9 @@ html[data-look="plain"] .hc-head em { background: var(--brand-soft) !important; 
 /* ---- 素白再补一点气色：主卡极淡品牌底 + 分组圆点品牌色 ---- */
 html[data-look="plain"] .overview-hero { background: #FAF8FF !important; border-color: #ECE7FB !important; }
 html[data-look="plain"] .nav-label::before { background: var(--brand) !important; opacity: .55; }
+
+/* 侧栏页签改为真实链接：保持与按钮一致的外观 */
+a.tab { text-decoration: none; }
+a.tab:visited { color: var(--ink-3); }
+a.tab.active,
+a.tab.active:visited { color: var(--ink-1); }
