@@ -6681,3 +6681,19 @@ html[data-theme="light"] .ava-anon { background: linear-gradient(180deg, #DDDDDD
 html[data-theme="light"] .streak-mini .sm-week i { background: #E8E8EB; }
 html[data-look="plain"] .streak-mini .sm-week i.on { background: #D98A4E; background-image: none; }
 html[data-look="plain"] .streak-mini .sm-week i.today { box-shadow: none; }
+
+/* 组间距拉到 48px（约原来 16px 的 3 倍），深浅色统一 */
+html[data-theme="dark"][data-look="plain"] .set-pane .set-card.set-nav,
+html[data-theme="light"][data-look="plain"] .set-pane .set-card.set-nav {
+  margin-bottom: 48px !important;
+  border-radius: 12px !important;
+}
+html[data-theme="dark"][data-look="plain"] .set-pane .set-card.set-nav:first-of-type,
+html[data-theme="light"][data-look="plain"] .set-pane .set-card.set-nav:first-of-type {
+  margin-top: 28px !important;
+}
+html[data-theme="dark"][data-look="plain"] .set-pane .set-card.set-nav:last-of-type,
+html[data-theme="light"][data-look="plain"] .set-pane .set-card.set-nav:last-of-type {
+  margin-bottom: 48px !important;
+}
+html[data-theme="light"][data-look="plain"] .set-pane .set-card.set-nav { background: #F6F6F7 !important; }
