@@ -205,6 +205,43 @@
     return Promise.all([p1, p2]);
   }
 
+  // ---- 账户资料：注册序号（账户 ID 的字母代号来源）----
+  // user_profile.reg_no 是数据库自增身份列，同一账号在任何设备上序号一致。
+  function readAccountObj() {
+    try { return JSON.parse(localStorage.getItem(ACCOUNT_KEY) || 'null') || {}; }
+    catch (e) { return {}; }
+  }
+  function writeAccountObj(a) {
+    try { localStorage.setItem(ACCOUNT_KEY, JSON.stringify(a)); } catch (e) {}
+  }
+  function syncProfile(sess) {
+    var s = sess || getSession();
+    var uid = s && s.user && (s.user.id || s.user.sub);
+    if (!uid) return Promise.resolve(null);
+    var acc = readAccountObj();
+    var tail = String(acc.phoneTail || '').replace(/\D/g, '').slice(-4);
+    var row = { user_id: uid };
+    if (acc.nickname) row.nickname = acc.nickname;
+    if (tail.length === 4) row.phone_tail = tail;
+    var year = parseInt(acc.regYear, 10);
+    if (!(year >= 2000 && year <= 2200)) year = new Date().getFullYear();
+    row.reg_year = year;
+    return request('/rest/v1/user_profile?on_conflict=user_id', {
+      method: 'POST',
+      headers: buildHeaders({ 'Prefer': 'resolution=merge-duplicates,return=representation' }, s),
+      body: JSON.stringify([row])
+    }).then(function (rows) {
+      var r = rows && rows[0];
+      if (!r) return null;
+      // 云端序号优先：写回本机账户，下次渲染即显示正确的注册代号
+      if (r.reg_no) acc.regNo = Number(r.reg_no);
+      if (r.reg_year) acc.regYear = Number(r.reg_year);
+      if (r.phone_tail) acc.phoneTail = String(r.phone_tail).replace(/\D/g, '').slice(-4);
+      writeAccountObj(acc);
+      return r;
+    }).catch(function () { return null; });
+  }
+
   // ---- 自动上传：包装 setItem，捕获进度写入 ----
   var _origSetItem = (typeof Storage !== 'undefined' && Storage.prototype && Storage.prototype.setItem)
     ? Storage.prototype.setItem : null;
@@ -228,10 +265,20 @@
       } catch (e) {}
     }, PUSH_DELAY);
   }
+  // 账户资料变化（昵称 / 手机尾号）单独防抖同步，不重复上传整份进度
+  var _profileTimer = null;
+  function scheduleProfile() {
+    if (!configured() || CFG.autoPush === false || !online()) return;
+    if (!getSession()) return;
+    if (_profileTimer) clearTimeout(_profileTimer);
+    _profileTimer = setTimeout(function () { syncProfile(getSession()); }, 1500);
+  }
   if (_origSetItem && !FC.__cloudSyncHooked) {
     Storage.prototype.setItem = function (k, v) {
       _origSetItem.call(this, k, v);
-      if (!_inSync && k === STATE_KEY && this === localStorage) schedulePush();
+      if (_inSync || this !== localStorage) return;
+      if (k === STATE_KEY) schedulePush();
+      else if (k === ACCOUNT_KEY) scheduleProfile();
     };
     FC.__cloudSyncHooked = true;
   }
@@ -241,6 +288,8 @@
     if (!configured() || !online()) return;
     var s = getSession();
     if (!s) return;
+    // 同步账户资料（昵称 / 手机尾号 / 注册序号），拿到云端 reg_no 写回本机
+    syncProfile(s);
     pull().then(function (r) {
       if (r.has && r.state) {
         rawSet(STATE_KEY, JSON.stringify(r.state));
@@ -354,6 +403,7 @@
     verifyCode: verifyCode,
     pull: pull,
     push: push,
+    syncProfile: syncProfile,
     boot: boot,
     mount: renderPanel
   };
