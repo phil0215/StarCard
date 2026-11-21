@@ -5322,3 +5322,68 @@ html[data-motion="off"] .hero-float { animation: none !important; }
     width: auto;
   }
 }
+
+/* ================= 账户公开 ID（注册代号 + 年份 + 手机尾号） ================= */
+.set-acct-id {
+  margin-top: 6px;
+  font-family: "HarmonyOS Sans SC", "HarmonyOS Sans", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: .1em;
+  color: var(--ink-3);
+  word-break: normal;
+}
+.set-acct-id.is-empty { opacity: .55; letter-spacing: .04em; }
+.set-code {
+  display: inline-flex;
+  align-items: center;
+  height: 26px;
+  padding: 0 9px;
+  border-radius: 8px;
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+  font-family: "HarmonyOS Sans SC", "HarmonyOS Sans", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  font-weight: 750;
+  letter-spacing: .08em;
+  white-space: nowrap;
+}
+.set-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 650;
+  cursor: pointer;
+  transition: color .16s;
+}
+.set-link svg { width: 12px; height: 12px; opacity: .45; }
+.set-link:hover { color: var(--brand-strong); }
+.am-head-id {
+  font-family: "HarmonyOS Sans SC", "HarmonyOS Sans", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  letter-spacing: .08em;
+}
+.acct-idline {
+  margin-top: 7px;
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--brand-soft);
+  color: var(--brand-strong);
+  font-family: "HarmonyOS Sans SC", "HarmonyOS Sans", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: .1em;
+}
+.acct-idline.is-empty {
+  padding: 3px 0;
+  background: transparent;
+  color: var(--ink-4);
+  letter-spacing: .04em;
+}
