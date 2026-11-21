@@ -6005,3 +6005,72 @@ a.tab { text-decoration: none; }
 a.tab:visited { color: var(--ink-3); }
 a.tab.active,
 a.tab.active:visited { color: var(--ink-1); }
+/* ===== 彻底一致（plain）：去紫光 / 去立体 / 按钮统一 ===== */
+/* 1) 紫光与光晕一律移除 */
+html[data-look="plain"] .acct-hero::before { display: none !important; }
+html[data-look="plain"] .section-title::before { box-shadow: none !important; background: var(--brand) !important; background-image: none !important; }
+html[data-look="plain"] .notice-item.unread { background: var(--surface) !important; border-color: var(--line) !important; }
+html[data-look="plain"] .field input:focus, html[data-look="plain"] .field textarea:focus,
+html[data-look="plain"] .field select:focus, html[data-look="plain"] .cmd-search:focus {
+  box-shadow: 0 0 0 2px var(--brand-ring) !important;
+}
+/* 2) 头像 / 图标方块：去渐变、去阴影（消除立体与浮雕感） */
+html[data-look="plain"] .pk-ava,
+html[data-look="plain"] .deck-av,
+html[data-look="plain"] .notice-ico,
+html[data-look="plain"] .lv-badge,
+html[data-look="plain"] .sk-badge,
+html[data-look="plain"] [class*="ava-c"],
+html[data-look="plain"] .ava-xl,
+html[data-look="plain"] .acct-ava {
+  background-image: none !important;
+  box-shadow: none !important;
+}
+html[data-look="plain"] .pk-ava { background: var(--brand) !important; color: #fff !important; }
+html[data-look="plain"] [class*="ava-c"],
+html[data-look="plain"] .acct-ava { background: var(--brand-soft) !important; color: var(--brand-strong) !important; }
+/* 3) 卡片统一：中性细边 + 极淡阴影，杜绝紫光描边 */
+html[data-look="plain"] .card,
+html[data-look="plain"] .card.wide,
+html[data-look="plain"] .panel,
+html[data-look="plain"] .import-card,
+html[data-look="plain"] .pk-hero {
+  box-shadow: var(--sh-xs) !important;
+  border-color: var(--line) !important;
+}
+/* 4) PK 页背景去渐变 */
+html[data-look="plain"] .pk-hero { background: var(--surface) !important; background-image: none !important; }
+/* 5) 按钮一致：所有主按钮品牌紫 */
+html[data-look="plain"] .btn-primary,
+html[data-look="plain"] .btn-primary:hover { background: var(--brand) !important; background-image: none !important; color: #fff !important; border-color: var(--brand) !important; }
+
+/* ---- 设置/分组图标：去阴影 + 柔和彩色（与豆包一致的扁平图标） ---- */
+html[data-look="plain"] .set-ico,
+html[data-look="plain"] .set-ico[class*="t-"],
+html[data-look="plain"] .ss-ico,
+html[data-look="plain"] .notice-ico,
+html[data-look="plain"] .sf-badge,
+html[data-look="plain"] .dchip,
+html[data-look="plain"] .acct-badge,
+html[data-look="plain"] .lv-badge,
+html[data-look="plain"] .sk-badge {
+  box-shadow: none !important;
+  background-image: none !important;
+}
+html[data-look="plain"] .set-ico,
+html[data-look="plain"] .set-ico[class*="t-"] { background: var(--brand-soft) !important; color: var(--brand) !important; }
+html[data-look="plain"] .set-ico.t-blue { background: #EEF2FF !important; color: #4F6EF7 !important; }
+html[data-look="plain"] .set-ico.t-green { background: #E8F8F1 !important; color: #0E9C70 !important; }
+html[data-look="plain"] .set-ico.t-orange, html[data-look="plain"] .set-ico.t-amber { background: #FFF4E8 !important; color: #E07B00 !important; }
+html[data-look="plain"] .set-ico.t-cyan { background: #E6F8F8 !important; color: #0A8F8F !important; }
+html[data-look="plain"] .set-ico.t-pink { background: #FFEDF3 !important; color: #E0477A !important; }
+html[data-look="plain"] .set-ico.t-indigo, html[data-look="plain"] .set-ico.t-purple { background: var(--brand-soft) !important; color: var(--brand) !important; }
+html[data-look="plain"] .set-ico.t-slate, html[data-look="plain"] .set-ico.t-gray { background: var(--surface-2) !important; color: var(--ink-3) !important; }
+
+/* ---- 设置页账户卡：去紫光 ---- */
+html[data-look="plain"] .set-acct { background: var(--surface) !important; background-image: none !important; }
+
+/* ---- 小星悬浮按钮：去紫色辉光与脉冲环 ---- */
+html[data-look="plain"] .ai-fab,
+html[data-look="plain"] .ai-fab:hover { box-shadow: 0 2px 8px rgba(0, 0, 0, .10) !important; }
+html[data-look="plain"] .ai-fab::after { display: none !important; }
