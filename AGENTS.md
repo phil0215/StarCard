@@ -4,7 +4,7 @@
 
 ## 结构
 
-- 页面：`/`（卡片）、`books/`、`class/`、`deskmate/`、`battle/`、`stats/`、`settings/`、`browse/`、`store/`
+- 页面：`/`（卡片）、`books/`、`class/`、`deskmate/`、`battle/`、`stats/`、`settings/`、`browse/`、`store/`、`community/`（社区，第 10 页；公共脚本改动 10 页都要加，最易漏 store 与 community）
 - 应用代码全部在 `js/`。仓库根目录曾有同名单文件版（`app.js` 11919 行），已删除；不要再往根目录写应用代码。
 - 9 个页面共用一套基础脚本（17 个，顺序固定）；页面专属模块额外叠加，例如 `class/` 额外加载 `js/classroom.js`。新增公共模块必须同步加到全部 9 个页面（`store/index.html` 最容易漏）。
 - 词库 `.srcd` 放在根目录，由 `js/shop.js` 的官方商品和 `js/app.js` 的 autoLoad 按文件名引用。
@@ -36,6 +36,8 @@
 
 ## 已知坑
 
+- **版本字母不许回用**：发布过的 `?v=值` 可能已进浏览器缓存，内容换了的资源不能再用旧值。多会话并发时字母序会乱（出现过 h/l/m 混用），稳妥做法：发布前 `grep -ro 'v=2026[0-9]*[a-z]' --include=*.html . | sort -u` 看当前值，然后**直接跳到从未出现过的值**（如换日期 `v=20261123a`），别按字母顺延猜。
+- **多个 agent 共用同一本地目录**（starcard-gh-pages）：你改文件的同时别的会话也在改同一批文件。改前先拉远端最新，推完立即重新拉校验；推送被拒（远端已前进）时**重新拉取→重放自己的补丁→再推**，绝不 force。
 - `cloudsync-config.js` 必须排在 `app.js` 之前：班级/云同步模块在首屏渲染时就要读到配置，排在后面会误报「云同步还没配置」。
 - 子目录站点的资源根路径有两处实现，改动要同步：`js/ui.js` 的 `siteRootPath()` 与 `js/cloud-config.js` 的 `FC.siteRoot()`，两边的 `known` 目录表都要包含新增子目录（如 `store`）。
 - `.content` 是 grid 多列容器，需要单列块布局的页面用 `display:block` 覆盖（设置页、商铺页）。
