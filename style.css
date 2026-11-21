@@ -7755,7 +7755,7 @@ html[data-theme="dark"][data-look="plain"] .set-main .set-card { background: #23
   .set-block { padding: 12px; }
 }
 
-/* ============================================================
+/* =====================================================
    全局关闭动态效果（动画 / 过渡全部停用）
    ============================================================ */
 *, *::before, *::after {
@@ -7763,3 +7763,25 @@ html[data-theme="dark"][data-look="plain"] .set-main .set-card { background: #23
   transition: none !important;
 }
 html { scroll-behavior: auto !important; }
+=======
+/* 设置页 · 分块之间留白，让每块能看出独立边界（WorkBuddy 观感） */
+.set-main .set-card { margin-bottom: 14px; }
+.set-main .set-card:last-child { margin-bottom: 0; }
+.set-main .set-pane > .set-card:first-child { margin-top: 0; }
+
+/* 设置页 · 块级分块：含 set-block 的卡片不画底，改由每个块自己成块（圆角 + 块间留白） */
+.set-main .set-block { border-radius: 12px; margin-bottom: 14px; }
+.set-main .set-block:last-child { margin-bottom: 0; }
+.set-main .set-card:has(.set-block) {
+  background: transparent !important;
+  border-color: transparent !important;
+  padding: 0; margin-bottom: 0;
+}
+
+/* 上面的 transparent 需要和主题色规则同权重才压得住 */
+html[data-theme][data-look="plain"] .set-main .set-card:has(.set-block) {
+  background: transparent !important;
+  border-color: transparent !important;
+  padding: 0 !important;
+  margin-bottom: 0 !important;
+}
