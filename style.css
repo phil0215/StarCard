@@ -5121,3 +5121,118 @@ html[data-motion="off"] .hero-float { animation: none !important; }
 [data-theme="dark"] .set-tip.warn { background: rgba(242, 85, 124, .16); color: #FF9DB8; }
 [data-theme="dark"] .set-num,
 [data-theme="dark"] .set-select { background-color: rgba(255, 255, 255, .05); }
+
+/* ============================================================
+   数据页 · 连续打卡卡 + 彩色线性图标
+   ============================================================ */
+.streak-card {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 18px 24px;
+  padding: 16px 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+  background:
+    radial-gradient(120% 150% at 0% 0%, rgba(255, 154, 61, .18), transparent 56%),
+    radial-gradient(110% 140% at 100% 0%, rgba(124, 92, 255, .13), transparent 60%),
+    var(--surface);
+  box-shadow: var(--sh-xs);
+}
+.streak-card.done {
+  background:
+    radial-gradient(120% 150% at 0% 0%, rgba(22, 167, 142, .16), transparent 56%),
+    radial-gradient(110% 140% at 100% 0%, rgba(124, 92, 255, .12), transparent 60%),
+    var(--surface);
+}
+.sk-main {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: 1 1 220px;
+  min-width: 200px;
+}
+.sk-badge {
+  flex: none;
+  width: 46px; height: 46px;
+  border-radius: 15px;
+  display: grid; place-items: center;
+  color: #fff;
+  background: linear-gradient(135deg, #FF9A3D, #FFC94A);
+  box-shadow: 0 10px 20px -8px rgba(255, 140, 40, .8);
+}
+.streak-card.done .sk-badge {
+  background: linear-gradient(135deg, #16A78E, #2ED3B7);
+  box-shadow: 0 10px 20px -8px rgba(22, 167, 142, .75);
+}
+.sk-badge svg { width: 22px; height: 22px; }
+.sk-body { min-width: 0; }
+.sk-num { display: flex; align-items: baseline; gap: 4px; }
+.sk-num b {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  line-height: 1;
+  color: var(--ink-1);
+  font-variant-numeric: tabular-nums;
+}
+.sk-num span { font-size: 12px; font-weight: 650; color: var(--ink-3); }
+.sk-txt b {
+  display: block;
+  margin-top: 7px;
+  font-size: 12.5px;
+  font-weight: 750;
+  color: var(--ink-2);
+}
+.sk-txt small {
+  display: block;
+  margin-top: 1px;
+  font-size: 11.5px;
+  color: var(--ink-4);
+  line-height: 1.5;
+}
+.sk-chart {
+  flex: 1 1 260px;
+  min-width: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.sk-spark { width: 100%; height: 46px; display: block; overflow: visible; }
+.sk-dots { display: flex; gap: 6px; }
+.sk-dot { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.sk-dot i {
+  display: block;
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--line-2);
+  transition: background .2s;
+}
+.sk-dot.on i { background: linear-gradient(90deg, #FF9A3D, #FFC94A); }
+.streak-card.done .sk-dot.on i { background: linear-gradient(90deg, #16A78E, #2ED3B7); }
+.sk-dot.today i { box-shadow: 0 0 0 3px rgba(255, 154, 61, .18); }
+.streak-card.done .sk-dot.today i { box-shadow: 0 0 0 3px rgba(22, 167, 142, .18); }
+.sk-dot small { font-size: 10px; color: var(--ink-4); }
+.sk-dot.on small { color: var(--ink-2); font-weight: 650; }
+.sk-axis { display: flex; justify-content: space-between; font-size: 10px; color: var(--ink-4); }
+
+@media (max-width: 720px) {
+  .streak-card { padding: 14px 15px; gap: 14px; }
+  .sk-main { flex: 1 1 100%; }
+  .sk-chart { flex: 1 1 100%; }
+  .sk-num b { font-size: 28px; }
+}
+
+/* —— 统计卡的彩色线性图标 —— */
+.stat-ico { color: var(--ink-4); }
+.stat-ico.ico-cards { color: #5B8CFF; }
+.stat-ico.ico-rotate { color: #FF6B9D; }
+.stat-ico.ico-plus { color: #E89500; }
+.stat-ico.ico-clock { color: #2ED3B7; }
+.stat-ico.ico-chart { color: #7C5CFF; }
+.stat-ico.ico-trophy { color: #FFB03A; }
+.stat-ico.ico-layers { color: #7C5CFF; }
+.stat-ico.ico-flame { color: #FF8A5B; }
+[data-theme="dark"] .stat-ico { opacity: .92; }
