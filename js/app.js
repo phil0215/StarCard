@@ -2639,8 +2639,7 @@
     if (act === 'mask-click') { if (e.target === el) App.closeModal(); return; }
 
     switch (act) {
-      // —— 小星助手 / 命令面板 ——
-      case 'ai-toggle': App.aiToggle(); break;
+      // —— 小星助手 / 命令面板：入口已移除 ——
       case 'ai-close': App.aiClose(); break;
       case 'ai-send': {
         const inp = byId('aiInput');
@@ -2657,7 +2656,6 @@
         App.aiOpenWith(c ? ('查 ' + (FC.AI && FC.AI.STRIP ? FC.AI.STRIP(c.front) : c.front)) : '今天要学多少');
         break;
       }
-      case 'cmd-open': App.cmdToggle(); break;
       case 'cmd-close': App.cmdClose(); break;
       case 'cmd-mask': if (e.target === el) App.cmdClose(); break;
       case 'cmd-pick': App.cmdPick(parseInt(d.i, 10)); break;
@@ -3237,29 +3235,7 @@
       }
       return;
     }
-    // 智能命令面板：Ctrl + K 全局唤出
-    if ((e.metaKey || e.ctrlKey) && (e.key === 'k' || e.key === 'K')) {
-      e.preventDefault();
-      App.cmdToggle();
-      return;
-    }
-    // 命令面板键盘导航
-    if (App.cmdOpen) {
-      if (e.key === 'ArrowDown') { e.preventDefault(); App.cmdMove(1); }
-      else if (e.key === 'ArrowUp') { e.preventDefault(); App.cmdMove(-1); }
-      else if (e.key === 'Enter') { e.preventDefault(); App.cmdPick(App.cmdIndex); }
-      else if (e.key === 'Escape') { e.preventDefault(); App.cmdClose(); }
-      return;
-    }
-    // 小星输入框：Enter 发送 / Esc 关闭（不打断中文输入法）
-    if (App.aiOpen && typing) {
-      if (e.key === 'Enter' && !e.isComposing) {
-        e.preventDefault();
-        const inp = qs('#aiInput');
-        App.aiSend(inp ? inp.value : App.aiDraft);
-      } else if (e.key === 'Escape') { e.preventDefault(); App.aiClose(); }
-      return;
-    }
+    // 命令面板与小星输入已移除，键盘事件不再拦截
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (typing) return;
 
@@ -3271,7 +3247,6 @@
       }
       return;
     }
-    if (App.aiOpen && e.key === 'Escape') { e.preventDefault(); App.aiClose(); return; }
     // 全局：? 打开快捷键面板（PK 进行中不打断）
     if (e.key === '?' && !App.battle) {
       e.preventDefault();
