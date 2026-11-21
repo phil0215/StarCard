@@ -43,3 +43,5 @@
 - **死链检查**：在 HTML 里新增 `<script>`/`<link>` 必须和文件本体在同一次提交里，push 前用 `git ls-tree -r --name-only HEAD | grep 文件名` 确认文件真的进了仓库。曾出现 `index.html` 引用 `js/community.js?v=...h` 而仓库从无此文件，线上首页脚本链直接报 `Cannot read properties of undefined (reading 'Component')`。
 - **版本号一次改全**：每次改动 9 个 `index.html` 的 `?v=` 必须同一次提交内统一提升一个字母（`grep -ro 'v=2026112[0-9][a-z]' --include=*.html . | sort -u` 应只输出一个值）。曾出现 h 与 k 混用，部分页命中旧缓存。
 - **设置页结构**：`settingsPage()` 已是两栏（`.set-layout` = 左 `.set-side`/`.ss-item` + 右 `.set-main`/`.set-main-head`），`app.settingsPane` 默认值必须是 `account`，不要再引入 `'root'` 这类不在 `CATS` 里的值，否则右栏空白。
+- **禁止用过期基线整体覆盖文件**：`js/ui.js`、`js/app.js`、`style.css` 都是多人在改的热点。改之前先 `git fetch && git log --oneline -3 -- <文件>`，确认自己的编辑基线是远端最新。曾发生社区功能提交（65209aa）基于过期版本整体替换 `settingsPage()`，把设置页两栏（`.set-layout`/`.ss-item`）和 `settingsPane='account'` 默认值一起回退。
+- **改 `settingsPage()` 前后各 grep 一次**：`grep -c "set-layout\|ss-item\|set-main-head" js/ui.js` 必须 ≥ 1；`grep "settingsPane:" js/app.js` 必须是 `'account'`。为 0 或 'root' 说明又被覆盖了。

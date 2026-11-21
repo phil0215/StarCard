@@ -2264,7 +2264,7 @@
       const on = !!a.loggedIn;
       const name = app.accountDisplayName ? app.accountDisplayName() : (a.nickname || '匿名用户');
       const idt = accountIdentity(app);
-      const pane = app.settingsPane || 'root';
+      const pane = (app.settingsPane && app.settingsPane !== 'root') ? app.settingsPane : 'account';
   
       // 行 / 组 / 块 三个基础构件：一行 = 彩色圆角图标 + 标题 + 右侧控件
       const row = function (ico, tone, label, right, sub) {
@@ -2324,38 +2324,36 @@
       let curCat = null;
       for (let ci = 0; ci < CATS.length; ci++) { if (CATS[ci].k === pane) curCat = CATS[ci]; }
   
-      // —— 标题栏：一级是「设置」，二级是分类名 + 返回 ——
-      let html = curCat
-        ? titlebar(curCat.t, curCat.d, { back: { act: 'set-pane-back' } })
-        : titlebar('设置', '账户 · 学习 · 外观 · 数据');
-      html += '<div class="content set-content"><div class="set-win">';
-  
-      // ================= 一级：目录 =================
-      let root = '';
-      root += '<div class="set-acct">' +
-        '<div class="set-acct-ava">' + avatarFace(a, 'ava-lg') + '</div>' +
-        '<div class="set-acct-name">' + esc(on ? name : '匿名用户') + '</div>' +
-        '<div class="set-acct-id' + (idt.ready ? '' : ' is-empty') + '" title="账户 ID">' + esc(idt.code || '待填手机尾号') + '</div>' +
-        '<button class="set-acct-btn" data-act="set-pane" data-pane="account">' + icon('user', 'i15') + (on ? '账户管理' : '登录 / 注册') + '</button>' +
-        '</div>';
+      // —— 标题栏：单层「设置」，分类切换在左栏完成 ——
+      let html = titlebar('设置', '左侧选分类，右侧改设置');
+      html += '<div class="content set-content"><div class="set-layout">';
+
+      // ================= 左栏：分类导航 =================
+      html += '<aside class="set-side">';
+      html += '<div class="ss-acct"><span class="ss-ava">' + avatarFace(a, 'ava-sm') + '</span>' +
+        '<div class="ss-main"><b>' + esc(on ? name : '匿名用户') + '</b>' +
+        '<small>' + esc(idt.ready ? idt.code : (on ? '' : '点击登录')) + '</small></div></div>';
       const navGroups = ['账户', '学习', '个性化', '系统'];
       for (let gi = 0; gi < navGroups.length; gi++) {
-        let rows = '';
+        html += '<div class="ss-group">' + esc(navGroups[gi]) + '</div>';
         for (let ci = 0; ci < CATS.length; ci++) {
           const c = CATS[ci];
           if (c.g !== navGroups[gi]) continue;
-          rows += '<button class="set-nav-row" data-act="set-pane" data-pane="' + c.k + '">' +
-            '<span class="set-ico t-' + c.tone + '">' + icon(c.ico, 'i16') + '</span>' +
-            '<span class="set-nav-txt"><span class="set-nav-t">' + esc(c.t) + '</span>' +
-            '<span class="set-nav-s">' + esc(c.d) + '</span></span>' +
-            (c.val ? '<span class="set-nav-val">' + esc(c.val) + '</span>' : '') +
-            '<span class="set-nav-arrow">' + icon('chevronRight', 'i14') + '</span>' +
+          html += '<button class="ss-item' + (pane === c.k ? ' on' : '') + '" data-act="set-pane" data-pane="' + c.k + '">' +
+            '<span class="ss-ico">' + icon(c.ico, 'i18') + '</span>' +
+            '<span class="ss-label">' + esc(c.t) + '</span>' +
             '</button>';
         }
-        root += '<div class="set-grp-title">' + esc(navGroups[gi]) + '</div><div class="set-card set-nav">' + rows + '</div>';
       }
-      root += '<div class="set-ver">闪星卡 StarCard 1.6.0 · 数据都在本机</div>';
-      html += paneBox('root', root);
+      html += '<div class="set-ver">闪星卡 1.6.0 · 数据在本机</div>';
+      html += '</aside>';
+
+      // ================= 右栏：当前分类的参数 =================
+      html += '<div class="set-main">';
+      if (curCat) {
+        html += '<div class="set-main-head"><h2>' + esc(curCat.t) + '</h2>' +
+          (curCat.d ? '<p>' + esc(curCat.d) + '</p>' : '') + '</div>';
+      }
   
       // ================= 二级：各类参数 =================
   
@@ -2582,7 +2580,7 @@
         '</div></div>'
       );
   
-      html += '</div></div>';
+      html += '</div></div></div>';
       return html + tabbar(6, app);
     }
 
