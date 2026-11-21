@@ -6735,3 +6735,120 @@ html[data-theme="dark"][data-look="plain"] .streak-mini.lit {
 .set-block .privacy-row { padding: 10px 0; }
 .set-block .privacy-row:first-of-type { border-top: 0; }
 .set-val.ok { color: var(--green); }
+
+/* ============================================================
+   2026-11-21 · 侧栏本周进度改为「连续一调」 + 打卡火苗燃烧动画
+   ============================================================ */
+/* 一条连续的进度条（不再是 7 段小方块），整体缩短到 62px */
+.streak-mini .sm-week,
+html[data-look="plain"] .streak-mini .sm-week,
+html[data-theme="dark"] .streak-mini .sm-week,
+html[data-theme="dark"][data-look="plain"] .streak-mini .sm-week {
+  display: block;
+  position: relative;
+  flex: 0 0 62px;
+  width: 62px;
+  height: 5px;
+  margin-left: auto;
+  border-radius: 3px;
+  background: #1B1B1E;
+  overflow: hidden;
+  box-shadow: none;
+}
+html[data-theme="dark"] .streak-mini .sm-week,
+html[data-theme="dark"][data-look="plain"] .streak-mini .sm-week {
+  background: #34343A;
+}
+.streak-mini .sm-week .sm-fill {
+  display: block;
+  height: 100%;
+  width: 0;
+  border-radius: 3px;
+  background: linear-gradient(90deg, #FF8A3D, #FF3B30);
+  transition: width .5s cubic-bezier(.22, .61, .36, 1);
+}
+html[data-look="plain"] .streak-mini .sm-week .sm-fill {
+  background: #D98A4E;
+  background-image: none;
+}
+/* 旧的 7 格规则彻底失效（若还残留 <i> 也不显示） */
+.streak-mini .sm-week i { display: none !important; }
+
+/* ---- 打卡成功：火苗燃烧 ---- */
+.streak-mini .sm-flame {
+  position: relative;
+  isolation: isolate;
+}
+.streak-mini.lit .sm-flame .sm-fire {
+  overflow: visible;
+  filter: drop-shadow(0 0 3px rgba(255, 96, 24, .55)) drop-shadow(0 0 8px rgba(255, 60, 20, .28));
+  transform-origin: 50% 92%;
+  animation: smFireSway 1.7s ease-in-out infinite;
+  will-change: transform, filter;
+}
+.streak-mini.lit .sm-flame .sm-fire-outer {
+  transform-box: fill-box;
+  transform-origin: 50% 92%;
+  animation: smFireBody 1.05s ease-in-out infinite alternate;
+}
+.streak-mini.lit .sm-flame .sm-fire-inner {
+  transform-box: fill-box;
+  transform-origin: 50% 90%;
+  animation: smFireCore .68s ease-in-out infinite alternate;
+}
+/* 火光光晕 */
+.streak-mini.lit .sm-flame::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 52%;
+  width: 30px;
+  height: 30px;
+  margin: -16px 0 0 -15px;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(255, 138, 44, .42), rgba(255, 70, 20, .12) 55%, rgba(255, 60, 20, 0) 72%);
+  z-index: -1;
+  pointer-events: none;
+  animation: smFireGlow 1.35s ease-in-out infinite;
+}
+@keyframes smFireSway {
+  0%, 100% { transform: translateY(0) scale(1) rotate(-2deg); }
+  30%      { transform: translateY(-1.2px) scale(1.04, 1.07) rotate(1.5deg); }
+  55%      { transform: translateY(-.4px) scale(.985, 1.03) rotate(-1deg); }
+  78%      { transform: translateY(-1.6px) scale(1.05, 1.02) rotate(2.2deg); }
+}
+@keyframes smFireBody {
+  from { transform: scale(.96, 1.02) skewX(-2deg); }
+  to   { transform: scale(1.04, .95) skewX(2.5deg); }
+}
+@keyframes smFireCore {
+  0%   { transform: scale(.82, .9); opacity: .65; }
+  45%  { transform: scale(1.02, .82) translateY(1px); opacity: .95; }
+  100% { transform: scale(.9, 1) translateY(-1px); opacity: .75; }
+}
+@keyframes smFireGlow {
+  0%, 100% { opacity: .55; transform: scale(.9); }
+  40%      { opacity: .95; transform: scale(1.08); }
+  70%      { opacity: .7; transform: scale(.97); }
+}
+/* 动效关闭 / 系统省电模式：只保留静态火苗 */
+html[data-motion="off"] .streak-mini .sm-fire,
+html[data-motion="off"] .streak-mini .sm-fire *,
+html[data-motion="off"] .streak-mini .sm-flame::before,
+html[data-motion="calm"] .streak-mini .sm-fire,
+html[data-motion="calm"] .streak-mini .sm-fire * {
+  animation-duration: 4s !important;
+}
+html[data-motion="off"] .streak-mini .sm-fire,
+html[data-motion="off"] .streak-mini .sm-fire *,
+html[data-motion="off"] .streak-mini .sm-flame::before {
+  animation: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .streak-mini .sm-fire,
+  .streak-mini .sm-fire *,
+  .streak-mini .sm-flame::before { animation: none !important; }
+}
+@media (max-width: 600px) {
+  .streak-mini .sm-week { display: none; }
+}
