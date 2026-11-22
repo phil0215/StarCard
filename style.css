@@ -8128,6 +8128,14 @@ html[data-theme="dark"] .folder-card { background: var(--surface-2); }
 .sd-hint { font-size: 11px; color: var(--ink-4); margin-top: 8px; }
 .sd-actions { display: flex; gap: 8px; margin-top: 12px; }
 
+/* 宽屏：双栏吃满首屏高度（左列表内部滚动，右详情独立滚动），页面不留大片空白 */
+@media (min-width: 901px) {
+  .studio2 { height: calc(100vh - 126px); min-height: 460px; }
+  .studio2-list { max-height: none; height: 100%; }
+  .studio2-detail { position: static; height: 100%; overflow-y: auto; display: flex; flex-direction: column; }
+  .studio2-detail .sd-empty { flex: 1; justify-content: center; margin: 0; }
+  .studio2-detail .sd-form { flex: none; }
+}
 @media (max-width: 900px) {
   .studio2 { grid-template-columns: minmax(0, 1fr); }
   .studio2-detail { position: static; }
