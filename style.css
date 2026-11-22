@@ -8418,3 +8418,14 @@ html[data-look="plain"] .side-account .sa-badge { background: #FF3B30 !important
   .content--studio .studio2-list { max-height: none; height: auto; flex: 1; }
 }
 .content--studio .studio2 { align-items: stretch; }
+
+/* ============================================================
+   2026-11-22 · 账户行回归极简（只有头像+名字）；通知入口移入账户菜单
+   ============================================================ */
+.side-account .sa-bell,
+.side-account .sa-dots { display: none !important; }
+.am-item .am-badge-num {
+  min-width: 17px; height: 17px; padding: 0 5px;
+  border-radius: 999px; background: #FF3B30; color: #fff;
+  font-size: 10px; font-weight: 700; line-height: 17px; text-align: center;
+}
