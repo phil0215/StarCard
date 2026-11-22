@@ -8679,3 +8679,45 @@ html[data-theme="dark"] .content--studio { padding: 8px 10px 10px; }
 .bl-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 .bl-main b { font-size: 13px; color: var(--ink-1); }
 .bl-main small { font-size: 11px; color: var(--ink-4); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ============================================================
+   工坊三列一体化：不再各自成卡，共用框架底色，1px 细线分隔
+   ============================================================ */
+.content--studio .studio2 { gap: 0; }
+.content--studio .stg-side {
+  background: transparent;
+  border: 0; border-radius: 0;
+  border-right: 1px solid var(--line);
+}
+.content--studio .studio2-list {
+  background: transparent;
+  border: 0; border-radius: 0;
+  border-right: 1px solid var(--line);
+}
+.content--studio .studio2-detail { background: transparent; border: 0; }
+
+/* ============================================================
+   拉杆统一：全站同色同宽细拉杆（深浅主题各一套）
+   ============================================================ */
+html[data-theme="dark"] { color-scheme: dark; }
+.stg-side::-webkit-scrollbar,
+.studio2-rows::-webkit-scrollbar,
+.studio2-detail::-webkit-scrollbar,
+.side-decks-actions::-webkit-scrollbar { width: 8px; height: 8px; }
+.stg-side::-webkit-scrollbar-thumb,
+.studio2-rows::-webkit-scrollbar-thumb,
+.studio2-detail::-webkit-scrollbar-thumb {
+  background: rgba(127, 127, 127, .32);
+  border-radius: 8px; border: 2px solid transparent; background-clip: content-box;
+}
+.stg-side::-webkit-scrollbar-thumb:hover,
+.studio2-rows::-webkit-scrollbar-thumb:hover,
+.studio2-detail::-webkit-scrollbar-thumb:hover { background: rgba(127, 127, 127, .5); background-clip: content-box; }
+.stg-side::-webkit-scrollbar-track,
+.studio2-rows::-webkit-scrollbar-track,
+.studio2-detail::-webkit-scrollbar-track { background: transparent; }
+/* 深色下主内容区拉杆与上面统一为中性灰（不再偏蓝） */
+[data-theme="dark"] .content::-webkit-scrollbar-thumb { background: rgba(127, 127, 127, .32); background-clip: content-box; }
+[data-theme="dark"] .content::-webkit-scrollbar-thumb:hover { background: rgba(127, 127, 127, .5); background-clip: content-box; }
+/* 深色下 tabbar / 其他容器原生拉杆走暗色 */
+[data-theme="dark"] *::-webkit-scrollbar-thumb { background-color: rgba(127, 127, 127, .32); }
