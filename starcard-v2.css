@@ -387,3 +387,133 @@ html[data-theme] .stg-side-item.on { background: rgba(255, 255, 255, .08) !impor
   html[data-theme] .studio-top [data-act="new-deck"] { display: none !important; }
   html[data-theme] .studio-top .stg-count { display: none !important; }
 }
+
+/* ============================================================
+   v2.1 质感精修：侧栏 / 排版 / 滚动条 / 下拉 / 复习页
+   ============================================================ */
+
+/* ---------- 18. 侧栏：呼吸感 + 华为式胶囊导航 ---------- */
+html[data-theme] .tabbar { padding: 10px 10px 8px !important; }
+html[data-theme] .tab {
+  min-height: 38px; margin: 1px 0; border-radius: 11px;
+  font-size: 13.5px; letter-spacing: .01em;
+}
+html[data-theme] .tab .ico { opacity: .82; }
+html[data-theme] .tab.active { background: rgba(10, 89, 247, .16) !important; }
+html[data-theme] .tab.active .ico { color: #9DBDFF; }
+html[data-theme] .nav-label {
+  margin: 14px 10px 6px; font-size: 10.5px; letter-spacing: .14em;
+}
+/* 侧栏顶部：品牌 + 火苗打卡块玻璃化 */
+html[data-theme] .side-brand, html[data-theme] .tabbar-brand { letter-spacing: -.02em; }
+html[data-theme] .side-streak, html[data-theme] .streak-box, html[data-theme] .checkin-box {
+  background: linear-gradient(150deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, .03)) !important;
+  border: 1px solid rgba(255, 255, 255, .09) !important;
+  border-radius: 14px !important;
+}
+html[data-theme] .side-account { border-top: 1px solid rgba(255, 255, 255, .07); }
+
+/* ---------- 19. 全局排版：字号与留白 ---------- */
+html[data-theme] .content { padding: 8px 30px 34px !important; gap: 14px; }
+html[data-theme] .content .card,
+html[data-theme] .list-item,
+html[data-theme] .panel { font-size: 13.5px; }
+html[data-theme] .titlebar { padding: 4px 6px 14px; }
+html[data-theme] .titlebar .h-title,
+html[data-theme] .pg-title,
+html[data-theme] .stg-title { font-size: 19px; font-weight: 700; letter-spacing: -.3px; color: #fff; }
+html[data-theme] .titlebar .subtle,
+html[data-theme] .pg-sub { font-size: 12.5px; }
+html[data-theme] .hint, html[data-theme] .set-tip { color: rgba(255, 255, 255, .42); }
+
+/* ---------- 20. 滚动条：黑底上清晰但不抢戏 ---------- */
+html[data-theme] *::-webkit-scrollbar { width: 8px; height: 8px; }
+html[data-theme] *::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, .14) !important;
+  border-radius: 999px;
+  border: 2px solid transparent; background-clip: content-box;
+}
+html[data-theme] *::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, .24) !important; background-clip: content-box; }
+html[data-theme] *::-webkit-scrollbar-track { background: transparent; }
+html[data-theme] * { scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, .16) transparent; }
+
+/* ---------- 21. 原生下拉：暗色选项面板 ---------- */
+html[data-theme] select { -webkit-appearance: none; appearance: none; }
+html[data-theme] option,
+html[data-theme] optgroup { background: #16181D; color: rgba(255, 255, 255, .85); }
+
+/* ---------- 22. 复习页：统计胶囊 + 大卡 ---------- */
+html[data-theme] .rv-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+html[data-theme] .rv-chip {
+  display: inline-flex; align-items: baseline; gap: 3px;
+  padding: 4px 11px; border-radius: 999px;
+  font-size: 12px; color: rgba(255, 255, 255, .66);
+  background: rgba(255, 255, 255, .06);
+  border: 1px solid rgba(255, 255, 255, .07);
+}
+html[data-theme] .rv-chip b { font-size: 13px; font-weight: 700; color: #fff; }
+html[data-theme] .battle-head { padding: 18px 26px 0; }
+html[data-theme] .study-card,
+html[data-theme] .study-area .card {
+  border-radius: 24px !important;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .07);
+}
+html[data-theme] .card-face-front, html[data-theme] .sf-front { letter-spacing: -.5px; }
+
+/* ---------- 23. 设置页：搜索框与目录玻璃化 ---------- */
+html[data-theme] .set-search input,
+html[data-theme] .settings-search input {
+  background: rgba(255, 255, 255, .05) !important;
+  border: 1px solid rgba(255, 255, 255, .09) !important;
+  border-radius: 12px !important;
+}
+html[data-theme] .set-cat, html[data-theme] .set-item, html[data-theme] .cat-row {
+  border-radius: 12px;
+}
+html[data-theme] .set-item:hover, html[data-theme] .cat-row:hover {
+  background: rgba(255, 255, 255, .05);
+}
+
+/* ---------- 24. 空态：图标玻璃圆 + 更大的呼吸感 ---------- */
+html[data-theme] .empty,
+html[data-theme] .shp-blank,
+html[data-theme] .cls-login {
+  border-radius: 20px !important;
+  padding: 40px 26px !important;
+}
+html[data-theme] .empty .e-ico,
+html[data-theme] .cls-login-ico {
+  background: rgba(255, 255, 255, .055) !important;
+  border: 1px solid rgba(255, 255, 255, .08);
+}
+
+/* ---------- 25. 弹窗 / 抽屉：更深的玻璃 ---------- */
+html[data-theme] .modal,
+html[data-theme] .sheet {
+  background: rgba(24, 26, 32, .78) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(170%); backdrop-filter: blur(40px) saturate(170%);
+  border: 1px solid rgba(255, 255, 255, .12);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, .6);
+}
+
+/* ---------- 26. 焦点可见性 ---------- */
+html[data-theme] :focus-visible {
+  outline: 2px solid rgba(122, 163, 255, .6) !important;
+  outline-offset: 2px;
+}
+
+/* ---------- 27. 复习卡细节：词库标签胶囊化 ---------- */
+html[data-theme] .flip-card .chip.gray,
+html[data-theme] .chip.gray {
+  padding: 3px 10px; border-radius: 999px;
+  background: rgba(255, 255, 255, .07) !important;
+  border: 1px solid rgba(255, 255, 255, .09) !important;
+  color: rgba(255, 255, 255, .55) !important;
+  font-size: 11px; letter-spacing: .04em;
+}
+html[data-theme] .flip-hint { color: rgba(255, 255, 255, .28); font-size: 11.5px; }
+
+/* ---------- 28. 工坊左栏加宽，牌组名不截断 ---------- */
+@media (min-width: 1280px) {
+  html[data-theme] .content--studio .studio2 { grid-template-columns: 224px minmax(0, 1fr) 400px !important; }
+}

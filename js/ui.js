@@ -861,12 +861,13 @@
     html += '<div class="battle-head"><div class="between"><div>' +
       '<div class="h-title">卡片学习' + (sess.deckName ? ' · ' + esc(sess.deckName) : '') + '</div>' +
       // 进度条口径 = 已掌握词汇（以良好/简单毕业的卡），不是「学过/刷过」的张数
-      '<div class="subtle">已掌握 <strong>' + mastered + '</strong> / ' + sess.total + ' 个单词' +
-      ' · 已学 ' + studied +
-      ' · 剩余 ' + Math.max(0, sess.total - studied) + ' 张' +
-      (pending ? ' · 待复习 ' + pending + ' 张' : '') +
-      ' · 本次 ' + graded + ' 次评分 / ' + dur +
-      ((sess.requeued) ? ' · 重来 ' + sess.requeued + ' 次' : '') + '</div></div>' +
+      '<div class="rv-meta">' +
+      '<span class="rv-chip">已掌握 <b>' + mastered + '</b>/' + sess.total + '</span>' +
+      '<span class="rv-chip">已学 <b>' + studied + '</b></span>' +
+      '<span class="rv-chip">剩余 <b>' + Math.max(0, sess.total - studied) + '</b></span>' +
+      (pending ? '<span class="rv-chip">待复习 <b>' + pending + '</b></span>' : '') +
+      '<span class="rv-chip">' + graded + ' 次评分 · ' + dur + '</span>' +
+      ((sess.requeued) ? '<span class="rv-chip">重来 ' + sess.requeued + '</span>' : '') + '</div></div>' +
       '<div style="display:flex;gap:8px;align-items:center">' +
       '<button class="btn btn-sm" data-act="study-stop">退出</button></div></div>' +
       '<div class="progress"><span style="width:' +
@@ -1044,7 +1045,7 @@
       '<div class="sd-preview"><div class="sd-pv-lab">学习者看到的样子</div>' +
       '<div class="sd-pv-front" id="sdPvFront">' + richCard(f.Front) + '</div>' +
       '<div class="sd-pv-back" id="sdPvBack">' + richCard(f.Back) + '</div>' +
-      '<div class="sd-pv-note">== 包裹的词会高亮，换行保留</div></div>' +
+      '<div class="sd-pv-note">用 <mark class="sd-hl">==双等号==</mark> 包住的词会高亮，换行保留</div></div>' +
       '<div class="sd-form">' +
       '<label class="sd-label">模板</label><select id="sdType" class="sd-input">' + typeOpts + '</select>' +
       '<label class="sd-label">正面</label><textarea id="sdFront" class="sd-input sd-ta" data-min="2" rows="' + taRows(f.Front, 2) + '">' + esc(f.Front || '') + '</textarea>' +
@@ -1196,6 +1197,7 @@
         icon('layers', 'i14') + '<span class="stg-side-txt">我的卡片</span><span class="ff-n">' + rows.length + '</span></button>' +
         '<div class="stg-side-lab">旗标</div>';
       for (let fi = 1; fi <= 7; fi++) {
+        if (!flagCounts[fi]) continue; // 没人用的旗标不占行，找得更快
         sideHtml += '<button class="stg-side-item' + (fflag === fi ? ' on' : '') + '" data-act="studio-fflag" data-flag="' + fi + '" title="Shift+' + fi + '">' +
           '<span class="flag-dot" style="background:' + FC.FLAG_COLORS[fi] + '"></span><span class="stg-side-txt">' + FF_NAMES[fi - 1] +
           '</span><span class="ff-n">' + flagCounts[fi] + '</span></button>';
@@ -2604,7 +2606,7 @@
         { k: 'plan', t: '学习计划', d: '每日新卡与复习上限', ico: 'target', tone: 'blue', g: '学习', val: s.newCardsPerDay + ' / ' + s.reviewCardsPerDay },
         { k: 'fsrs', t: '记忆算法', d: 'FSRS-5 留存率与间隔', ico: 'zap', tone: 'purple', g: '学习', val: '' },
         { k: 'study', t: '学习行为', d: '顺序、Leech、提示音与字号', ico: 'bell', tone: 'orange', g: '学习', val: '' },
-        { k: 'appearance', t: '外观与个性化', d: '主题、强调色与底纹', ico: 'palette', tone: 'pink', g: '个性化', val: themeName },
+        { k: 'appearance', t: '外观与个性化', d: '动效与字号', ico: 'palette', tone: 'pink', g: '个性化', val: '深色玻璃 · ' + (s.motion === 'off' ? '动效关' : (s.motion === 'full' ? '动效全开' : '动效轻')) },
         { k: 'data', t: '数据与备份', d: '备份提醒与本机数据', ico: 'cloud', tone: 'cyan', g: '系统', val: '' },
         { k: 'privacy', t: '隐私与安全', d: '数据存在哪、怎么清除', ico: 'shield', tone: 'indigo', g: '系统', val: '' },
         { k: 'keys', t: '快捷键', d: '键盘操作一览', ico: 'keyboard', tone: 'slate', g: '系统', val: '' },
@@ -2857,27 +2859,20 @@
           { v: '5', label: '5 秒', on: s.autoRevealSeconds === 5 },
           { v: '10', label: '10 秒', on: s.autoRevealSeconds === 10 }
         ])) +
-        row('book', 'orange', '学习卡字号', sel('setFont', [
-          { v: 's', label: '小', on: s.studyFont === 's' },
-          { v: 'm', label: '标准', on: s.studyFont !== 's' && s.studyFont !== 'l' },
-          { v: 'l', label: '大', on: s.studyFont === 'l' }
-        ])) +
         '</div>' + saveBar
       );
   
-      // 外观与个性化
+      // 外观与个性化：v2 深色玻璃是全站固定外观，只保留真正生效的选项
       html += paneBox('appearance',
         '<div class="set-card">' +
-        block('明暗模式', themeModeBtns(s.theme || 'dark'), 'v2 界面固定为深色玻璃质感，此选项保留你的偏好但不再改变外观。') +
-        block('主题配色', presetGrid(s.preset || 'default'), '每套配色自带强调色与背景底纹，点选立即生效。') +
-        block('强调色', '<div class="swatch-row" id="setAccent">' +
-          swatch('brand', '星蓝', s.accent, 'accent') +
-          swatch('green', '青绿', s.accent, 'accent') +
-          swatch('teal', '湖蓝', s.accent, 'accent') +
-          swatch('amber', '琥珀', s.accent, 'accent') +
-          swatch('red', '绯红', s.accent, 'accent') +
-          swatch('rose', '玫瑰', s.accent, 'accent') +
-          '</div>', '只改按钮、进度与选中态的颜色，不动背景。') +
+        '<div class="set-block"><div class="set-block-h">界面外观</div>' +
+        '<div class="set-tip">当前为 v2 深色玻璃主题（华为质感），全站统一，不随明暗模式切换。</div>' +
+        block('界面动效', fxBtns(s.motion), '轻 = 只保留必要过渡；关闭 = 全部静止，老设备更省电。') +
+        block('学习卡字号', '<select class="set-select" id="setFont">' +
+          '<option value="s"' + (s.studyFont === 's' ? ' selected' : '') + '>小</option>' +
+          '<option value="m"' + (s.studyFont !== 's' && s.studyFont !== 'l' ? ' selected' : '') + '>标准</option>' +
+          '<option value="l"' + (s.studyFont === 'l' ? ' selected' : '') + '>大</option>' +
+          '</select>', '复习时正面单词与背面释义的字号。') +
         '</div>'
       );
   
