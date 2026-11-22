@@ -267,17 +267,11 @@
         children.push(pe);
       }
     }
-    const bellKids = [iconEl('bell', 'i18')];
-    if (unread > 0) bellKids.push(new A.El('span', String(unread)).cls('sa-badge'));
     children.push(new A.El('div').cls('side-account' + (on ? ' on' : '')).attr('act', 'account-menu').title('账户菜单').children([
       avatarEl(acc, 'ava-sm'),
       new A.El('span').cls('sa-txt').children([
         new A.El('span', on ? name : '匿名用户').cls('sa-name')
-      ]),
-      new A.El('button').cls('sa-bell').attr('act', 'notice-open').title('通知')
-        .attr('aria-label', '通知').children(bellKids),
-      new A.El('button').cls('sa-dots').attr('act', 'account-menu').title('账户菜单')
-        .attr('aria-label', '更多').children([iconEl('more', 'i18')])
+      ])
     ]));
     return new A.El('nav').cls('tabbar').children(children);
   }
@@ -480,9 +474,6 @@
     html += '<div class="side-account' + (on ? ' on' : '') + '" data-act="account-menu" title="账户菜单">' +
       avatarFace(acc, 'ava-sm') +
       '<span class="sa-txt"><span class="sa-name">' + esc(on ? name : '匿名用户') + '</span></span>' +
-      '<button class="sa-bell" data-act="notice-open" title="通知" aria-label="通知">' + icon('bell', 'i18') +
-      (unread > 0 ? '<span class="sa-badge">' + unread + '</span>' : '') + '</button>' +
-      '<button class="sa-dots" data-act="account-menu" title="账户菜单" aria-label="更多">' + icon('more', 'i18') + '</button>' +
       '</div>' +
       '</nav>';
     return html;
@@ -3384,6 +3375,7 @@ kr(k('Ctrl') + ' + ' + k('Z'), '撤销上一步') +
     const on = !!acc.loggedIn;
     const name = app.accountDisplayName ? app.accountDisplayName() : (acc.nickname || '学习者');
     const idt = accountIdentity(app);
+    const unread = noticeUnread(app);
     // 豆包风菜单行：线性图标 + 文字 + 右侧数值/箭头
     const item = function (ico, act, label, val, cls) {
       return '<button class="am-item' + (cls ? ' ' + cls : '') + '" data-act="' + act + '">' +
@@ -3404,6 +3396,11 @@ kr(k('Ctrl') + ' + ' + k('Z'), '撤销上一步') +
       '<div class="am-list">' +
       '<div class="am-group">' +
       item('settings', 'goto-settings', '设置') +
+      '<button class="am-item" data-act="notice-open">' +
+      '<span class="am-ico">' + icon('bell', 'i20') + '</span>' +
+      '<span class="am-txt"><b>通知</b></span>' +
+      (unread > 0 ? '<span class="am-val am-badge-num">' + unread + '</span>' : '') +
+      icon('chevronRight', 'i14') + '</button>' +
       '</div>' +
       '<div class="am-group">' +
       item('shield', 'privacy-info', '隐私说明') +
