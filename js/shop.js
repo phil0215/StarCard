@@ -319,9 +319,10 @@
   function headerHtml(app, L) {
     var bal = Math.max(0, L.earned - L.spent);
     var m = monthStats(L);
-    return '<header class="topbar"><div class="tb-main">' +
-      '<div class="topbar-t"><h1>商铺</h1></div>' +
-      '<p>换词库 · 逛同学的作品</p></div>' +
+    return '<header class="studio-top">' +
+      '<button class="stg-btn" data-act="side-toggle" title="隐藏 / 显示侧栏">' + icon('sidebar', 'i18') + '</button>' +
+      '<div class="tb-main stg-main"><span class="stg-title">商铺</span>' +
+      '<span class="stg-sub">换词库 · 逛同学的作品</span></div>' +
       '<div class="shp-balance">' +
       '<b>' + bal + '</b><span>积分</span>' +
       '<em>本月 +' + m.earn + ' / −' + m.spend + '</em>' +

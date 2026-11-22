@@ -93,10 +93,11 @@
     const selCount = selectedIds(app).length;
 
     let html = '<div class="browser-page">';
-    html += '<header class="topbar browser-top">' +
-      '<button class="btn-icon" data-act="browser-close" title="返回">' + icon('chevronLeft', 'i18') + '</button>' +
-      '<div class="tb-main"><div class="topbar-t"><h1>浏览</h1></div>' +
-      '<p>' + total + ' 张卡片' + (selCount ? ' · 已选 ' + selCount : '') + '</p></div>' +
+    html += '<header class="studio-top browser-top">' +
+      '<button class="stg-btn" data-act="side-toggle" title="隐藏 / 显示侧栏">' + icon('sidebar', 'i18') + '</button>' +
+      '<button class="stg-btn stg-back" data-act="browser-close" title="返回">' + icon('chevronLeft', 'i18') + '</button>' +
+      '<div class="tb-main stg-main"><span class="stg-title">浏览</span>' +
+      '<span class="stg-sub">' + total + ' 张卡片' + (selCount ? ' · 已选 ' + selCount : '') + '</span></div>' +
       '<div class="tb-actions"><button class="btn btn-sm btn-primary" data-act="card-new-global">' +
       icon('plus', 'i14') + '添加卡片</button></div></header>';
 

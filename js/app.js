@@ -76,6 +76,8 @@
 
   const App = {
     state: FC.defaultState(),
+    // 侧栏隐藏：桌面版专属，跨页跳转（整页刷新）也要记住
+    sideHide: (function () { try { return localStorage.getItem('scSideHide') === '1'; } catch (e) { return false; } })(),
     tab: 1,
     seriesId: '',
     showRemovedSeries: false,
@@ -3168,6 +3170,7 @@
       }
       case 'side-toggle':
         App.sideHide = !App.sideHide;
+        try { localStorage.setItem('scSideHide', App.sideHide ? '1' : '0'); } catch (e) {}
         App.render();
         break;
       // 往当前范围牌组添加卡片（工坊顶部 / 空牌组引导）
@@ -3611,6 +3614,11 @@
       App.refreshBrowser();
     }
     // 小星输入框：暂存草稿（不重绘，避免打断输入 / 中文输入法）
+    // 工坊编辑文本框：随输入自动长高（字多框大，不固定行数）
+    if (t.classList && t.classList.contains('sd-ta')) {
+      t.style.height = 'auto';
+      t.style.height = (t.scrollHeight + 2) + 'px';
+    }
     // 工坊卡片列表搜索：纯 DOM 过滤，不重绘整个应用（保住焦点与中文输入法）
     if (t.id === 'sdQuery') {
       if (!App.studio) App.studio = { q: '', sel: '' };

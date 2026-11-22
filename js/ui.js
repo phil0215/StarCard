@@ -484,16 +484,18 @@
     return html;
   }
 
+  // 全站统一紧凑操作栏：隐藏侧栏 + （返回）+ 标题 + 副题 + 右侧动作
   function titlebar(title, sub, opt) {
     opt = opt || {};
-    let html = '<header class="topbar">';
+    let html = '<header class="studio-top">';
+    html += '<button class="stg-btn" data-act="side-toggle" title="隐藏 / 显示侧栏">' + icon('sidebar', 'i18') + '</button>';
     if (opt.back) {
-      html += '<button class="btn-icon" data-act="' + opt.back.act + '"' +
+      html += '<button class="stg-btn stg-back" data-act="' + opt.back.act + '"' +
         (opt.back.view !== undefined ? ' data-view="' + opt.back.view + '"' : '') +
         ' aria-label="返回">' + icon('chevronLeft', 'i18') + '</button>';
     }
-    html += '<div class="tb-main"><div class="topbar-t"><h1>' + esc(title || '闪星卡') + '</h1></div>' +
-      (sub ? '<p>' + esc(sub) + '</p>' : '') + '</div>';
+    html += '<div class="tb-main stg-main"><span class="stg-title">' + esc(title || '闪星卡') + '</span>' +
+      (sub ? '<span class="stg-sub">' + esc(sub) + '</span>' : '') + '</div>';
     if (opt.actions) html += '<div class="tb-actions">' + opt.actions + '</div>';
     return html + '</header>';
   }
@@ -968,6 +970,15 @@
   function cardFrontText(c) { return String((c.fields && c.fields.Front) || c.front || ''); }
   function cardBackText(c) { return String((c.fields && c.fields.Back) || c.back || ''); }
 
+  // 文本框行数按内容估算：400px 详情栏约 28 个全角字符/行，上限 24 行
+  function taRows(txt, min) {
+    const t = String(txt || '');
+    if (!t) return min;
+    const lines = t.split('\n').length;
+    const est = Math.ceil(t.length / 28) + (lines - 1);
+    return Math.max(min, Math.min(24, est + 1));
+  }
+
   function studioDetailHtml(app) {
     const st = app.state;
     const sel = app.studio && app.studio.sel;
@@ -1000,9 +1011,9 @@
       '<button class="btn btn-sm btn-more" data-act="deck-menu" data-id="' + esc(r.deck.id) + '" title="牌组选项">' + icon('more', 'i16') + '</button></div>' +
       '<div class="sd-form">' +
       '<label class="sd-label">模板</label><select id="sdType" class="sd-input">' + typeOpts + '</select>' +
-      '<label class="sd-label">正面</label><textarea id="sdFront" class="sd-input sd-ta" rows="3">' + esc(f.Front || '') + '</textarea>' +
-      '<label class="sd-label">背面</label><textarea id="sdBack" class="sd-input sd-ta" rows="3">' + esc(f.Back || '') + '</textarea>' +
-      '<label class="sd-label">补充</label><textarea id="sdExtra" class="sd-input sd-ta" rows="2">' + esc(f.Extra || '') + '</textarea>' +
+      '<label class="sd-label">正面</label><textarea id="sdFront" class="sd-input sd-ta" data-min="2" rows="' + taRows(f.Front, 2) + '">' + esc(f.Front || '') + '</textarea>' +
+      '<label class="sd-label">背面</label><textarea id="sdBack" class="sd-input sd-ta" data-min="3" rows="' + taRows(f.Back, 3) + '">' + esc(f.Back || '') + '</textarea>' +
+      '<label class="sd-label">补充</label><textarea id="sdExtra" class="sd-input sd-ta" data-min="2" rows="' + taRows(f.Extra, 2) + '">' + esc(f.Extra || '') + '</textarea>' +
       '<label class="sd-label">来源</label><input id="sdSource" class="sd-input" value="' + esc(f.Source || '') + '" />' +
       '<label class="sd-label">标签</label><input id="sdTags" class="sd-input" value="' + esc((c.tags || []).join(' ')) + '" placeholder="空格分隔多个标签" />' +
       '<div class="sd-hint">填空模板的正面需要写成 {{c1::答案}} 的形式。</div>' +

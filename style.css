@@ -8079,7 +8079,24 @@ html[data-theme="dark"] .folder-card { background: var(--surface-2); }
   cursor: pointer; transition: border-color .15s var(--ease);
 }
 .stg-scope:focus { border-color: var(--brand-ring); }
-.stg-count { margin-left: auto; flex: none; font-size: 12px; color: var(--ink-3); font-weight: 550; white-space: nowrap; }
+.stg-count { flex: none; font-size: 12px; color: var(--ink-3); font-weight: 550; white-space: nowrap; }
+/* 全站操作栏：标题占中间，动作推到最右 */
+.studio-top { padding: 10px 24px 8px; }
+.studio-top .stg-main { display: flex; align-items: baseline; gap: 8px; min-width: 0; flex: 1; }
+.stg-main .stg-title { flex: none; }
+.stg-sub { font-size: 12px; color: var(--ink-4); font-weight: 450; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.studio-top .tb-actions { margin-left: auto; flex: none; }
+.studio-top .stg-count { margin-left: auto; }
+.studio-top .tb-actions ~ .stg-count, .studio-top .stg-count ~ .tb-actions { margin-left: 0; }
+.stg-back { margin-left: -4px; }
+/* 浏览页是全屏工作区，没有侧栏，隐藏开关不展示 */
+.browser-top .stg-btn[data-act="side-toggle"] { display: none; }
+/* 工坊的范围下拉紧跟标题，占可用空间 */
+.studio-top .stg-scope { margin-left: 2px; }
+.studio-top .stg-scope:not(:last-child) { flex: 0 1 auto; }
+/* 工坊：下拉后到计数之间留白（计数与动作在右侧） */
+.studio-top > .stg-count { margin-left: auto; }
+.studio-top > .tb-actions { margin-left: 8px; }
 .studio-top .btn { flex: none; }
 .stg-add {
   width: 26px; height: 26px; flex: none;
@@ -8186,6 +8203,8 @@ html[data-theme="dark"] .folder-card { background: var(--surface-2); }
 @media (max-width: 760px) {
   .studio-top { padding: 8px 12px 6px; gap: 8px; }
   .stg-btn { display: none; }
+  .stg-sub { display: none; }
+  .studio-top .stg-title { font-size: 15px; }
   .stg-scope { flex: 1; min-width: 0; max-width: none; }
   .stg-count { display: none; }
 }
