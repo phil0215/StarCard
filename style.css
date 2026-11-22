@@ -8314,3 +8314,21 @@ html[data-look="plain"] .side-account .sa-badge { background: #FF3B30 !important
 @media (max-width: 860px) {
   .ff-hint { display: none; }
 }
+
+/* ============================================================
+   2026-11-22 · 账户行单行化：小字名字（可显示长名），去「点击登录」
+   ============================================================ */
+.side-account { align-items: center; }
+.side-account .sa-txt { display: flex; align-items: center; min-width: 0; flex: 1; }
+.side-account .sa-name {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -.1px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.side-account .sa-sub { display: none !important; }
+.side-account .sa-ava { width: 26px; height: 26px; font-size: 12px; }
+.side-account .sa-bell, .side-account .sa-dots { width: 28px; height: 28px; }
