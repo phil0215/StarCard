@@ -232,18 +232,11 @@
     const weekPct = wk.length ? Math.round(weekOk / wk.length * 100) : 0;
     const weekBars = new A.El('div').cls('sm-week').title('本周 ' + weekOk + '/' + wk.length + ' 天达标')
       .child(new A.El('span').cls('sm-fill').style('width', weekPct + '%'));
-    children.push(new A.El('div').cls('streak-mini' + (sd.doneToday ? ' lit' : ''))
-      .title('连续打卡 ' + (sd.days > 0 ? sd.days : 0) + ' 天 · 每天 10 分钟 + 100 词')
-      .children([
-        new A.El('div').cls('sm-top').children([
-          new A.El('span').cls('sm-flame').children([flameEl('i18', sd.doneToday)]),
-          new A.El('span').cls('sm-txt').children([
-            new A.El('b', (sd.days > 0 ? sd.days : 0) + ' 天'),
-            new A.El('small', sd.doneToday ? '今日已打卡' : '连续打卡')
-          ])
-        ]),
-        weekBars
-      ]));
+    children.push(new A.El('div').cls('side-brand').children([
+      new A.El('span', '闪星卡').cls('sb-name'),
+      new A.El('button').cls('sb-search').attr('act', 'side-search').attr('title', '搜索卡片 / 牌组')
+        .attr('aria-label', '搜索').child(iconEl('search', 'i18'))
+    ]));
     const unread = noticeUnread(app);
     let lastGroup = '';
     for (let i = 0; i < NAV.length; i++) {
@@ -267,10 +260,16 @@
         children.push(pe);
       }
     }
+    const sdv = streakStat(app);
+    const sub = on ? (sdv.days > 0 ? '连续打卡 ' + sdv.days + ' 天' : (sdv.doneToday ? '今日已打卡' : '连续打卡 0 天')) : '未登录';
     children.push(new A.El('div').cls('side-account' + (on ? ' on' : '')).attr('act', 'account-menu').title('账户菜单').children([
       avatarEl(acc, 'ava-sm'),
       new A.El('span').cls('sa-txt').children([
-        new A.El('span', on ? name : '匿名用户').cls('sa-name')
+        new A.El('span').cls('sa-name-row').children([
+          new A.El('span', on ? name : '匿名用户').cls('sa-name'),
+          iconEl('chevronRight', 'i14')
+        ]),
+        new A.El('span', sub).cls('sa-sub')
       ])
     ]));
     return new A.El('nav').cls('tabbar').children(children);
@@ -430,7 +429,9 @@
     }
     const tabActive = (pageActive || (app && app.folderId)) ? -999 : active;
     const name = (app && app.accountDisplayName) ? app.accountDisplayName() : (acc.nickname || '学习者');
-    let html = '<nav class="tabbar' + (app && app.sideHide ? ' side-hidden' : '') + '">' + streakMiniHtml(app);
+    let html = '<nav class="tabbar' + (app && app.sideHide ? ' side-hidden' : '') + '">' +
+      '<div class="side-brand"><span class="sb-name">闪星卡</span>' +
+      '<button class="sb-search" data-act="side-search" title="搜索卡片 / 牌组" aria-label="搜索">' + icon('search', 'i18') + '</button></div>';
     const unread = noticeUnread(app);
     let lastGroup = '';
     for (let i = 0; i < NAV.length; i++) {
@@ -471,9 +472,13 @@
       '<button class="sd-act" data-act="folder-new" title="新建文件夹">' + icon('plus', 'i18') + '</button>' +
       '<button class="sd-act" data-act="import-hub" title="导入词库（.srcd / .apkg / CSV）">' + icon('download', 'i18') + '</button>' +
       '</div>';
+    const _sd = streakStat(app);
+    const _sub = on ? (_sd.days > 0 ? '连续打卡 ' + _sd.days + ' 天' : (_sd.doneToday ? '今日已打卡' : '连续打卡 0 天')) : '未登录';
     html += '<div class="side-account' + (on ? ' on' : '') + '" data-act="account-menu" title="账户菜单">' +
       avatarFace(acc, 'ava-sm') +
-      '<span class="sa-txt"><span class="sa-name">' + esc(on ? name : '匿名用户') + '</span></span>' +
+      '<span class="sa-txt"><span class="sa-name-row"><span class="sa-name">' + esc(on ? name : '匿名用户') + '</span>' +
+      icon('chevronRight', 'i14') + '</span>' +
+      '<span class="sa-sub">' + esc(_sub) + '</span></span>' +
       '</div>' +
       '</nav>';
     return html;

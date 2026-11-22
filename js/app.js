@@ -1152,6 +1152,16 @@
     aiCmd: function (key) { this.aiClose(); this.runCommandByKey(key); },
 
     // ---- 命令面板----
+    sideSearch: function () {
+      this.tab = 1;
+      this.study = null;
+      this.render();
+      setTimeout(function () {
+        var el = document.getElementById('sdQuery');
+        if (el) { el.focus(); }
+      }, 60);
+    },
+
     cmdToggle: function () {
       if (this.cmdOpen) { this.cmdClose(); return; }
       this.cmdOpen = true;
@@ -3609,6 +3619,7 @@
       case 'modal-cancel': App.closeModal(); break;
       case 'shortcuts-help': App.openModal({ type: 'shortcuts' }); break;
       case 'notice-open': App.openNoticePage(); break;
+      case 'side-search': App.sideSearch(); break;
       case 'notice-back': App.closeNoticePage(); break;
       case 'backup-open': App.openBackupPage(); break;
       case 'backup-back': App.closeBackupPage(); break;
