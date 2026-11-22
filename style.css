@@ -8215,3 +8215,40 @@ html[data-theme="dark"] .folder-card { background: var(--surface-2); }
   .side-decks-actions { padding: 0; justify-content: center; gap: 6px; }
   .sd-act { width: 34px; height: 30px; }
 }
+
+/* ============================================================
+   2026-11-22 · 左下角账户行：铃铛（通知徽标）+ 三点（账户菜单）
+   ============================================================ */
+.side-account { position: relative; }
+.side-account .sa-bell,
+.side-account .sa-dots {
+  flex: none;
+  width: 30px; height: 30px;
+  border: 0; background: none;
+  border-radius: 8px;
+  color: var(--ink-3);
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  position: relative;
+  padding: 0;
+  transition: background .15s var(--ease), color .15s var(--ease);
+}
+.side-account .sa-bell:hover,
+.side-account .sa-dots:hover { background: var(--surface-2); color: var(--ink-1); }
+.side-account .sa-bell .ic { width: 17px; height: 17px; }
+.side-account .sa-dots .ic { width: 18px; height: 18px; }
+.side-account .sa-badge {
+  position: absolute; top: -5px; right: -7px;
+  min-width: 16px; height: 16px; padding: 0 4px;
+  border-radius: 999px; background: #FF3B30; color: #fff;
+  font-size: 9.5px; font-weight: 700; line-height: 16px; text-align: center;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 0 0 2px var(--surface);
+  pointer-events: none;
+}
+html[data-look="plain"] .side-account .sa-badge { background: #FF3B30 !important; }
+[data-theme="dark"] .side-account .sa-badge { box-shadow: 0 0 0 2px var(--surface-2); }
+.side-account .chev { display: none !important; }
+@media (max-width: 860px) {
+  .side-account .sa-bell, .side-account .sa-dots { width: 26px; height: 26px; }
+}
