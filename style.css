@@ -60,7 +60,7 @@
   --sh-md: 0 12px 28px rgba(23, 31, 61, .11);
   --sh-lg: 0 22px 52px rgba(23, 31, 61, .17);
 
-  --side-w: 232px;
+  --side-w: 208px;
   --ease: cubic-bezier(.34, 1.56, .64, 1);   /* 弹性回弹：灵动感来源 */
   --ease-soft: cubic-bezier(.4, 0, .2, 1);
 
@@ -139,7 +139,7 @@ body {
   flex-direction: column;
   padding: 16px 10px 12px;
   background: var(--bg);
-  border-right: 1px dashed var(--line);
+  border-right: 1px solid var(--line);
   overflow-y: auto;
   overflow-x: hidden;
   user-select: none;
@@ -1646,13 +1646,13 @@ body.privacy-covered::after {
    自适应
    ============================================================ */
 @media (max-width: 1024px) {
-  :root { --side-w: 200px; }
+  :root { --side-w: 176px; }
   .topbar { padding: 18px 24px 12px; }
   .content { padding: 4px 24px 24px; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
 }
 
 @media (max-width: 860px) {
-  :root { --side-w: 132px; }
+  :root { --side-w: 118px; }
   .tabbar { padding: 14px 8px 10px; }
   .tab { padding: 0 8px; gap: 8px; }
   .topbar { padding: 16px 18px 10px; }
@@ -3604,8 +3604,8 @@ html[data-motion="off"] .tab.active .ico { animation: none !important; }
   width: 110vw; height: 110vw; right: -40vw; bottom: -52vw;
   background: radial-gradient(circle at 50% 50%, rgba(255, 107, 157, .10), rgba(255, 107, 157, 0) 64%);
 }
-[data-theme="dark"] #app::before { background: radial-gradient(circle at 50% 50%, rgba(139, 112, 255, .16), rgba(139, 112, 255, 0) 64%); }
-[data-theme="dark"] #app::after  { background: radial-gradient(circle at 50% 50%, rgba(255, 107, 157, .12), rgba(255, 107, 157, 0) 64%); }
+[data-theme="dark"] #app::before { background: radial-gradient(circle at 50% 50%, rgba(139, 112, 255, .07), rgba(139, 112, 255, 0) 64%); }
+[data-theme="dark"] #app::after  { background: radial-gradient(circle at 50% 50%, rgba(255, 107, 157, .05), rgba(255, 107, 157, 0) 64%); }
 
 /* 旧内核不支持 conic-gradient 时，环形退化为实心灰环，避免出现空洞 */
 @supports not (background: conic-gradient(red, blue)) {
@@ -5631,7 +5631,7 @@ html[data-look="plain"] {
 /* ---------- 2. 素白 · 夜间配色 ---------- */
 html[data-theme="dark"][data-look="plain"] {
   --bg: #0F0F10;
-  --bg-side: #121213;
+  --bg-side: #1C1D1F;
   --surface: #171718;
   --surface-2: #1F1F21;
 
@@ -6073,8 +6073,8 @@ html[data-look="plain"] .ai-fab::after { display: none !important; }
 
 /* ===== 豆包深色规范：中性灰阶 + 品牌紫点缀，统一分割线/图标/控件 ===== */
 html[data-theme="dark"] {
-  --bg: #1A1A1A; --bg-side: #1A1A1A;
-  --surface: #232323; --surface-2: #2A2A2A;
+  --bg: #0F0F10; --bg-side: #1C1D1F;
+  --surface: #202124; --surface-2: #2A2A2A;
   --ink-1: #EDEDED; --ink-2: #B6B6B6; --ink-3: #8A8A8A; --ink-4: #666666;
   --line: rgba(255,255,255,.07); --line-2: rgba(255,255,255,.12);
   --brand: #7D9CF5; --brand-strong: #7DA4FF;
@@ -6148,8 +6148,8 @@ html[data-theme="dark"] .cap-warn { background: rgba(255,255,255,.07) !important
 /* ---- 深色 + 素白 组合：只回填中性灰阶与分割线；
    品牌色交给「深色基础」与「强调色」两条规则决定，否则强调色在深色下会被这里盖掉 ---- */
 html[data-theme="dark"][data-look="plain"] {
-  --bg: #1A1A1A; --bg-side: #1A1A1A;
-  --surface: #232323; --surface-2: #2A2A2A;
+  --bg: #0F0F10; --bg-side: #1C1D1F;
+  --surface: #202124; --surface-2: #2A2A2A;
   --ink-1: #EDEDED; --ink-2: #B6B6B6; --ink-3: #8A8A8A; --ink-4: #666666;
   --line: rgba(255,255,255,.07); --line-2: rgba(255,255,255,.12);
   --brand-ink: #FFFFFF;
@@ -7884,7 +7884,7 @@ html[data-look="plain"] .am-item-danger .am-txt b {
 /* ============================================================
    侧栏收紧：232 → 186，项内边距与字号同步压缩（内容宽 170）
    ============================================================ */
-@media (min-width: 761px) { :root { --side-w: 186px; } }
+@media (min-width: 761px) { :root { --side-w: 164px; } }
 .tabbar { padding: 14px 8px 10px; }
 .tab { height: 32px; padding: 0 9px; gap: 9px; font-size: 13px; border-radius: 8px; }
 .tab .ico { flex: 0 0 18px; display: flex; justify-content: center; }
@@ -8085,9 +8085,9 @@ html[data-theme="dark"] .folder-card { background: var(--surface-2); }
   grid-column: 2;
   position: relative;
   display: flex; flex-direction: column;
-  margin: 10px 24px 14px;
+  margin: 8px 12px 12px;
   min-height: 0;
-  height: calc(100vh - 24px);
+  height: calc(100vh - 32px);
   background: var(--surface);
   border: 1px solid var(--line);
   border-radius: 16px;
@@ -8647,3 +8647,16 @@ html[data-theme="light"][data-look="plain"] .set-main .set-block {
   border-color: #E8EBF2 !important;
   box-shadow: 0 1px 2px rgba(23, 31, 61, .035) !important;
 }
+
+/* ============================================================
+   暗色 · 豆包/WorkBuddy 同款框架：侧栏灰、主区黑、一条实线分隔
+   ============================================================ */
+html[data-theme="dark"] .tabbar {
+  background: var(--bg-side);
+  border-right: 1px solid rgba(255, 255, 255, .09);
+}
+html[data-theme="dark"] .studio-frame {
+  background: var(--bg);
+  border-color: rgba(255, 255, 255, .08);
+}
+html[data-theme="dark"] .content--studio { padding: 8px 10px 10px; }
