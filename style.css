@@ -8721,3 +8721,6 @@ html[data-theme="dark"] { color-scheme: dark; }
 [data-theme="dark"] .content::-webkit-scrollbar-thumb:hover { background: rgba(127, 127, 127, .5); background-clip: content-box; }
 /* 深色下 tabbar / 其他容器原生拉杆走暗色 */
 [data-theme="dark"] *::-webkit-scrollbar-thumb { background-color: rgba(127, 127, 127, .32); }
+
+/* —— 账户行兜底：文字区不允许出现图标/箭头（防并发改回），副行沿用已有隐藏规则 —— */
+.side-account .sa-txt .ic{display:none!important}
