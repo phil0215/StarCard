@@ -26,7 +26,11 @@
       window.addEventListener('error', function (e) {
         var t = e && e.target;
         if (t && (t.tagName === 'SCRIPT' || t.tagName === 'LINK')) {
-          if (retryOnce()) return;
+          // 只自愈本站资源；外链（登录 SDK 的 CDN）失败不能整页重载，否则会丢掉用户输入
+          var src = t.src || t.href || '';
+          var sameOrigin = false;
+          try { sameOrigin = !!src && new URL(src, location.href).origin === location.origin; } catch (x) {}
+          if (sameOrigin && retryOnce()) return;
         }
         var b = document.getElementById('bootErr');
         if (!b || !b.style) return;

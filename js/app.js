@@ -1852,7 +1852,7 @@
       }
       this._otpChallenge = null;
       this._otpCountdown = 0;
-      this._loginDraft = null;
+      this.clearLoginDraft();
       this.saveAccount();
       this.toast('登录成功，欢迎 ' + (a.privacy && a.privacy.showNickname === false ? '回来' : a.nickname));
     },
@@ -1883,7 +1883,7 @@
       if (!a.uid) a.uid = 'bc_' + FC.makeId().replace(/-/g, '').slice(0, 10);
       if (!a.joinedAt) a.joinedAt = FC.nowIso();
       if (!a.regYear) a.regYear = new Date().getFullYear();
-      this._loginDraft = null;
+      this.clearLoginDraft();
       this.saveAccount();
       this.toast('已登录，欢迎 ' + nickname);
     },
@@ -1898,6 +1898,24 @@
         agree: byId('loginAgree') ? !!byId('loginAgree').checked : false,
         mode: this.loginMode || 'email'
       };
+      try { sessionStorage.setItem('sc_login_draft', JSON.stringify(this._loginDraft)); } catch (e) {}
+    },
+    // 页面重载 / 刷新后把上次填的邮箱、验证码恢复回来
+    restoreLoginDraft: function () {
+      if (this._loginDraft && Object.keys(this._loginDraft).length) return;
+      try {
+        const raw = sessionStorage.getItem('sc_login_draft');
+        if (!raw) return;
+        const d = JSON.parse(raw);
+        if (d && typeof d === 'object') {
+          this._loginDraft = d;
+          if (d.mode === 'phone') this.loginMode = 'phone';
+        }
+      } catch (e) {}
+    },
+    clearLoginDraft: function () {
+      this._loginDraft = null;
+      try { sessionStorage.removeItem('sc_login_draft'); } catch (e) {}
     },
     // 只更新登录区的行内提示，不整页重绘（保住输入焦点与内容）
     setLoginMsg: function (msg, kind) {
@@ -4110,6 +4128,19 @@
   } catch (e) {}
   // 设置页左栏搜索：内联 oninput 在闭包外，拿不到 App，这里挂一个薄桥
   window.scFilterSettings = function (q) { try { App.filterSettings(q); } catch (e) {} };
+
+  // 登录表单输入即落盘：任何重载 / 刷新都不会吞掉已填的邮箱与验证码
+  document.addEventListener('input', function (e) {
+    const t = e.target;
+    if (t && t.id && /^login(Email|Phone|Code|Password|Nick)$/.test(t.id)) {
+      try { App.saveLoginDraft(); } catch (x) {}
+    }
+  });
+  document.addEventListener('change', function (e) {
+    const t = e.target;
+    if (t && t.id === 'loginAgree') { try { App.saveLoginDraft(); } catch (x) {} }
+  });
+  App.restoreLoginDraft();
 
   // 在线环境下异步校验云端登录会话（离线不触发网络请求）
   App.restoreCloudSession();

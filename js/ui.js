@@ -2583,7 +2583,13 @@
         if (on) return '';
         const mode = app.loginMode === 'phone' ? 'phone' : 'email';
         const isPhone = mode === 'phone';
-        const draft = app._loginDraft || {};
+        // 草稿优先取内存；页面刷新 / 重载后从 sessionStorage 兜底，表单内容不会被冲掉
+        let draft = app._loginDraft;
+        if (!draft || !Object.keys(draft).length) {
+          try { draft = JSON.parse(sessionStorage.getItem('sc_login_draft') || 'null'); } catch (e) { draft = null; }
+          if (draft) app._loginDraft = draft;
+        }
+        draft = draft || {};
         const dv = function (k, fb) { return draft[k] !== undefined ? draft[k] : (fb || ''); };
         const msg = app._loginMsg || {};
         const cnt = app._otpCountdown || 0;

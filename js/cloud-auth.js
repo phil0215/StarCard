@@ -16,7 +16,19 @@
   var FC = window.FC || (window.FC = {});
 
   // CDN IIFE 全局为 WorkBuddyCloud；用 @dev 通道（latest 未维护）
-  var SDK_URL = 'https://cdn.jsdelivr.net/npm/@tencent-ai/workbuddy-cloud-sdk@dev/lib/index.global.js';
+  // 多个源依次兜底：jsDelivr 在部分网络下会被阻断/503，失败后自动换 unpkg
+  // 第一个是仓库内置副本（同源、不受 CDN 封锁影响），后三个是公网兜底
+  function sdkSources() {
+    var local = '';
+    try { if (FC.siteRoot) local = FC.assetUrl ? FC.assetUrl('js/vendor/workbuddy-cloud.js') : FC.siteRoot() + 'js/vendor/workbuddy-cloud.js'; } catch (e) {}
+    return [
+      local,
+      'https://cdn.jsdelivr.net/npm/@tencent-ai/workbuddy-cloud-sdk@dev/lib/index.global.js',
+      'https://unpkg.com/@tencent-ai/workbuddy-cloud-sdk@dev/lib/index.global.js',
+      'https://cdn.jsdelivr.net/npm/@tencent-ai/workbuddy-cloud-sdk@latest/lib/index.global.js'
+    ].filter(function (x) { return !!x; });
+  }
+  var _sdkSources = null;
   var _sdkPromise = null;
   var _cloud = null;
 
@@ -35,6 +47,7 @@
       too_many_requests: '操作太频繁，请稍后再试',
       rate_limited: '操作太频繁，请稍后再试',
       quota_exceeded: '免费额度已用完，请稍后再试',
+      sdk_load_failed: '登录组件没能加载出来（CDN 可能被阻断），请换网络后重试',
       invalid_phone: '请输入正确的 11 位手机号'
     };
     if (map[kind]) return map[kind];
@@ -42,7 +55,34 @@
     return '操作失败，请稍后重试';
   }
 
-  // 懒加载 SDK 脚本（失败时缓存结果，不无限重试）
+  // 注入单个 CDN 源；带标记，加载失败不会触发整页自愈重载
+  function injectSdk(url) {
+    return new Promise(function (resolve) {
+      try {
+        var s = document.createElement('script');
+        s.src = url; // 动态注入，源码里不出现外链属性（保持离线 HTML 无外链）
+        s.async = true;
+        s.charset = 'utf-8';
+        s.setAttribute('data-cloud-sdk', '1');
+        var done = false;
+        var timer = setTimeout(function () {
+          if (done) return; done = true; resolve(false);
+        }, 8000);
+        s.onload = function () {
+          if (done) return; done = true; clearTimeout(timer);
+          resolve(!!(window.WorkBuddyCloud && window.WorkBuddyCloud.createWorkBuddyCloud));
+        };
+        s.onerror = function () {
+          if (done) return; done = true; clearTimeout(timer);
+          try { s.remove(); } catch (e) {}
+          resolve(false);
+        };
+        (document.head || document.body).appendChild(s);
+      } catch (e) { resolve(false); }
+    });
+  }
+
+  // 懒加载 SDK：按源列表依次重试；全部失败时清空缓存，下次点击还能再试一次
   function loadSdk() {
     if (window.WorkBuddyCloud && window.WorkBuddyCloud.createWorkBuddyCloud) {
       return Promise.resolve(true);
@@ -51,24 +91,15 @@
     if (!FC.cloudAvailable || !FC.cloudAvailable()) {
       return Promise.resolve(false);
     }
+    if (!_sdkSources) _sdkSources = sdkSources();
+    var list = _sdkSources;
     _sdkPromise = new Promise(function (resolve) {
-      try {
-        var s = document.createElement('script');
-        s.src = SDK_URL; // 动态注入，源码里不出现外链属性（保持离线 HTML 无外链）
-        s.async = true;
-        s.charset = 'utf-8';
-        var done = false;
-        s.onload = function () {
-          done = true;
-          resolve(!!(window.WorkBuddyCloud && window.WorkBuddyCloud.createWorkBuddyCloud));
-        };
-        s.onerror = function () { done = true; resolve(false); };
-        (document.head || document.body).appendChild(s);
-        // 15 秒超时兜底
-        setTimeout(function () { if (!done) resolve(false); }, 15000);
-      } catch (e) {
-        resolve(false);
-      }
+      var i = 0;
+      (function next() {
+        if (window.WorkBuddyCloud && window.WorkBuddyCloud.createWorkBuddyCloud) { resolve(true); return; }
+        if (i >= list.length) { _sdkPromise = null; resolve(false); return; }
+        injectSdk(list[i++]).then(function (ok) { if (ok) resolve(true); else next(); });
+      })();
     });
     return _sdkPromise;
   }
@@ -95,7 +126,7 @@
 
   function withCloud(fn) {
     return getCloud().then(function (c) {
-      if (!c) return { data: null, error: { kind: 'network', message: '登录服务不可用' } };
+      if (!c) return { data: null, error: { kind: 'sdk_load_failed', message: '登录组件没能加载出来（CDN 可能被阻断），请换网络后重试' } };
       try { return fn(c); }
       catch (e) { return { data: null, error: { kind: 'client', message: friendlyError(e) } }; }
     });
