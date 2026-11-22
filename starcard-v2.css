@@ -369,3 +369,21 @@ html[data-theme="dark"] .s2-row:hover { background: rgba(255, 255, 255, .045); }
 html[data-theme="dark"] .s2-row.active { background: rgba(10, 89, 247, .18) !important; box-shadow: inset 0 0 0 1px rgba(122, 163, 255, .34); }
 html[data-theme="dark"] .stg-side-item { border-radius: 10px; }
 html[data-theme="dark"] .stg-side-item.on { background: rgba(255, 255, 255, .08) !important; color: #fff !important; }
+
+/* ---------- 17. 窄屏：工坊收成单列 ---------- */
+@media (max-width: 860px) {
+  html[data-theme="dark"] .studio2 { grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; }
+  html[data-theme="dark"] .stg-side { display: none !important; }
+  html[data-theme="dark"] .studio-top {
+    flex-wrap: wrap; height: auto !important; min-height: 52px; padding: 8px 10px; gap: 8px;
+  }
+  html[data-theme="dark"] .stg-scope { max-width: 110px; }
+  html[data-theme="dark"] .sd-flagrow { flex-wrap: wrap; row-gap: 6px; }
+  html[data-theme="dark"] .sd-preview { padding: 12px 13px 10px; }
+  html[data-theme="dark"] .sd-pv-front { font-size: 19px; }
+  html[data-theme="dark"] .content { padding: 4px 14px 18px !important; }
+}
+@media (max-width: 860px) {
+  html[data-theme="dark"] .studio-top [data-act="new-deck"] { display: none !important; }
+  html[data-theme="dark"] .studio-top .stg-count { display: none !important; }
+}
