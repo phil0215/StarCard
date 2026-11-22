@@ -272,8 +272,7 @@
     children.push(new A.El('div').cls('side-account' + (on ? ' on' : '')).attr('act', 'account-menu').title('账户菜单').children([
       avatarEl(acc, 'ava-sm'),
       new A.El('span').cls('sa-txt').children([
-        new A.El('span', on ? name : '匿名用户').cls('sa-name'),
-        new A.El('span', on ? '打开账户菜单' : '点击登录').cls('sa-sub')
+        new A.El('span', on ? name : '匿名用户').cls('sa-name')
       ]),
       new A.El('button').cls('sa-bell').attr('act', 'notice-open').title('通知')
         .attr('aria-label', '通知').children(bellKids),
@@ -480,8 +479,7 @@
       '</div>';
     html += '<div class="side-account' + (on ? ' on' : '') + '" data-act="account-menu" title="账户菜单">' +
       avatarFace(acc, 'ava-sm') +
-      '<span class="sa-txt"><span class="sa-name">' + esc(on ? name : '匿名用户') + '</span>' +
-      '<span class="sa-sub">' + (on ? '打开账户菜单' : '点击登录') + '</span></span>' +
+      '<span class="sa-txt"><span class="sa-name">' + esc(on ? name : '匿名用户') + '</span></span>' +
       '<button class="sa-bell" data-act="notice-open" title="通知" aria-label="通知">' + icon('bell', 'i18') +
       (unread > 0 ? '<span class="sa-badge">' + unread + '</span>' : '') + '</button>' +
       '<button class="sa-dots" data-act="account-menu" title="账户菜单" aria-label="更多">' + icon('more', 'i18') + '</button>' +
