@@ -274,11 +274,13 @@
       this.toast('继续上次学习');
     },
     applyTheme: function () {
-      // v2 皮肤（starcard-v2.css，HarmonyOS 液态玻璃深色）是全站唯一外观：
-      // 无论设置里选什么明暗模式，都统一渲染成 v2 深色玻璃，避免浅色老皮肤漏出来
+      // 明暗模式三选一：跟随系统 / 浅色 / 深色（浅色走 style.css 设计系统，深色叠加 v2 液态玻璃）
       const s = this.state.settings || {};
+      const t = s.theme || 'auto';
+      let dark = t === 'dark';
+      if (t === 'auto') dark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
       const root = document.documentElement;
-      root.setAttribute('data-theme', 'dark');
+      root.setAttribute('data-theme', dark ? 'dark' : 'light');
       // 强调色与背景：通过 data 属性交给 CSS 处理（不写死颜色，便于深色模式适配）
       root.setAttribute('data-accent', s.accent || 'brand');
       root.setAttribute('data-bg', s.bg || 'default');

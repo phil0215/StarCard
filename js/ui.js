@@ -2606,7 +2606,7 @@
         { k: 'plan', t: '学习计划', d: '每日新卡与复习上限', ico: 'target', tone: 'blue', g: '学习', val: s.newCardsPerDay + ' / ' + s.reviewCardsPerDay },
         { k: 'fsrs', t: '记忆算法', d: 'FSRS-5 留存率与间隔', ico: 'zap', tone: 'purple', g: '学习', val: '' },
         { k: 'study', t: '学习行为', d: '顺序、Leech、提示音与字号', ico: 'bell', tone: 'orange', g: '学习', val: '' },
-        { k: 'appearance', t: '外观与个性化', d: '动效与字号', ico: 'palette', tone: 'pink', g: '个性化', val: '深色玻璃 · ' + (s.motion === 'off' ? '动效关' : (s.motion === 'full' ? '动效全开' : '动效轻')) },
+        { k: 'appearance', t: '外观与个性化', d: '明暗模式、主题预设、动效与字号', ico: 'palette', tone: 'pink', g: '个性化', val: ((s.theme === 'light') ? '浅色' : (s.theme === 'dark' ? '深色' : '跟随系统')) + ' · ' + (s.motion === 'off' ? '动效关' : (s.motion === 'full' ? '动效全开' : '动效轻')) },
         { k: 'data', t: '数据与备份', d: '备份提醒与本机数据', ico: 'cloud', tone: 'cyan', g: '系统', val: '' },
         { k: 'privacy', t: '隐私与安全', d: '数据存在哪、怎么清除', ico: 'shield', tone: 'indigo', g: '系统', val: '' },
         { k: 'keys', t: '快捷键', d: '键盘操作一览', ico: 'keyboard', tone: 'slate', g: '系统', val: '' },
@@ -2640,7 +2640,7 @@
         }
       }
       html += '<div class="ss-empty" id="ssEmpty" style="display:none">没有匹配的设置项</div>';
-      html += '<div class="set-ver">闪星卡 1.6.0 · 数据在本机</div>';
+      html += '<div class="set-ver">闪星卡 2.1.0 · 数据在本机</div>';
       html += '</aside>';
 
       // ================= 右栏：当前分类的参数 =================
@@ -2862,11 +2862,13 @@
         '</div>' + saveBar
       );
   
-      // 外观与个性化：v2 深色玻璃是全站固定外观，只保留真正生效的选项
+      // 外观与个性化：明暗模式 + 主题预设 + 动效 + 字号（深色叠加 v2 液态玻璃，浅色走设计系统）
       html += paneBox('appearance',
         '<div class="set-card">' +
         '<div class="set-block"><div class="set-block-h">界面外观</div>' +
-        '<div class="set-tip">当前为 v2 深色玻璃主题（华为质感），全站统一，不随明暗模式切换。</div>' +
+        '<div class="set-tip">深色 = 液态玻璃（华为质感）；浅色 = 素白纸感设计。明暗独立于主题预设，随切随生效。</div>' +
+        block('明暗模式', themeModeBtns(s.theme || 'auto'), '跟随系统 = 电脑是深色它就是深色；也可固定浅色 / 深色。') +
+        block('主题预设', presetGrid(s.preset || 'default'), '一套「配色 + 背景」组合，一键应用；深色玻璃下背景装饰自动收敛。') +
         block('界面动效', fxBtns(s.motion), '轻 = 只保留必要过渡；关闭 = 全部静止，老设备更省电。') +
         block('学习卡字号', '<select class="set-select" id="setFont">' +
           '<option value="s"' + (s.studyFont === 's' ? ' selected' : '') + '>小</option>' +
@@ -2928,7 +2930,7 @@
       html += paneBox('about',
         '<div class="set-card"><div class="set-block set-about">' +
         '<div class="set-about-t">闪星卡 · StarCard</div>' +
-        '<div class="set-about-s">网页版 1.6.0 · 开发人 小李同学 · 小李工作室</div>' +
+        '<div class="set-about-s">网页版 2.1.0 · 开发人 小李同学 · 小李工作室</div>' +
         '<div class="set-about-d">一款比 Anki 更全面、更智能的间隔重复卡片学习软件。基于 FSRS-5 科学记忆算法，数据与 .srcd 都在本机处理。</div>' +
         '</div></div>'
       );
@@ -4002,7 +4004,7 @@ kr(k('Ctrl') + ' + ' + k('Z'), '撤销上一步') +
     if (app.wb) { let h = '<div id="root">' + wordBookSession(app) + '</div>'; const m = modal(app); if (m) h += m; return htmlToNode(h + overlays(app)); }
     if (app.battle) { let h = '<div id="root">' + battleSession(app) + '</div>'; const m = modal(app); if (m) h += m; return htmlToNode(h + overlays(app)); }
     if (app.browser && FCUI.browserPage) {
-      let bh = '<div id="root">' + FCUI.browserPage(app) + '</div>';
+      let bh = '<div id="root">' + FCUI.browserPage(app) + tabbar(-1, app) + '</div>';
       const bm = modal(app);
       if (bm) bh += bm;
       return htmlToNode(bh + overlays(app));
@@ -4040,7 +4042,7 @@ kr(k('Ctrl') + ' + ' + k('Z'), '撤销上一步') +
       if (app.wb) return '<div id="root">' + wordBookSession(app) + '</div>' + overlays(app);
       if (app.battle) return '<div id="root">' + battleSession(app) + '</div>' + overlays(app);
       if (app.browser && FCUI.browserPage) {
-        let bh = '<div id="root">' + FCUI.browserPage(app) + '</div>';
+        let bh = '<div id="root">' + FCUI.browserPage(app) + tabbar(-1, app) + '</div>';
         const bm = modal(app);
         if (bm) bh += bm;
         return bh + overlays(app);

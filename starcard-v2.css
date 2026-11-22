@@ -14,10 +14,10 @@
 }
 
 /* ---------- 1. 令牌：纯黑 + 玻璃 ---------- */
-html[data-theme],
-html[data-theme][data-look],
-html[data-theme][data-bg],
-html[data-theme][data-preset] {
+html[data-theme="dark"],
+html[data-theme="dark"][data-look],
+html[data-theme="dark"][data-bg],
+html[data-theme="dark"][data-preset] {
   --bg: #000000;
   --bg-side: rgba(255, 255, 255, .035);
   --surface: rgba(255, 255, 255, .062);
@@ -47,46 +47,46 @@ html[data-theme][data-preset] {
   --sh-lg: 0 28px 70px rgba(0, 0, 0, .55);
 }
 
-/* ---------- 2. 画布与外壳 ---------- */
-html, body { background: #000 !important; }
-body {
+/* ---------- 2. 画布与外壳（仅深色：纯黑 + 光晕；浅色交给 style.css 设计系统） ---------- */
+html[data-theme="dark"], html[data-theme="dark"] body { background: #000 !important; }
+html[data-theme="dark"] body {
   color: var(--ink-1);
   background-image:
     radial-gradient(900px 520px at 6% -8%, rgba(10, 89, 247, .20), transparent 62%),
     radial-gradient(760px 460px at 98% 2%, rgba(120, 80, 255, .13), transparent 58%),
     radial-gradient(820px 540px at 50% 112%, rgba(10, 89, 247, .09), transparent 62%) !important;
   background-attachment: fixed !important;
-  -webkit-font-smoothing: antialiased;
 }
+body { -webkit-font-smoothing: antialiased; }
 
-html[data-theme] .tabbar {
+html[data-theme="dark"] .tabbar {
   background: var(--sc-glass-1) !important;
   border-right: 1px solid rgba(255, 255, 255, .07) !important;
   backdrop-filter: blur(40px) saturate(150%);
   -webkit-backdrop-filter: blur(40px) saturate(150%);
 }
-html[data-theme] .content { background: transparent !important; }
+html[data-theme="dark"] .content { background: transparent !important; }
 
 /* 侧栏选中态：浅玻璃 + 左侧细蓝条 */
-html[data-theme] .tab.active {
+html[data-theme="dark"] .tab.active {
   background: rgba(255, 255, 255, .09) !important;
   color: #fff !important;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .06);
   border-radius: 12px;
 }
-html[data-theme] .tab.active .ico { color: var(--sc-blue-text); }
-html[data-theme] .tab:hover { background: rgba(255, 255, 255, .05); color: #fff; }
-html[data-theme] .nav-label { color: rgba(255, 255, 255, .32); letter-spacing: .08em; }
+html[data-theme="dark"] .tab.active .ico { color: var(--sc-blue-text); }
+html[data-theme="dark"] .tab:hover { background: rgba(255, 255, 255, .05); color: #fff; }
+html[data-theme="dark"] .nav-label { color: rgba(255, 255, 255, .32); letter-spacing: .08em; }
 
 /* ---------- 3. 卡片：玻璃三层 ---------- */
-html[data-theme] .list-item,
-html[data-theme] .book-card,
-html[data-theme] .card,
-html[data-theme] .panel,
-html[data-theme] .sheet,
-html[data-theme] .modal,
-html[data-theme] .sd-form,
-html[data-theme] .empty {
+html[data-theme="dark"] .list-item,
+html[data-theme="dark"] .book-card,
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .panel,
+html[data-theme="dark"] .sheet,
+html[data-theme="dark"] .modal,
+html[data-theme="dark"] .sd-form,
+html[data-theme="dark"] .empty {
   background: linear-gradient(180deg, rgba(255, 255, 255, .075), rgba(255, 255, 255, .048)) !important;
   border: 1px solid var(--sc-hair) !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07) !important;
@@ -94,87 +94,87 @@ html[data-theme] .empty {
   -webkit-backdrop-filter: blur(30px) saturate(160%);
   border-radius: 20px;
 }
-html[data-theme] .list-item[data-act]:hover,
-html[data-theme] .book-card:hover {
+html[data-theme="dark"] .list-item[data-act]:hover,
+html[data-theme="dark"] .book-card:hover {
   background: rgba(255, 255, 255, .085) !important;
   border-color: rgba(255, 255, 255, .18) !important;
   transform: translateY(-2px);
 }
-html[data-theme] .list-item[data-act]:active { background: rgba(255, 255, 255, .10) !important; }
+html[data-theme="dark"] .list-item[data-act]:active { background: rgba(255, 255, 255, .10) !important; }
 
 /* ---------- 4. 按钮：实心蓝只给主动作 ---------- */
-html[data-theme] .btn {
+html[data-theme="dark"] .btn {
   background: rgba(255, 255, 255, .07) !important;
   border: 1px solid rgba(255, 255, 255, .12) !important;
   color: rgba(255, 255, 255, .86) !important;
   box-shadow: none !important;
   border-radius: 12px;
 }
-html[data-theme] .btn:hover {
+html[data-theme="dark"] .btn:hover {
   background: rgba(255, 255, 255, .11) !important;
   border-color: rgba(255, 255, 255, .18) !important;
 }
-html[data-theme] .btn:active { background: rgba(255, 255, 255, .14) !important; }
+html[data-theme="dark"] .btn:active { background: rgba(255, 255, 255, .14) !important; }
 
-html[data-theme] .btn-primary,
-html[data-theme] .btn-accent {
+html[data-theme="dark"] .btn-primary,
+html[data-theme="dark"] .btn-accent {
   background: #0A59F7 !important;
   border-color: #0A59F7 !important;
   color: #fff !important;
   box-shadow: 0 6px 20px rgba(10, 89, 247, .30) !important;
   background-image: none !important;
 }
-html[data-theme] .btn-primary:hover,
-html[data-theme] .btn-accent:hover {
+html[data-theme="dark"] .btn-primary:hover,
+html[data-theme="dark"] .btn-accent:hover {
   background: #2E6BFF !important;
   border-color: #2E6BFF !important;
 }
-html[data-theme] .btn-primary:active { background: #0847CC !important; }
+html[data-theme="dark"] .btn-primary:active { background: #0847CC !important; }
 
 /* ---------- 5. 输入控件 ---------- */
-html[data-theme] input:not([type="file"]):not([type="checkbox"]):not([type="radio"]),
-html[data-theme] select,
-html[data-theme] textarea {
+html[data-theme="dark"] input:not([type="file"]):not([type="checkbox"]):not([type="radio"]),
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea {
   background: rgba(255, 255, 255, .06) !important;
   border: 1px solid rgba(255, 255, 255, .12) !important;
   color: #fff !important;
   border-radius: 12px;
 }
-html[data-theme] input::placeholder,
-html[data-theme] textarea::placeholder { color: rgba(255, 255, 255, .32) !important; }
-html[data-theme] input:focus,
-html[data-theme] select:focus,
-html[data-theme] textarea:focus {
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder { color: rgba(255, 255, 255, .32) !important; }
+html[data-theme="dark"] input:focus,
+html[data-theme="dark"] select:focus,
+html[data-theme="dark"] textarea:focus {
   border-color: rgba(46, 107, 255, .55) !important;
   background: rgba(255, 255, 255, .085) !important;
   outline: none;
 }
 
 /* ---------- 6. 进度 / 环 / 标签 ---------- */
-html[data-theme] .progress { background: rgba(255, 255, 255, .09) !important; height: 5px; border-radius: 999px; }
-html[data-theme] .progress > span {
+html[data-theme="dark"] .progress { background: rgba(255, 255, 255, .09) !important; height: 5px; border-radius: 999px; }
+html[data-theme="dark"] .progress > span {
   background: #2E6BFF !important;
   background-image: none !important;
   border-radius: 999px;
 }
-html[data-theme] .deck-ring {
+html[data-theme="dark"] .deck-ring {
   background: conic-gradient(#2E6BFF calc(var(--p, 0) * 1%), rgba(255, 255, 255, .10) 0) !important;
 }
-html[data-theme] .deck-ring.done {
+html[data-theme="dark"] .deck-ring.done {
   background: conic-gradient(#3DD68C 100%, rgba(255, 255, 255, .10) 0) !important;
 }
-html[data-theme] .deck-ring b { color: #fff; }
-html[data-theme] .dchip { border-radius: 999px; font-weight: 500; }
-html[data-theme] .dchip.dc-new { background: rgba(255, 255, 255, .10); color: rgba(255, 255, 255, .72); }
-html[data-theme] .dchip.dc-due { background: rgba(255, 176, 32, .15); color: #FFC46B; }
-html[data-theme] .dchip.dc-done { background: rgba(61, 214, 140, .13); color: #6FE0AB; }
+html[data-theme="dark"] .deck-ring b { color: #fff; }
+html[data-theme="dark"] .dchip { border-radius: 999px; font-weight: 500; }
+html[data-theme="dark"] .dchip.dc-new { background: rgba(255, 255, 255, .10); color: rgba(255, 255, 255, .72); }
+html[data-theme="dark"] .dchip.dc-due { background: rgba(255, 176, 32, .15); color: #FFC46B; }
+html[data-theme="dark"] .dchip.dc-done { background: rgba(61, 214, 140, .13); color: #6FE0AB; }
 
 /* 头像色块：统一压成低饱和玻璃色 */
-html[data-theme] .avatar,
-html[data-theme] .deck-av { background: rgba(46, 107, 255, .16) !important; color: #9CBCFF !important; border-radius: 13px; }
-html[data-theme] .av-tone-0, html[data-theme] .av-tone-1, html[data-theme] .av-tone-2,
-html[data-theme] .av-tone-3, html[data-theme] .av-tone-4, html[data-theme] .av-tone-5,
-html[data-theme] .av-tone-6, html[data-theme] .av-tone-7 {
+html[data-theme="dark"] .avatar,
+html[data-theme="dark"] .deck-av { background: rgba(46, 107, 255, .16) !important; color: #9CBCFF !important; border-radius: 13px; }
+html[data-theme="dark"] .av-tone-0, html[data-theme="dark"] .av-tone-1, html[data-theme="dark"] .av-tone-2,
+html[data-theme="dark"] .av-tone-3, html[data-theme="dark"] .av-tone-4, html[data-theme="dark"] .av-tone-5,
+html[data-theme="dark"] .av-tone-6, html[data-theme="dark"] .av-tone-7 {
   background: rgba(255, 255, 255, .085) !important; color: #fff !important;
 }
 
@@ -222,38 +222,38 @@ html[data-theme] .av-tone-6, html[data-theme] .av-tone-7 {
 }
 
 /* ---------- 8. 牌组行：单一“开始” ---------- */
-html[data-theme] .row-go {
+html[data-theme="dark"] .row-go {
   flex: none;
   display: inline-flex; align-items: center; gap: 4px;
   font-size: 12.5px; color: var(--sc-blue-text);
   padding-left: 6px;
 }
-html[data-theme] .row-go .ic { width: 13px; height: 13px; }
-html[data-theme] .li-actions { gap: 6px; }
+html[data-theme="dark"] .row-go .ic { width: 13px; height: 13px; }
+html[data-theme="dark"] .li-actions { gap: 6px; }
 
 /* ---------- 9. 细节收口 ---------- */
-html[data-theme] .chev { color: rgba(255, 255, 255, .34); }
-html[data-theme] .empty { color: var(--ink-3); }
-html[data-theme] ::-webkit-scrollbar-thumb {
+html[data-theme="dark"] .chev { color: rgba(255, 255, 255, .34); }
+html[data-theme="dark"] .empty { color: var(--ink-3); }
+html[data-theme="dark"] ::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, .14) !important;
   background-clip: content-box !important;
   border: 3px solid transparent !important;
   border-radius: 999px;
 }
-html[data-theme] .content::-webkit-scrollbar-thumb {
+html[data-theme="dark"] .content::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, .14) !important;
   background-clip: content-box !important;
 }
-html[data-theme] .sg-head .sg-name,
-html[data-theme] .sf-name { color: #fff; }
-html[data-theme] .switch { background: rgba(255, 255, 255, .12); }
-html[data-theme] .switch.on { background: #0A59F7; }
+html[data-theme="dark"] .sg-head .sg-name,
+html[data-theme="dark"] .sf-name { color: #fff; }
+html[data-theme="dark"] .switch { background: rgba(255, 255, 255, .12); }
+html[data-theme="dark"] .switch.on { background: #0A59F7; }
 
 /* ---------- 11. 覆盖「素白」那层更高特异性的规则 ---------- */
-html[data-theme][data-look="plain"] .btn-primary,
-html[data-theme][data-look="plain"] .btn-primary:hover,
-html[data-theme][data-look="glass"] .btn-primary,
-html[data-theme][data-look="glass"] .btn-primary:hover {
+html[data-theme="dark"][data-look="plain"] .btn-primary,
+html[data-theme="dark"][data-look="plain"] .btn-primary:hover,
+html[data-theme="dark"][data-look="glass"] .btn-primary,
+html[data-theme="dark"][data-look="glass"] .btn-primary:hover {
   background: var(--sc-blue) !important;
   background-image: none !important;
   border-color: transparent !important;
@@ -261,15 +261,15 @@ html[data-theme][data-look="glass"] .btn-primary:hover {
   box-shadow: 0 6px 20px rgba(10, 89, 247, .42) !important;
   animation: none !important;
 }
-html[data-theme][data-look="plain"] .btn-primary:hover,
-html[data-theme][data-look="glass"] .btn-primary:hover { background: var(--sc-blue-hover) !important; }
-html[data-theme][data-look="plain"] .btn-primary:disabled,
-html[data-theme][data-look="plain"] .btn-primary.is-off {
+html[data-theme="dark"][data-look="plain"] .btn-primary:hover,
+html[data-theme="dark"][data-look="glass"] .btn-primary:hover { background: var(--sc-blue-hover) !important; }
+html[data-theme="dark"][data-look="plain"] .btn-primary:disabled,
+html[data-theme="dark"][data-look="plain"] .btn-primary.is-off {
   background: rgba(255, 255, 255, .10) !important; color: rgba(255, 255, 255, .40) !important; box-shadow: none !important;
 }
 
 /* 保存条吸底，滚动时始终可见 */
-html[data-theme] .set-save {
+html[data-theme="dark"] .set-save {
   position: sticky; bottom: 14px; z-index: 5;
   background: rgba(20, 20, 22, .72) !important;
   -webkit-backdrop-filter: blur(24px) saturate(160%); backdrop-filter: blur(24px) saturate(160%);
@@ -280,38 +280,38 @@ html[data-theme] .set-save {
 
 /* ---------- 12. 商铺货架：宽屏不横滑，全部可见 ---------- */
 @media (min-width: 1100px) {
-  html[data-theme] .shp-rail {
+  html[data-theme="dark"] .shp-rail {
     display: grid !important;
     grid-template-columns: repeat(auto-fill, minmax(196px, 1fr));
     overflow: visible !important;
     scroll-snap-type: none !important;
     padding-bottom: 4px;
   }
-  html[data-theme] .shp-card { flex: initial !important; }
+  html[data-theme="dark"] .shp-card { flex: initial !important; }
 }
 
 /* ---------- 13. 商铺：货架铺满整行 + 封面去艳 ---------- */
-html[data-theme] .shp-shelf,
-html[data-theme] .shp-tip,
-html[data-theme] .shp-owned-hint,
-html[data-theme] .shp-blank,
-html[data-theme] .shp-my,
-html[data-theme] .shp-tabs { grid-column: 1 / -1 !important; width: 100% !important; }
+html[data-theme="dark"] .shp-shelf,
+html[data-theme="dark"] .shp-tip,
+html[data-theme="dark"] .shp-owned-hint,
+html[data-theme="dark"] .shp-blank,
+html[data-theme="dark"] .shp-my,
+html[data-theme="dark"] .shp-tabs { grid-column: 1 / -1 !important; width: 100% !important; }
 @media (min-width: 1100px) {
-  html[data-theme] .shp-rail { grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)) !important; }
+  html[data-theme="dark"] .shp-rail { grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)) !important; }
 }
-html[data-theme] .shp-cover { filter: saturate(.62) brightness(.9); }
-html[data-theme] .shp-card {
+html[data-theme="dark"] .shp-cover { filter: saturate(.62) brightness(.9); }
+html[data-theme="dark"] .shp-card {
   background: rgba(255, 255, 255, .055) !important;
   border: 1px solid rgba(255, 255, 255, .09) !important;
   border-radius: 16px !important;
   overflow: hidden;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06);
 }
-html[data-theme] .shp-card:hover { background: rgba(255, 255, 255, .085) !important; }
+html[data-theme="dark"] .shp-card:hover { background: rgba(255, 255, 255, .085) !important; }
 
 /* ---------- 14. 内容栅格统一：所有页同一栏宽，居中 ---------- */
-html[data-theme] .content:not(.content--studio):not(.content--split) {
+html[data-theme="dark"] .content:not(.content--studio):not(.content--split) {
   width: 100%;
   max-width: none !important;
   margin: 0 !important;
@@ -319,7 +319,7 @@ html[data-theme] .content:not(.content--studio):not(.content--split) {
 
 
 /* ---------- 15. 工坊编辑器：卡片预览 ---------- */
-html[data-theme] .sd-preview {
+html[data-theme="dark"] .sd-preview {
   margin: 4px 0 12px;
   padding: 14px 16px 12px;
   border-radius: 16px;
@@ -327,65 +327,65 @@ html[data-theme] .sd-preview {
   border: 1px solid rgba(255, 255, 255, .11);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
 }
-html[data-theme] .sd-pv-lab {
+html[data-theme="dark"] .sd-pv-lab {
   font-size: 11px; letter-spacing: .06em; color: rgba(255, 255, 255, .34); margin-bottom: 8px;
 }
-html[data-theme] .sd-pv-front {
+html[data-theme="dark"] .sd-pv-front {
   font-size: 22px; font-weight: 600; color: #fff; line-height: 1.35; letter-spacing: -.3px;
 }
-html[data-theme] .sd-pv-back {
+html[data-theme="dark"] .sd-pv-back {
   margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, .08);
   font-size: 13.5px; line-height: 1.7; color: rgba(255, 255, 255, .78);
 }
-html[data-theme] .sd-hl {
+html[data-theme="dark"] .sd-hl {
   background: rgba(10, 89, 247, .28) !important; color: #DCE8FF !important;
   padding: 0 4px; border-radius: 5px; font-weight: 600;
 }
-html[data-theme] .sd-pv-empty { color: rgba(255, 255, 255, .28); font-style: normal; }
-html[data-theme] .sd-pv-note {
+html[data-theme="dark"] .sd-pv-empty { color: rgba(255, 255, 255, .28); font-style: normal; }
+html[data-theme="dark"] .sd-pv-note {
   margin-top: 10px; font-size: 11px; color: rgba(255, 255, 255, .28);
 }
 
 /* ---------- 16. 工坊三栏：做成三块玻璃面板 ---------- */
-html[data-theme] .studio2 { gap: 12px !important; }
-html[data-theme] .stg-side,
-html[data-theme] .studio2-list,
-html[data-theme] .studio2-detail {
+html[data-theme="dark"] .studio2 { gap: 12px !important; }
+html[data-theme="dark"] .stg-side,
+html[data-theme="dark"] .studio2-list,
+html[data-theme="dark"] .studio2-detail {
   background: linear-gradient(165deg, rgba(255, 255, 255, .062), rgba(255, 255, 255, .032)) !important;
   border: 1px solid rgba(255, 255, 255, .09) !important;
   border-radius: 18px !important;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 12px 34px rgba(0, 0, 0, .34);
   -webkit-backdrop-filter: blur(28px) saturate(150%); backdrop-filter: blur(28px) saturate(150%);
 }
-html[data-theme] .studio2-list { padding: 0 2px 0 2px; }
-html[data-theme] .studio2-detail { padding: 14px 14px 10px; }
-html[data-theme] .studio2-search {
+html[data-theme="dark"] .studio2-list { padding: 0 2px 0 2px; }
+html[data-theme="dark"] .studio2-detail { padding: 14px 14px 10px; }
+html[data-theme="dark"] .studio2-search {
   margin: 8px 8px 4px; border-radius: 12px;
   background: rgba(255, 255, 255, .05) !important;
   border: 1px solid rgba(255, 255, 255, .07);
 }
-html[data-theme] .s2-row { border-radius: 10px; margin: 1px 6px; padding-left: 10px; padding-right: 10px; }
-html[data-theme] .s2-row:hover { background: rgba(255, 255, 255, .045); }
-html[data-theme] .s2-row.active { background: rgba(10, 89, 247, .18) !important; box-shadow: inset 0 0 0 1px rgba(122, 163, 255, .34); }
-html[data-theme] .stg-side-item { border-radius: 10px; }
-html[data-theme] .stg-side-item.on { background: rgba(255, 255, 255, .08) !important; color: #fff !important; }
+html[data-theme="dark"] .s2-row { border-radius: 10px; margin: 1px 6px; padding-left: 10px; padding-right: 10px; }
+html[data-theme="dark"] .s2-row:hover { background: rgba(255, 255, 255, .045); }
+html[data-theme="dark"] .s2-row.active { background: rgba(10, 89, 247, .18) !important; box-shadow: inset 0 0 0 1px rgba(122, 163, 255, .34); }
+html[data-theme="dark"] .stg-side-item { border-radius: 10px; }
+html[data-theme="dark"] .stg-side-item.on { background: rgba(255, 255, 255, .08) !important; color: #fff !important; }
 
 /* ---------- 17. 窄屏：工坊收成单列 ---------- */
 @media (max-width: 860px) {
-  html[data-theme] .studio2 { grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; }
-  html[data-theme] .stg-side { display: none !important; }
-  html[data-theme] .studio-top {
+  html[data-theme="dark"] .studio2 { grid-template-columns: minmax(0, 1fr) !important; gap: 10px !important; }
+  html[data-theme="dark"] .stg-side { display: none !important; }
+  html[data-theme="dark"] .studio-top {
     flex-wrap: wrap; height: auto !important; min-height: 52px; padding: 8px 10px; gap: 8px;
   }
-  html[data-theme] .stg-scope { max-width: 110px; }
-  html[data-theme] .sd-flagrow { flex-wrap: wrap; row-gap: 6px; }
-  html[data-theme] .sd-preview { padding: 12px 13px 10px; }
-  html[data-theme] .sd-pv-front { font-size: 19px; }
-  html[data-theme] .content { padding: 4px 14px 18px !important; }
+  html[data-theme="dark"] .stg-scope { max-width: 110px; }
+  html[data-theme="dark"] .sd-flagrow { flex-wrap: wrap; row-gap: 6px; }
+  html[data-theme="dark"] .sd-preview { padding: 12px 13px 10px; }
+  html[data-theme="dark"] .sd-pv-front { font-size: 19px; }
+  html[data-theme="dark"] .content { padding: 4px 14px 18px !important; }
 }
 @media (max-width: 860px) {
-  html[data-theme] .studio-top [data-act="new-deck"] { display: none !important; }
-  html[data-theme] .studio-top .stg-count { display: none !important; }
+  html[data-theme="dark"] .studio-top [data-act="new-deck"] { display: none !important; }
+  html[data-theme="dark"] .studio-top .stg-count { display: none !important; }
 }
 
 /* ============================================================
@@ -393,103 +393,103 @@ html[data-theme] .stg-side-item.on { background: rgba(255, 255, 255, .08) !impor
    ============================================================ */
 
 /* ---------- 18. 侧栏：呼吸感 + 华为式胶囊导航 ---------- */
-html[data-theme] .tabbar { padding: 10px 10px 8px !important; }
-html[data-theme] .tab {
+html[data-theme="dark"] .tabbar { padding: 10px 10px 8px !important; }
+html[data-theme="dark"] .tab {
   min-height: 38px; margin: 1px 0; border-radius: 11px;
   font-size: 13.5px; letter-spacing: .01em;
 }
-html[data-theme] .tab .ico { opacity: .82; }
-html[data-theme] .tab.active { background: rgba(10, 89, 247, .16) !important; }
-html[data-theme] .tab.active .ico { color: #9DBDFF; }
-html[data-theme] .nav-label {
+html[data-theme="dark"] .tab .ico { opacity: .82; }
+html[data-theme="dark"] .tab.active { background: rgba(10, 89, 247, .16) !important; }
+html[data-theme="dark"] .tab.active .ico { color: #9DBDFF; }
+html[data-theme="dark"] .nav-label {
   margin: 14px 10px 6px; font-size: 10.5px; letter-spacing: .14em;
 }
 /* 侧栏顶部：品牌 + 火苗打卡块玻璃化 */
-html[data-theme] .side-brand, html[data-theme] .tabbar-brand { letter-spacing: -.02em; }
-html[data-theme] .side-streak, html[data-theme] .streak-box, html[data-theme] .checkin-box {
+html[data-theme="dark"] .side-brand, html[data-theme="dark"] .tabbar-brand { letter-spacing: -.02em; }
+html[data-theme="dark"] .side-streak, html[data-theme="dark"] .streak-box, html[data-theme="dark"] .checkin-box {
   background: linear-gradient(150deg, rgba(255, 255, 255, .07), rgba(255, 255, 255, .03)) !important;
   border: 1px solid rgba(255, 255, 255, .09) !important;
   border-radius: 14px !important;
 }
-html[data-theme] .side-account { border-top: 1px solid rgba(255, 255, 255, .07); }
+html[data-theme="dark"] .side-account { border-top: 1px solid rgba(255, 255, 255, .07); }
 
 /* ---------- 19. 全局排版：字号与留白 ---------- */
-html[data-theme] .content { padding: 8px 30px 34px !important; gap: 14px; }
-html[data-theme] .content .card,
-html[data-theme] .list-item,
-html[data-theme] .panel { font-size: 13.5px; }
-html[data-theme] .titlebar { padding: 4px 6px 14px; }
-html[data-theme] .titlebar .h-title,
-html[data-theme] .pg-title,
-html[data-theme] .stg-title { font-size: 19px; font-weight: 700; letter-spacing: -.3px; color: #fff; }
-html[data-theme] .titlebar .subtle,
-html[data-theme] .pg-sub { font-size: 12.5px; }
-html[data-theme] .hint, html[data-theme] .set-tip { color: rgba(255, 255, 255, .42); }
+html[data-theme="dark"] .content { padding: 8px 30px 34px !important; gap: 14px; }
+html[data-theme="dark"] .content .card,
+html[data-theme="dark"] .list-item,
+html[data-theme="dark"] .panel { font-size: 13.5px; }
+html[data-theme="dark"] .titlebar { padding: 4px 6px 14px; }
+html[data-theme="dark"] .titlebar .h-title,
+html[data-theme="dark"] .pg-title,
+html[data-theme="dark"] .stg-title { font-size: 19px; font-weight: 700; letter-spacing: -.3px; color: #fff; }
+html[data-theme="dark"] .titlebar .subtle,
+html[data-theme="dark"] .pg-sub { font-size: 12.5px; }
+html[data-theme="dark"] .hint, html[data-theme="dark"] .set-tip { color: rgba(255, 255, 255, .42); }
 
 /* ---------- 20. 滚动条：黑底上清晰但不抢戏 ---------- */
-html[data-theme] *::-webkit-scrollbar { width: 8px; height: 8px; }
-html[data-theme] *::-webkit-scrollbar-thumb {
+html[data-theme="dark"] *::-webkit-scrollbar { width: 8px; height: 8px; }
+html[data-theme="dark"] *::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, .14) !important;
   border-radius: 999px;
   border: 2px solid transparent; background-clip: content-box;
 }
-html[data-theme] *::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, .24) !important; background-clip: content-box; }
-html[data-theme] *::-webkit-scrollbar-track { background: transparent; }
-html[data-theme] * { scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, .16) transparent; }
+html[data-theme="dark"] *::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, .24) !important; background-clip: content-box; }
+html[data-theme="dark"] *::-webkit-scrollbar-track { background: transparent; }
+html[data-theme="dark"] * { scrollbar-width: thin; scrollbar-color: rgba(255, 255, 255, .16) transparent; }
 
 /* ---------- 21. 原生下拉：暗色选项面板 ---------- */
-html[data-theme] select { -webkit-appearance: none; appearance: none; }
-html[data-theme] option,
-html[data-theme] optgroup { background: #16181D; color: rgba(255, 255, 255, .85); }
+html[data-theme="dark"] select { -webkit-appearance: none; appearance: none; }
+html[data-theme="dark"] option,
+html[data-theme="dark"] optgroup { background: #16181D; color: rgba(255, 255, 255, .85); }
 
 /* ---------- 22. 复习页：统计胶囊 + 大卡 ---------- */
-html[data-theme] .rv-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
-html[data-theme] .rv-chip {
+html[data-theme="dark"] .rv-meta { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+html[data-theme="dark"] .rv-chip {
   display: inline-flex; align-items: baseline; gap: 3px;
   padding: 4px 11px; border-radius: 999px;
   font-size: 12px; color: rgba(255, 255, 255, .66);
   background: rgba(255, 255, 255, .06);
   border: 1px solid rgba(255, 255, 255, .07);
 }
-html[data-theme] .rv-chip b { font-size: 13px; font-weight: 700; color: #fff; }
-html[data-theme] .battle-head { padding: 18px 26px 0; }
-html[data-theme] .study-card,
-html[data-theme] .study-area .card {
+html[data-theme="dark"] .rv-chip b { font-size: 13px; font-weight: 700; color: #fff; }
+html[data-theme="dark"] .battle-head { padding: 18px 26px 0; }
+html[data-theme="dark"] .study-card,
+html[data-theme="dark"] .study-area .card {
   border-radius: 24px !important;
   box-shadow: 0 24px 60px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .07);
 }
-html[data-theme] .card-face-front, html[data-theme] .sf-front { letter-spacing: -.5px; }
+html[data-theme="dark"] .card-face-front, html[data-theme="dark"] .sf-front { letter-spacing: -.5px; }
 
 /* ---------- 23. 设置页：搜索框与目录玻璃化 ---------- */
-html[data-theme] .set-search input,
-html[data-theme] .settings-search input {
+html[data-theme="dark"] .set-search input,
+html[data-theme="dark"] .settings-search input {
   background: rgba(255, 255, 255, .05) !important;
   border: 1px solid rgba(255, 255, 255, .09) !important;
   border-radius: 12px !important;
 }
-html[data-theme] .set-cat, html[data-theme] .set-item, html[data-theme] .cat-row {
+html[data-theme="dark"] .set-cat, html[data-theme="dark"] .set-item, html[data-theme="dark"] .cat-row {
   border-radius: 12px;
 }
-html[data-theme] .set-item:hover, html[data-theme] .cat-row:hover {
+html[data-theme="dark"] .set-item:hover, html[data-theme="dark"] .cat-row:hover {
   background: rgba(255, 255, 255, .05);
 }
 
 /* ---------- 24. 空态：图标玻璃圆 + 更大的呼吸感 ---------- */
-html[data-theme] .empty,
-html[data-theme] .shp-blank,
-html[data-theme] .cls-login {
+html[data-theme="dark"] .empty,
+html[data-theme="dark"] .shp-blank,
+html[data-theme="dark"] .cls-login {
   border-radius: 20px !important;
   padding: 40px 26px !important;
 }
-html[data-theme] .empty .e-ico,
-html[data-theme] .cls-login-ico {
+html[data-theme="dark"] .empty .e-ico,
+html[data-theme="dark"] .cls-login-ico {
   background: rgba(255, 255, 255, .055) !important;
   border: 1px solid rgba(255, 255, 255, .08);
 }
 
 /* ---------- 25. 弹窗 / 抽屉：更深的玻璃 ---------- */
-html[data-theme] .modal,
-html[data-theme] .sheet {
+html[data-theme="dark"] .modal,
+html[data-theme="dark"] .sheet {
   background: rgba(24, 26, 32, .78) !important;
   -webkit-backdrop-filter: blur(40px) saturate(170%); backdrop-filter: blur(40px) saturate(170%);
   border: 1px solid rgba(255, 255, 255, .12);
@@ -497,23 +497,23 @@ html[data-theme] .sheet {
 }
 
 /* ---------- 26. 焦点可见性 ---------- */
-html[data-theme] :focus-visible {
+html[data-theme="dark"] :focus-visible {
   outline: 2px solid rgba(122, 163, 255, .6) !important;
   outline-offset: 2px;
 }
 
 /* ---------- 27. 复习卡细节：词库标签胶囊化 ---------- */
-html[data-theme] .flip-card .chip.gray,
-html[data-theme] .chip.gray {
+html[data-theme="dark"] .flip-card .chip.gray,
+html[data-theme="dark"] .chip.gray {
   padding: 3px 10px; border-radius: 999px;
   background: rgba(255, 255, 255, .07) !important;
   border: 1px solid rgba(255, 255, 255, .09) !important;
   color: rgba(255, 255, 255, .55) !important;
   font-size: 11px; letter-spacing: .04em;
 }
-html[data-theme] .flip-hint { color: rgba(255, 255, 255, .28); font-size: 11.5px; }
+html[data-theme="dark"] .flip-hint { color: rgba(255, 255, 255, .28); font-size: 11.5px; }
 
 /* ---------- 28. 工坊左栏加宽，牌组名不截断 ---------- */
 @media (min-width: 1280px) {
-  html[data-theme] .content--studio .studio2 { grid-template-columns: 224px minmax(0, 1fr) 400px !important; }
+  html[data-theme="dark"] .content--studio .studio2 { grid-template-columns: 224px minmax(0, 1fr) 400px !important; }
 }
