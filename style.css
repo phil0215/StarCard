@@ -8093,9 +8093,11 @@ html[data-theme="dark"] .folder-card { background: var(--surface-2); }
 .s2-none { padding: 28px 12px; text-align: center; font-size: 12px; color: var(--ink-4); }
 .sd-empty .btn { margin-top: 6px; }
 
-/* 侧栏收起：整个左栏移除，内容区占满 */
-.tabbar.side-hidden { display: none; }
-#root:has(> .tabbar.side-hidden) { grid-template-columns: 0 minmax(0, 1fr); }
+/* 侧栏收起：桌面版专属（手机版侧栏是 60px 图标导航，永远不隐藏） */
+@media (min-width: 761px) {
+  .tabbar.side-hidden { display: none; }
+  #root:has(> .tabbar.side-hidden) { grid-template-columns: 0 minmax(0, 1fr); }
+}
 
 /* 牌组陈列页（所有牌组 / 文件夹）横跨内容网格整行：手机端 2 列网格不再把牌组挤成细条 */
 .content > .series-group, .content > .deck-item, .content > .section-title,
@@ -8180,9 +8182,10 @@ html[data-theme="dark"] .folder-card { background: var(--surface-2); }
   .studio2-list { max-height: 46vh; min-height: 0; }
 }
 
-/* 手机端：工坊工具条单行收窄，范围下拉占剩余宽度 */
+/* 手机端：工坊工具条单行收窄，范围下拉占剩余宽度；隐藏侧栏钮是桌面版专属 */
 @media (max-width: 760px) {
   .studio-top { padding: 8px 12px 6px; gap: 8px; }
+  .stg-btn { display: none; }
   .stg-scope { flex: 1; min-width: 0; max-width: none; }
   .stg-count { display: none; }
 }
