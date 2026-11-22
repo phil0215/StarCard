@@ -8060,31 +8060,49 @@ html[data-theme="dark"] .folder-card { background: var(--surface-2); }
 .tab.side-deck .lab { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* 工坊顶部小工具条：隐藏侧栏 / 标题 / 范围下拉 / 计数 / 添加牌组 */
-.studio-top { grid-column: 2; display: flex; align-items: center; gap: 10px; padding: 10px 24px 8px; min-width: 0; }
+/* 操作栏 = 悬浮凸台：宽度随内容、居中，圆角 + 底部投影做出「凸起物」的托盘感 */
+.studio-top {
+  grid-column: 2;
+  display: flex; align-items: center; gap: 8px;
+  width: fit-content; max-width: calc(100% - 24px);
+  justify-self: center;
+  margin: 8px auto 0;
+  padding: 4px 10px 4px 6px;
+  min-width: 0;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  box-shadow: 0 4px 12px -6px rgba(0, 0, 0, .25), 0 1px 2px rgba(0, 0, 0, .08);
+}
 .stg-btn {
-  width: 30px; height: 30px; flex: none;
+  width: 26px; height: 26px; flex: none;
   display: flex; align-items: center; justify-content: center;
   border-radius: 8px; border: 1px solid var(--line);
   background: var(--surface); color: var(--ink-3); cursor: pointer;
   transition: background .15s var(--ease), color .15s var(--ease), border-color .15s var(--ease);
 }
 .stg-btn:hover { background: var(--brand-soft); color: var(--brand-strong); border-color: var(--brand-ring); }
-.stg-btn .ic { width: 16px; height: 16px; }
-.stg-title { font-size: 16px; font-weight: 700; color: var(--ink-1); letter-spacing: -.2px; flex: none; }
+.stg-btn .ic { width: 14px; height: 14px; }
+.stg-title { font-size: 14px; font-weight: 700; color: var(--ink-1); letter-spacing: -.2px; flex: none; }
 .stg-scope {
-  max-width: 300px; height: 30px; min-width: 0;
+  max-width: 300px; height: 26px; min-width: 0;
   border-radius: 8px; border: 1px solid var(--line);
   background: var(--surface); color: var(--ink-2);
   font-size: 12.5px; font-family: inherit; padding: 0 8px; outline: none;
   cursor: pointer; transition: border-color .15s var(--ease);
 }
 .stg-scope:focus { border-color: var(--brand-ring); }
-.stg-count { flex: none; font-size: 12px; color: var(--ink-3); font-weight: 550; white-space: nowrap; }
+.stg-count { flex: none; font-size: 11px; color: var(--ink-3); font-weight: 550; white-space: nowrap; }
+/* 操作栏内的按钮同步缩小一档 */
+.studio-top .btn { height: 26px; padding: 0 10px; font-size: 12.5px; }
+.studio-top .btn .ic { width: 13px; height: 13px; }
+.studio-top .stg-add { width: 24px; height: 24px; }
+
 /* 全站操作栏：标题占中间，动作推到最右 */
-.studio-top { padding: 10px 24px 8px; }
+.studio-top { padding: 4px 10px 4px 6px; }
 .studio-top .stg-main { display: flex; align-items: baseline; gap: 8px; min-width: 0; flex: 1; }
 .stg-main .stg-title { flex: none; }
-.stg-sub { font-size: 12px; color: var(--ink-4); font-weight: 450; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stg-sub { font-size: 11.5px; color: var(--ink-4); font-weight: 450; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .studio-top .tb-actions { margin-left: auto; flex: none; }
 .studio-top .stg-count { margin-left: auto; }
 .studio-top .tb-actions ~ .stg-count, .studio-top .stg-count ~ .tb-actions { margin-left: 0; }
@@ -8187,7 +8205,7 @@ html[data-theme="dark"] .folder-card { background: var(--surface-2); }
 
 /* 宽屏：双栏吃满首屏高度（左列表内部滚动，右详情独立滚动），页面不留大片空白 */
 @media (min-width: 901px) {
-  .studio2 { height: calc(100vh - 88px); min-height: 460px; }
+  .studio2 { height: calc(100vh - 76px); min-height: 460px; }
   .studio2-list { max-height: none; height: 100%; }
   .studio2-detail { position: static; height: 100%; overflow-y: auto; display: flex; flex-direction: column; }
   .studio2-detail .sd-empty { flex: 1; justify-content: center; margin: 0; }
@@ -8201,7 +8219,7 @@ html[data-theme="dark"] .folder-card { background: var(--surface-2); }
 
 /* 手机端：工坊工具条单行收窄，范围下拉占剩余宽度；隐藏侧栏钮是桌面版专属 */
 @media (max-width: 760px) {
-  .studio-top { padding: 8px 12px 6px; gap: 8px; }
+  .studio-top { margin: 6px auto 0; padding: 3px 8px 3px 6px; gap: 6px; max-width: calc(100% - 16px); }
   .stg-btn { display: none; }
   .stg-sub { display: none; }
   .studio-top .stg-title { font-size: 15px; }
