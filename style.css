@@ -8270,3 +8270,47 @@ html[data-look="plain"] .side-account .sa-badge { background: #FF3B30 !important
 @media (max-width: 860px) {
   .side-account .sa-bell, .side-account .sa-dots { width: 26px; height: 26px; }
 }
+
+
+/* ============================================================
+   工坊 · 旗标（Anki 同款 7 色 + Shift 快捷键）
+   ============================================================ */
+.stg-fflags {
+  display: flex; align-items: center; gap: 6px;
+  flex-wrap: wrap;
+  padding: 8px 12px 6px;
+  border-bottom: 1px solid var(--line);
+}
+.ff-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  height: 24px; padding: 0 9px;
+  border: 1px solid var(--line-2); border-radius: 999px;
+  background: transparent; color: var(--ink-3);
+  font: inherit; font-size: 11px; font-weight: 550;
+  cursor: pointer; white-space: nowrap;
+}
+.ff-chip:hover { background: var(--surface-2); color: var(--ink-1); }
+.ff-chip.on { background: var(--brand-soft); border-color: var(--brand-ring); color: var(--brand-strong); }
+.ff-chip .flag-dot { margin: 0; }
+.ff-hint { margin-left: auto; font-size: 10px; color: var(--ink-4); white-space: nowrap; }
+
+.s2-row .flag-dot { margin-right: 7px; }
+
+.sd-flagrow {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 16px 2px;
+  flex-wrap: wrap;
+}
+.sd-flaglab { font-size: 11px; color: var(--ink-4); font-weight: 550; margin-right: 2px; }
+.sd-flag {
+  min-width: 30px; height: 28px; padding: 0 8px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--line-2); border-radius: 8px;
+  background: transparent; cursor: pointer;
+}
+.sd-flag:hover { background: var(--surface-2); }
+.sd-flag.on { border-color: var(--brand-ring); background: var(--brand-soft); }
+.sd-flag .flag-dot.big { width: 14px; height: 14px; }
+@media (max-width: 860px) {
+  .ff-hint { display: none; }
+}

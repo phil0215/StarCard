@@ -1013,9 +1013,15 @@
     const types = (FC.NOTETYPES || [{ id: 'basic', name: '问答' }, { id: 'cloze', name: '填空' }]);
     let typeOpts = '';
     for (let i = 0; i < types.length; i++) typeOpts += '<option value="' + esc(types[i].id) + '"' + (types[i].id === type ? ' selected' : '') + '>' + esc(types[i].name || types[i].id) + '</option>';
+    let flagRow = '<div class="sd-flagrow"><span class="sd-flaglab">旗标</span>';
+    for (let fi = 0; fi <= 7; fi++) {
+      flagRow += '<button class="sd-flag' + ((c.flags & 7) === fi ? ' on' : '') + '" data-act="studio-flag" data-flag="' + fi + '" title="' + (fi ? ('Shift+' + fi) : 'Shift+0') + '">' +
+        (fi ? '<span class="flag-dot big" style="background:' + FC.FLAG_COLORS[fi] + '"></span>' : '<span class="flag-none">无</span>') + '</button>';
+    }
+    flagRow += '</div>';
     return '<div class="sd-head"><span class="sd-deck-chip">' + icon('layers', 'i14') + esc(r.deck.name) + '</span>' +
       '<button class="btn btn-sm btn-more" data-act="deck-menu" data-id="' + esc(r.deck.id) + '" title="牌组选项">' + icon('more', 'i16') + '</button></div>' +
-      '<div class="sd-form">' +
+      flagRow + '<div class="sd-form">' +
       '<label class="sd-label">模板</label><select id="sdType" class="sd-input">' + typeOpts + '</select>' +
       '<label class="sd-label">正面</label><textarea id="sdFront" class="sd-input sd-ta" data-min="2" rows="' + taRows(f.Front, 2) + '">' + esc(f.Front || '') + '</textarea>' +
       '<label class="sd-label">背面</label><textarea id="sdBack" class="sd-input sd-ta" data-min="3" rows="' + taRows(f.Back, 3) + '">' + esc(f.Back || '') + '</textarea>' +
@@ -1030,7 +1036,7 @@
 
   function wordBookPage(app) {
     const st = app.state;
-    if (!app.studio) app.studio = { q: '', sel: '', scope: '' };
+    if (!app.studio) app.studio = { q: '', sel: '', scope: '', fflag: 0 };
     if (app.studio.scope === undefined) app.studio.scope = '';
     // —— 范围（全部 / 某个牌组）与计数 ——
     const scope = app.studio.scope;
@@ -1086,6 +1092,11 @@
       const d = srcDecks[i];
       for (let j = 0; j < d.cards.length; j++) rows.push({ deck: d, card: d.cards[j] });
     }
+    // —— 旗标筛选（Shift+1~7 打标，0 清除；筛选条按色过滤）——
+    const fflag = app.studio.fflag || 0;
+    const flagCounts = [0, 0, 0, 0, 0, 0, 0, 0];
+    for (let i = 0; i < rows.length; i++) flagCounts[rows[i].card.flags & 7] += 1;
+    const visRows = fflag ? rows.filter(function (r) { return (r.card.flags & 7) === fflag; }) : rows;
 
     if (!totalAll) { // 整个词库都没卡才显示引导；范围内空牌组仍进双栏，方便直接加卡
       html += '<div class="card wide wb-welcome">' +
@@ -1102,7 +1113,17 @@
     } else {
       // —— Anki Browser 式双栏：左列卡片行（DOM 过滤，不重渲染保输入法），右列内联详情 ——
       const LIMIT = 300;
-      const shown = rows.slice(0, LIMIT);
+      const shown = visRows.slice(0, LIMIT);
+      let ffBar = '<div class="stg-fflags">';
+      ffBar += '<button class="ff-chip' + (!fflag ? ' on' : '') + '" data-act="studio-fflag" data-flag="0">全部 ' + rows.length + '</button>';
+      const FF_NAMES = ['红', '橙', '绿', '蓝', '靛', '天蓝', '粉'];
+      for (let fi = 1; fi <= 7; fi++) {
+        ffBar += '<button class="ff-chip' + (fflag === fi ? ' on' : '') + '" data-act="studio-fflag" data-flag="' + fi + '" title="Shift+' + fi + '">' +
+          '<span class="flag-dot" style="background:' + FC.FLAG_COLORS[fi] + '"></span>' + FF_NAMES[fi - 1] +
+          ' ' + flagCounts[fi] + '</button>';
+      }
+      ffBar += '<span class="ff-hint">选中卡片后按 Shift+1~7 打标，Shift+0 清除</span></div>';
+      html += ffBar;
       const sel = app.studio.sel;
       html += '<div class="studio2">' +
         '<div class="studio2-list">' +
@@ -1115,11 +1136,12 @@
         const d = shown[i].deck, c = shown[i].card;
         const front = cardFrontText(c), back = cardBackText(c);
         const key = esc((front + ' ' + back + ' ' + d.name).toLowerCase()).replace(/"/g, '&quot;');
+        const fdot = (c.flags & 7) ? '<span class="flag-dot" style="background:' + FC.FLAG_COLORS[c.flags & 7] + '"></span>' : '';
         html += '<div class="s2-row' + (sel === c.id ? ' active' : '') + '" data-act="studio-row" data-id="' + esc(c.id) + '" data-key="' + key + '">' +
-          '<div class="s2-front">' + (esc(front) || '<i class="s2-blank">（空白）</i>') + '</div>' +
+          '<div class="s2-front">' + fdot + (esc(front) || '<i class="s2-blank">（空白）</i>') + '</div>' +
           '<div class="s2-sub"><span class="s2-deck">' + esc(d.name) + '</span>' + esc(String(back).slice(0, 48)) + '</div></div>';
       }
-      if (!rows.length) html += '<div class="s2-none">这个牌组还没有卡片，点右上 ＋ 添加。</div>';
+      if (!visRows.length) html += '<div class="s2-none">' + (fflag ? '没有带这个旗标的卡片。选中卡片按 Shift+1~7 打标。' : '这个牌组还没有卡片，点右上 ＋ 添加。') + '</div>';
       html += '</div>';
       const moreTxt = rows.length > LIMIT ? ('共 ' + rows.length + ' 张，列表只显示前 ' + LIMIT + ' 张，用上面的搜索定位更多。') : ('共 ' + rows.length + ' 张卡片');
       html += '<div class="s2-more" data-total="' + rows.length + '" data-orig="' + esc(moreTxt).replace(/"/g, '&quot;') + '">' + moreTxt + '</div>';
@@ -3321,7 +3343,9 @@
         '<div class="shortcut-group"><div class="shortcut-gt">全局</div>' +
           kr(k('?'), '打开本快捷键面板') +
           kr(k('B'), '打开卡片浏览器') +
-          kr(k('Ctrl') + ' + ' + k('Z'), '撤销上一步') +
+          kr(k('Shift') + ' + ' + k('1') + '~' + k('7'), '工坊：给选中卡片打旗标（7 色）') +
+          kr(k('Shift') + ' + ' + k('0'), '工坊：清除选中卡片的旗标') +
+kr(k('Ctrl') + ' + ' + k('Z'), '撤销上一步') +
           kr(k('Esc'), '退出学习 / 关闭弹窗') +
         '</div>' +
         '<div class="dialog-actions"><button class="btn btn-primary" data-act="modal-ok">知道了</button></div>';

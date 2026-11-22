@@ -3191,6 +3191,21 @@
         break;
       }
       // —— 工坊（Anki Browser 式）：左列点行 → 右侧内联编辑；保存走 rebuildNote ——
+      case 'studio-fflag': {
+        if (!App.studio) App.studio = { q: '', sel: '', fflag: 0 };
+        App.studio.fflag = parseInt(d.flag, 10) || 0;
+        App.render();
+        break;
+      }
+      case 'studio-flag': {
+        const fnum = parseInt(d.flag, 10) || 0;
+        if (App.studio && App.studio.sel) {
+          const rr = App.findCard(App.studio.sel);
+          if (rr) { App.pushUndo('标记卡片'); rr.card.flags = fnum; App.save(); App.toast(fnum ? ('已打上旗标 ' + fnum) : '已清除旗标'); }
+        }
+        App.render();
+        break;
+      }
       case 'studio-row':
         if (!App.studio) App.studio = { q: '', sel: '' };
         App.studio.sel = d.id;
@@ -3779,6 +3794,19 @@
       return;
     }
     // 命令面板与小星输入已移除，键盘事件不再拦截
+    // 工坊：Shift+1~7 给选中卡片打旗标，Shift+0 清除（Anki Browser 同款，输入框内不拦截）
+    if (e.shiftKey && !e.metaKey && !e.ctrlKey && !e.altKey && App.tab === 1 && !App.study && App.studio && App.studio.sel) {
+      const m = /^Digit([0-9])$/.exec(e.code || '');
+      if (m) {
+        const fv = parseInt(m[1], 10);
+        if (fv <= 7) {
+          e.preventDefault();
+          const rr = App.findCard(App.studio.sel);
+          if (rr) { App.pushUndo('标记卡片'); rr.card.flags = fv; App.save(); App.toast(fv ? ('已打上旗标 ' + fv) : '已清除旗标'); App.render(); }
+          return;
+        }
+      }
+    }
     if (e.metaKey || e.ctrlKey || e.altKey) return;
     if (typing) return;
 
