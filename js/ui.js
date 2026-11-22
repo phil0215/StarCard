@@ -267,13 +267,18 @@
         children.push(pe);
       }
     }
+    const bellKids = [iconEl('bell', 'i18')];
+    if (unread > 0) bellKids.push(new A.El('span', String(unread)).cls('sa-badge'));
     children.push(new A.El('div').cls('side-account' + (on ? ' on' : '')).attr('act', 'account-menu').title('账户菜单').children([
       avatarEl(acc, 'ava-sm'),
       new A.El('span').cls('sa-txt').children([
         new A.El('span', on ? name : '匿名用户').cls('sa-name'),
         new A.El('span', on ? '打开账户菜单' : '点击登录').cls('sa-sub')
       ]),
-      new A.El('span').cls('chev').child(iconEl('chevronRight', 'i14'))
+      new A.El('button').cls('sa-bell').attr('act', 'notice-open').title('通知')
+        .attr('aria-label', '通知').children(bellKids),
+      new A.El('button').cls('sa-dots').attr('act', 'account-menu').title('账户菜单')
+        .attr('aria-label', '更多').children([iconEl('more', 'i18')])
     ]));
     return new A.El('nav').cls('tabbar').children(children);
   }
@@ -380,9 +385,8 @@
     { kind: 'tab', tab: 8, label: '社区', ico: 'chat', group: '一起学' },
     { kind: 'tab', tab: 4, label: '比赛', ico: 'zap', group: '一起学' },
     { kind: 'tab', tab: 7, label: '商铺', ico: 'grid', group: '工具' },
-    { kind: 'tab', tab: 5, label: '数据', ico: 'chart', group: '工具' },
-    { kind: 'page', act: 'notice-open', label: '通知', ico: 'bell', group: '工具', badge: true }
-    // 「设置」已移入左下角头像弹出的账户菜单（见 accountMenuLayer）
+    { kind: 'tab', tab: 5, label: '数据', ico: 'chart', group: '工具' }
+    // 「通知」移到左下角账户行的铃铛；「设置」在头像弹出的账户菜单
   ];
 
   function logo() {
@@ -478,7 +482,9 @@
       avatarFace(acc, 'ava-sm') +
       '<span class="sa-txt"><span class="sa-name">' + esc(on ? name : '匿名用户') + '</span>' +
       '<span class="sa-sub">' + (on ? '打开账户菜单' : '点击登录') + '</span></span>' +
-      '<span class="chev">' + icon('chevronRight', 'i14') + '</span>' +
+      '<button class="sa-bell" data-act="notice-open" title="通知" aria-label="通知">' + icon('bell', 'i18') +
+      (unread > 0 ? '<span class="sa-badge">' + unread + '</span>' : '') + '</button>' +
+      '<button class="sa-dots" data-act="account-menu" title="账户菜单" aria-label="更多">' + icon('more', 'i18') + '</button>' +
       '</div>' +
       '</nav>';
     return html;
