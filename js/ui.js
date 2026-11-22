@@ -1122,7 +1122,7 @@
     }
     html += '<span class="stg-count">' + (scopeDeck ? scopeDeck.cards.length : totalAll) + ' 张卡片</span>' +
       '<button class="btn btn-sm btn-primary" data-act="study-all" title="开始复习今天到期的卡片">' +
-        icon('play', 'i14') + '今日 ' + (function () { const t = todayStat(app); return (t.due > 0 ? t.due + ' 张到期' : (t.fresh > 0 ? '开始学习' : '去复习')); })() + '</button>' +
+        icon('play', 'i14') + (function () { const t = todayStat(app); return (t.due > 0 ? '今日 ' + t.due + ' 张到期' : (t.fresh > 0 ? '开始学习' : '去复习')); })() + '</button>' +
       '<button class="btn btn-sm" data-act="new-deck">' + icon('plus', 'i14') + '添加牌组</button>' +
       '</header><div class="content content--studio">';
 
