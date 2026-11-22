@@ -223,7 +223,7 @@
     if (app) {
       if (app.noticePageOpen || app.backupPageOpen) pageActive = 'notice-open';
     }
-    const tabActive = pageActive ? -999 : active;
+    const tabActive = (pageActive || (app && app.folderId)) ? -999 : active;
     const name = (app && app.accountDisplayName) ? app.accountDisplayName() : (acc.nickname || '学习者');
     const children = [];
     const sd = streakStat(app);
@@ -428,7 +428,7 @@
     if (app) {
       if (app.noticePageOpen || app.backupPageOpen) pageActive = 'notice-open';
     }
-    const tabActive = pageActive ? -999 : active;
+    const tabActive = (pageActive || (app && app.folderId)) ? -999 : active;
     const name = (app && app.accountDisplayName) ? app.accountDisplayName() : (acc.nickname || '学习者');
     let html = '<nav class="tabbar' + (app && app.sideHide ? ' side-hidden' : '') + '">' + streakMiniHtml(app);
     const unread = noticeUnread(app);
