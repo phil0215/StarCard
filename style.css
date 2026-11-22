@@ -8465,3 +8465,185 @@ html[data-look="plain"] .side-account .sa-badge { background: #FF3B30 !important
 @media (max-width: 760px) {
   .side-account .sa-txt { display: none; }
 }
+
+/* ============================================================
+   2026-11-22 · 设置页账户区「去灰块」：WorkBuddy 式白卡 + 细描边 + 行式表单
+   问题：浅色 plain 外观下 .set-card 统一铺 #F6F6F7，登录区变成一整块灰板，
+        里面还套着灰底的 tab 轨道，灰叠灰、看不出分组边界。
+   改法：① 分区改白卡 + 1px 描边，灰底取消；② tab 收成贴合内容的胶囊；
+        ③ 登录表单从居中竖排改为「左标签 / 右控件」的行式，和昵称、手机尾号同一语言。
+   ============================================================ */
+
+/* —— ① 分区：白卡 + 细描边，取消灰底 —— */
+html[data-theme="light"][data-look="plain"] .set-main .set-card,
+html[data-theme="light"][data-look="plain"] .set-main .set-card.set-nav {
+  background: #FFFFFF !important;
+  border: 1px solid #E5E8F0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(23, 31, 61, .05) !important;
+}
+/* 含 set-block 的卡片本身不画底，由每个 block 自己成卡（白底 + 描边） */
+html[data-theme="light"][data-look="plain"] .set-main .set-block {
+  background: #FFFFFF !important;
+  border: 1px solid #E5E8F0 !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px rgba(23, 31, 61, .05) !important;
+  padding: 14px 16px !important;
+  margin-bottom: 12px !important;
+}
+html[data-theme="dark"][data-look="plain"] .set-main .set-block {
+  border: 1px solid rgba(255, 255, 255, .06) !important;
+}
+html[data-look="plain"] .set-pane > .set-card { margin-bottom: 13px !important; }
+html[data-look="plain"] .set-pane > .set-card:last-of-type { margin-bottom: 4px !important; }
+html[data-look="plain"] .set-main .set-block:last-child { margin-bottom: 12px !important; }
+
+/* —— ② 登录方式切换：贴合内容的小胶囊，不要横跨整行的灰轨道 —— */
+html[data-look="plain"] .set-login .lg-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+html[data-look="plain"] .set-login .lg-top .set-block-h { margin-bottom: 0; }
+html[data-look="plain"] .set-login .login-tabs {
+  display: inline-flex;
+  flex: none;
+  width: auto;
+  gap: 2px;
+  padding: 3px;
+  margin: 0;
+  border-radius: 10px;
+  background: #EFF1F5;
+  border: 1px solid #E7EAF1;
+}
+html[data-look="plain"] .set-login .login-tab {
+  flex: 0 0 auto;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+  gap: 5px;
+}
+html[data-theme="light"][data-look="plain"] .set-login .login-tab { color: var(--ink-3); }
+html[data-theme="light"][data-look="plain"] .set-login .login-tab.on {
+  background: #FFFFFF;
+  color: var(--brand);
+  box-shadow: 0 1px 2px rgba(20, 25, 40, .12), 0 0 0 1px rgba(255, 255, 255, .9);
+}
+
+/* —— ③ 登录表单：左标签 / 右控件，和设置页其它行同一套节奏 —— */
+html[data-look="plain"] .set-login .login-form { max-width: none; margin: 0; }
+html[data-look="plain"] .set-login .login-form .field {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin: 0;
+  padding: 11px 0;
+  border-top: 1px solid #EFF1F6;
+}
+html[data-look="plain"] .set-login .login-form .field > label {
+  flex: none;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink-2);
+  letter-spacing: 0;
+}
+html[data-look="plain"] .set-login .login-form .field > input {
+  flex: 0 1 380px;
+  width: 380px;
+  max-width: 62%;
+  height: 38px;
+  font-size: 13.5px;
+}
+html[data-look="plain"] .set-login .login-form .otp-row {
+  flex: 0 1 380px;
+  width: 380px;
+  max-width: 62%;
+}
+html[data-look="plain"] .set-login .login-form .otp-row > input { height: 38px; }
+html[data-look="plain"] .set-login .login-form .otp-row > .btn {
+  min-width: 96px;
+  height: 38px;
+  border-radius: 9px;
+  font-size: 12.5px;
+}
+html[data-look="plain"] .set-login .login-msg { margin: 10px 0 0; }
+html[data-look="plain"] .set-login .lg-actbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 14px;
+  padding-top: 13px;
+  border-top: 1px solid #EFF1F6;
+}
+html[data-look="plain"] .set-login .lg-actbar .agree {
+  margin: 0;
+  font-size: 12px;
+}
+html[data-look="plain"] .set-login .lg-actbar .btn-block {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 200px;
+  min-width: 0;
+  height: 40px;
+  margin: 0;
+  border-radius: 10px;
+  font-size: 13.5px;
+}
+
+/* 深色下同一套结构，只换颜色 */
+[data-theme="dark"][data-look="plain"] .set-login .login-tabs {
+  background: rgba(255, 255, 255, .05);
+  border-color: rgba(255, 255, 255, .08);
+}
+[data-theme="dark"][data-look="plain"] .set-login .login-tab.on {
+  background: rgba(255, 255, 255, .10);
+  color: var(--brand);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .10);
+}
+[data-theme="dark"][data-look="plain"] .set-login .login-form .field,
+[data-theme="dark"][data-look="plain"] .set-login .lg-actbar { border-top-color: rgba(255, 255, 255, .07); }
+
+@media (max-width: 700px) {
+  html[data-look="plain"] .set-login .lg-top { flex-wrap: wrap; }
+  html[data-look="plain"] .set-login .login-form .field {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    padding: 10px 0;
+  }
+  html[data-look="plain"] .set-login .login-form .field > input { flex: 0 0 auto; width: 100%; max-width: none; }
+  html[data-look="plain"] .set-login .login-form .otp-row {
+    flex: 0 0 auto;
+    flex-direction: row;
+    width: 100%;
+    max-width: none;
+  }
+  html[data-look="plain"] .set-login .login-form .otp-row > input { flex: 1 1 auto; width: auto; }
+  html[data-look="plain"] .set-login .login-form .otp-row > .btn { flex: 0 0 auto; width: auto; min-width: 92px; }
+  html[data-look="plain"] .set-login .lg-actbar { flex-wrap: wrap; gap: 10px; }
+  html[data-look="plain"] .set-login .lg-actbar .agree { margin: 0; }
+  html[data-look="plain"] .set-login .lg-actbar .btn-block { width: 100%; margin: 0; }
+}
+
+/* —— 浅色下把设置窗口的底改为浅灰，白卡才真正"浮"起来（WorkBuddy 的层叠关系） —— */
+html[data-theme="light"][data-look="plain"] .set-content {
+  background: #F7F8FA !important;
+}
+html[data-theme="light"][data-look="plain"] .ss-item.on {
+  background: #FFFFFF !important;
+  box-shadow: 0 1px 2px rgba(23, 31, 61, .06);
+}
+html[data-theme="light"][data-look="plain"] .ss-item:hover { background: rgba(255, 255, 255, .7); }
+html[data-theme="light"][data-look="plain"] .ss-search input { background: #FFFFFF; }
+html[data-theme="light"][data-look="plain"] .set-main .set-card,
+html[data-theme="light"][data-look="plain"] .set-main .set-block {
+  border-color: #E8EBF2 !important;
+  box-shadow: 0 1px 2px rgba(23, 31, 61, .035) !important;
+}

@@ -2575,12 +2575,14 @@
         const busy = !!app._otpBusy;
         const canSend = !busy && cnt <= 0;
         return '<div class="set-card set-login"><div class="set-block">' +
+          '<div class="lg-top">' +
           '<div class="set-block-h">登录 / 注册</div>' +
-          '<div class="set-block-sub">用邮箱或手机收验证码。昵称、头像、牌组与学习记录都只留本机。</div>' +
           '<div class="login-tabs">' +
           '<button class="login-tab' + (isPhone ? '' : ' on') + '" data-act="login-tab" data-mode="email">' + icon('mail', 'i15') + '邮箱</button>' +
           '<button class="login-tab' + (isPhone ? ' on' : '') + '" data-act="login-tab" data-mode="phone">' + icon('phone', 'i15') + '手机号</button>' +
           '</div>' +
+          '</div>' +
+          '<div class="set-block-sub">用邮箱或手机收验证码。昵称、头像、牌组与学习记录都只留本机。</div>' +
           '<div class="login-form">' +
           (isPhone
             ? '<div class="field"><label>手机号</label><input id="loginPhone" type="tel" inputmode="numeric" maxlength="11" value="' + esc(dv('phone', a.phone)) + '" placeholder="11 位手机号" autocomplete="tel" /></div>'
@@ -2593,9 +2595,11 @@
             ? '<div class="field"><label>设置密码（新用户）</label><input id="loginPassword" type="password" value="' + esc(dv('password')) + '" placeholder="至少 6 位" autocomplete="new-password" /></div>'
             : '') +
           '<div class="login-msg' + (msg.text ? ' login-msg-' + (msg.kind || 'err') : '') + '" id="loginMsg">' + esc(msg.text || '') + '</div>' +
+          '<div class="lg-actbar">' +
           '<label class="agree"><input type="checkbox" id="loginAgree"' + (draft.agree ? ' checked' : '') + ' />' +
           '<span>我已阅读并同意 <button class="link-btn" data-act="privacy-info">隐私说明</button></span></label>' +
           '<button class="btn btn-primary btn-block" data-act="login-submit">' + icon('lock', 'i16') + '登录 / 注册</button>' +
+          '</div>' +
           '</div></div></div>';
       })();
 
