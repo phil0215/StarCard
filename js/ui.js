@@ -1060,7 +1060,7 @@
     }
     html += '<span class="stg-count">' + (scopeDeck ? scopeDeck.cards.length : totalAll) + ' 张卡片</span>' +
       '<button class="btn btn-sm btn-primary" data-act="new-deck">' + icon('plus', 'i14') + '添加牌组</button>' +
-      '</header>' + '<div class="content">';
+      '</header>' + '<div class="content content--studio">';
 
     // —— 已移除的词书：默认折叠，可恢复重新显示（避免误删后无处找回）——
     const removedList = typeof FC.removedSeries === 'function' ? FC.removedSeries(st) : [];
@@ -1112,18 +1112,19 @@
       // —— Anki Browser 式双栏：左列卡片行（DOM 过滤，不重渲染保输入法），右列内联详情 ——
       const LIMIT = 300;
       const shown = visRows.slice(0, LIMIT);
-      let ffBar = '<div class="stg-fflags">';
-      ffBar += '<button class="ff-chip' + (!fflag ? ' on' : '') + '" data-act="studio-fflag" data-flag="0">全部 ' + rows.length + '</button>';
       const FF_NAMES = ['红', '橙', '绿', '蓝', '靛', '天蓝', '粉'];
+      let sideHtml = '<aside class="stg-side">' +
+        '<button class="stg-side-item' + (!fflag ? ' on' : '') + '" data-act="studio-fflag" data-flag="0">' +
+        icon('layers', 'i14') + '<span class="stg-side-txt">我的卡片</span><span class="ff-n">' + rows.length + '</span></button>' +
+        '<div class="stg-side-lab">旗标</div>';
       for (let fi = 1; fi <= 7; fi++) {
-        ffBar += '<button class="ff-chip' + (fflag === fi ? ' on' : '') + '" data-act="studio-fflag" data-flag="' + fi + '" title="Shift+' + fi + '">' +
-          '<span class="flag-dot" style="background:' + FC.FLAG_COLORS[fi] + '"></span>' + FF_NAMES[fi - 1] +
-          ' ' + flagCounts[fi] + '</button>';
+        sideHtml += '<button class="stg-side-item' + (fflag === fi ? ' on' : '') + '" data-act="studio-fflag" data-flag="' + fi + '" title="Shift+' + fi + '">' +
+          '<span class="flag-dot" style="background:' + FC.FLAG_COLORS[fi] + '"></span><span class="stg-side-txt">' + FF_NAMES[fi - 1] +
+          '</span><span class="ff-n">' + flagCounts[fi] + '</span></button>';
       }
-      ffBar += '<span class="ff-hint">选中卡片后按 Shift+1~7 打标，Shift+0 清除</span></div>';
-      html += ffBar;
+      sideHtml += '<div class="stg-side-hint">Shift+1~7 打标<br/>Shift+0 清除</div></aside>';
       const sel = app.studio.sel;
-      html += '<div class="studio2">' +
+      html += '<div class="studio2">' + sideHtml +
         '<div class="studio2-list">' +
         '<div class="studio2-search">' + icon('search', 'i16') +
         '<input id="sdQuery" type="text" placeholder="搜索正面 / 背面 / 牌组" value="' + esc(app.studio.q || '') + '" autocomplete="off" />' +

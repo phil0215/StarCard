@@ -8332,3 +8332,68 @@ html[data-look="plain"] .side-account .sa-badge { background: #FF3B30 !important
 .side-account .sa-sub { display: none !important; }
 .side-account .sa-ava { width: 26px; height: 26px; font-size: 12px; }
 .side-account .sa-bell, .side-account .sa-dots { width: 28px; height: 28px; }
+
+/* ============================================================
+   工坊 · 满屏框架化（框架不超屏幕，内部各自滚动）
+   三列：旗标侧栏（我的卡片 + 7 色）｜卡片列表｜编辑详情
+   ============================================================ */
+.content--studio {
+  display: flex; flex-direction: column;
+  padding-bottom: 14px;
+}
+.content--studio .studio2 {
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  margin: 8px 0 0;
+  grid-template-columns: 184px minmax(0, 1fr) 400px;
+}
+/* 旗标侧栏 */
+.stg-side {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  overflow-y: auto;
+  padding: 6px;
+  display: flex; flex-direction: column; gap: 2px;
+  min-height: 0;
+}
+.stg-side-item {
+  display: flex; align-items: center; gap: 8px;
+  height: 30px; padding: 0 8px;
+  border: 0; border-radius: 8px;
+  background: transparent; color: var(--ink-2);
+  font: inherit; font-size: 12.5px; font-weight: 550;
+  text-align: left; cursor: pointer; flex: none;
+}
+.stg-side-item:hover { background: var(--surface-2); color: var(--ink-1); }
+.stg-side-item.on { background: var(--brand-soft); color: var(--brand-strong); }
+.stg-side-item.on .ff-n { color: var(--brand-strong); }
+.stg-side-item .flag-dot { margin: 0; flex: none; }
+.stg-side-item > .ic { width: 14px; height: 14px; flex: none; }
+.stg-side-txt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ff-n { flex: none; font-size: 10.5px; color: var(--ink-4); font-weight: 550; }
+.stg-side-lab { margin: 8px 8px 2px; font-size: 10.5px; font-weight: 550; letter-spacing: .3px; color: var(--ink-4); flex: none; }
+.stg-side-hint { margin-top: auto; padding: 8px 8px 4px; font-size: 10px; line-height: 1.6; color: var(--ink-4); }
+
+/* 满屏高度统一接管：原有固定高规则让位 */
+@media (min-width: 901px) {
+  .content--studio .studio2 { height: auto; min-height: 320px; }
+  .content--studio .studio2-list { max-height: none; height: 100%; min-height: 0; }
+  .content--studio .studio2-detail { height: 100%; }
+}
+@media (max-width: 1240px) {
+  .content--studio .studio2 { grid-template-columns: 168px minmax(0, 1fr) 340px; }
+}
+/* 窄屏：三列收成单列，旗标侧栏横排在列表上方 */
+@media (max-width: 900px) {
+  .content--studio .studio2 { grid-template-columns: minmax(0, 1fr); }
+  .stg-side {
+    flex-direction: row; flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden;
+    align-items: center; padding: 6px;
+  }
+  .stg-side-item { height: 26px; padding: 0 8px; flex: none; }
+  .stg-side-lab, .stg-side-hint { display: none; }
+  .content--studio .studio2-list { max-height: none; height: auto; flex: 1; }
+}
+.content--studio .studio2 { align-items: stretch; }
