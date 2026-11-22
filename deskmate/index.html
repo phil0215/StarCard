@@ -1,1 +1,63 @@
-219d48982e73208c223a1a626cb28c03ad6fe6f4
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#FFFFFF" />
+  <meta name="description" content="找一位同桌，互相监督打卡" />
+  <meta name="author" content="小李工作室 XiaoLi Studio" />
+  <script>/* 资源 503 自愈（不依赖任何外部文件）：脚本/样式加载失败时整页重拉一次，sessionStorage 防循环 */
+  window.addEventListener('error', function (e) {
+    var t = e && e.target;
+    var bad = t && (t.tagName === 'SCRIPT' || (t.tagName === 'LINK' && /stylesheet/i.test(t.rel || '')));
+    if (!bad) return;
+    /* 只对本站资源整页重载：外链脚本（登录 SDK 的 CDN）失败时重载会把用户填的表单冲掉 */
+    var badSrc = t.src || t.href || '';
+    try { if (!badSrc || new URL(badSrc, location.href).origin !== location.origin) return; } catch (x) { return; }
+    try {
+      if (sessionStorage.getItem('sc_brt')) return;
+      sessionStorage.setItem('sc_brt', '1');
+      var u = new URL(location.href); u.searchParams.set('r', '1');
+      location.replace(u.toString());
+    } catch (x) {}
+  }, true);</script>
+  <link rel="icon" type="image/png" sizes="32x32" href="../favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="../favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../apple-touch-icon.png" />
+  <title>同桌 · 闪星卡 StarCard</title>
+  <link rel="stylesheet" href="../style.css?v=20261126a" />
+</head>
+<body>
+  <div id="boot" style="position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:#FFFFFF;color:#6B6B73;font:14px/1.6 -apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;">
+    <div style="text-align:center">
+      <div style="font-size:22px;font-weight:700;color:#141416;letter-spacing:-.5px">闪星卡</div>
+      <div style="margin-top:6px">正在加载同桌…</div>
+      <div id="bootErr" style="display:none;margin-top:14px;max-width:300px;font-size:12px;line-height:1.6;color:#F2557C;word-break:break-all"></div>
+    </div>
+  </div>
+  <div id="app"></div>
+
+  <!-- 隐藏的文件选择器：导入 .srcd（兼容旧 .fscd）/ Anki .apkg -->
+  <input type="file" id="srcdFile" accept=".srcd,.fscd,.json,application/json" style="display:none" />
+  <input type="file" id="apkgFile" accept=".apkg,.colpkg,.zip" style="display:none" />
+  <script>window.SC_PAGE = 'deskmate';</script>
+  <script src="../js/boot-guard.js?v=20261126a"></script>
+  <script src="../js/core.js?v=20261126a"></script>
+  <script src="../js/arkui.js?v=20261126a"></script>
+  <script src="../js/cloud-config.js?v=20261126a"></script>
+  <script src="../cloudsync-config.js?v=20261126a"></script>
+  <script src="../js/cloud-auth.js?v=20261126a"></script>
+  <script src="../js/series.js?v=20261126a"></script>
+  <script src="../js/zip.js?v=20261126a"></script>
+  <script src="../js/sqlite.js?v=20261126a"></script>
+  <script src="../js/apkg.js?v=20261126a"></script>
+  <script src="../js/anki.js?v=20261126a"></script>
+  <script src="../js/ai.js?v=20261126a"></script>
+  <script src="../js/ui.js?v=20261126a"></script>
+  <script src="../js/anki-ui.js?v=20261126a"></script>
+  <script src="../js/classroom.js?v=20261126a"></script>
+  <script src="../js/shop.js?v=20261126a"></script>
+  <script src="../js/app.js?v=20261126a"></script>
+  <script src="../cloudsync.js?v=20261126a"></script>
+</body>
+</html>
