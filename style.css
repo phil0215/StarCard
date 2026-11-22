@@ -8059,6 +8059,44 @@ html[data-theme="dark"] .folder-card { background: var(--surface-2); }
 .tab.side-deck { height: 30px; font-size: 12.5px; }
 .tab.side-deck .lab { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+/* 工坊顶部小工具条：隐藏侧栏 / 标题 / 范围下拉 / 计数 / 添加牌组 */
+.studio-top { grid-column: 2; display: flex; align-items: center; gap: 10px; padding: 10px 24px 8px; min-width: 0; }
+.stg-btn {
+  width: 30px; height: 30px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink-3); cursor: pointer;
+  transition: background .15s var(--ease), color .15s var(--ease), border-color .15s var(--ease);
+}
+.stg-btn:hover { background: var(--brand-soft); color: var(--brand-strong); border-color: var(--brand-ring); }
+.stg-btn .ic { width: 16px; height: 16px; }
+.stg-title { font-size: 16px; font-weight: 700; color: var(--ink-1); letter-spacing: -.2px; flex: none; }
+.stg-scope {
+  max-width: 300px; height: 30px; min-width: 0;
+  border-radius: 8px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink-2);
+  font-size: 12.5px; font-family: inherit; padding: 0 8px; outline: none;
+  cursor: pointer; transition: border-color .15s var(--ease);
+}
+.stg-scope:focus { border-color: var(--brand-ring); }
+.stg-count { margin-left: auto; flex: none; font-size: 12px; color: var(--ink-3); font-weight: 550; white-space: nowrap; }
+.studio-top .btn { flex: none; }
+.stg-add {
+  width: 26px; height: 26px; flex: none;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink-3); cursor: pointer;
+  transition: background .15s var(--ease), color .15s var(--ease), border-color .15s var(--ease);
+}
+.stg-add:hover { background: var(--brand-soft); color: var(--brand-strong); border-color: var(--brand-ring); }
+.stg-add .ic { width: 14px; height: 14px; }
+.s2-none { padding: 28px 12px; text-align: center; font-size: 12px; color: var(--ink-4); }
+.sd-empty .btn { margin-top: 6px; }
+
+/* 侧栏收起：整个左栏移除，内容区占满 */
+.tabbar.side-hidden { display: none; }
+#root:has(> .tabbar.side-hidden) { grid-template-columns: 0 minmax(0, 1fr); }
+
 /* 牌组陈列页（所有牌组 / 文件夹）横跨内容网格整行：手机端 2 列网格不再把牌组挤成细条 */
 .content > .series-group, .content > .deck-item, .content > .section-title,
 .content > .removed-series-box, .content > .wb-welcome, .content > .studio2,
@@ -8130,7 +8168,7 @@ html[data-theme="dark"] .folder-card { background: var(--surface-2); }
 
 /* 宽屏：双栏吃满首屏高度（左列表内部滚动，右详情独立滚动），页面不留大片空白 */
 @media (min-width: 901px) {
-  .studio2 { height: calc(100vh - 126px); min-height: 460px; }
+  .studio2 { height: calc(100vh - 88px); min-height: 460px; }
   .studio2-list { max-height: none; height: 100%; }
   .studio2-detail { position: static; height: 100%; overflow-y: auto; display: flex; flex-direction: column; }
   .studio2-detail .sd-empty { flex: 1; justify-content: center; margin: 0; }
@@ -8140,6 +8178,13 @@ html[data-theme="dark"] .folder-card { background: var(--surface-2); }
   .studio2 { grid-template-columns: minmax(0, 1fr); }
   .studio2-detail { position: static; }
   .studio2-list { max-height: 46vh; min-height: 0; }
+}
+
+/* 手机端：工坊工具条单行收窄，范围下拉占剩余宽度 */
+@media (max-width: 760px) {
+  .studio-top { padding: 8px 12px 6px; gap: 8px; }
+  .stg-scope { flex: 1; min-width: 0; max-width: none; }
+  .stg-count { display: none; }
 }
 
 /* 手机端：侧栏 60px 图标化 —— 牌组行只留图标，动作按钮收窄居中 */

@@ -74,6 +74,7 @@
     chevronDown: '<path d="m6 9 6 6 6-6" />',
     chevronUp: '<path d="m18 15-6-6-6 6" />',
     more: '<circle cx="12" cy="12" r="1" /> <circle cx="19" cy="12" r="1" /> <circle cx="5" cy="12" r="1" />',
+    sidebar: '<rect x="3" y="4" width="18" height="16" rx="2.5" /> <path d="M9.5 4v16" />',
     table: '<path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18" />',
     merge: '<circle cx="18" cy="18" r="3" /> <circle cx="6" cy="6" r="3" /> <path d="M6 21V9a9 9 0 0 0 9 9" />',
     bell: '<path d="M10.268 21a2 2 0 0 0 3.464 0" /> <path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326" />',
@@ -432,7 +433,7 @@
     }
     const tabActive = pageActive ? -999 : active;
     const name = (app && app.accountDisplayName) ? app.accountDisplayName() : (acc.nickname || '学习者');
-    let html = '<nav class="tabbar">' + streakMiniHtml(app);
+    let html = '<nav class="tabbar' + (app && app.sideHide ? ' side-hidden' : '') + '">' + streakMiniHtml(app);
     const unread = noticeUnread(app);
     let lastGroup = '';
     for (let i = 0; i < NAV.length; i++) {
@@ -971,6 +972,16 @@
     const st = app.state;
     const sel = app.studio && app.studio.sel;
     if (!sel) {
+      const _scope = app.studio && app.studio.scope;
+      if (_scope) {
+        let _d = null;
+        for (let i = 0; i < st.decks.length; i++) if (st.decks[i].id === _scope) { _d = st.decks[i]; break; }
+        if (_d && !_d.cards.length) {
+          return '<div class="sd-empty">' + icon('card', 'i22') +
+            '<b>「' + esc(_d.name) + '」还是空的</b><small>添加第一张卡片，保存后就会出现在左侧列表，随时点开继续编辑。</small>' +
+            '<button class="btn btn-primary" data-act="card-new-scope">' + icon('plus', 'i14') + '添加卡片</button></div>';
+        }
+      }
       return '<div class="sd-empty">' + icon('pencil', 'i22') +
         '<b>选中左侧任意一行</b><small>在这里直接改正面、背面、标签，点「保存」立即生效（Anki Browser 同款操作）。</small></div>';
     }
@@ -1002,11 +1013,33 @@
 
   function wordBookPage(app) {
     const st = app.state;
-    if (!app.studio) app.studio = { q: '', sel: '' };
-    let html = titlebar('工坊', '制作 · 管理卡片', {
-      actions: '<button class="btn btn-sm" data-act="new-deck">' + icon('plus', 'i14') + '新建牌组</button>' +
-        '<button class="btn btn-sm btn-primary" data-act="card-new-global">' + icon('card', 'i14') + '添加卡片</button>'
-    }) + '<div class="content">';
+    if (!app.studio) app.studio = { q: '', sel: '', scope: '' };
+    if (app.studio.scope === undefined) app.studio.scope = '';
+    // —— 范围（全部 / 某个牌组）与计数 ——
+    const scope = app.studio.scope;
+    let scopeDeck = null;
+    if (scope) {
+      for (let i = 0; i < st.decks.length; i++) if (st.decks[i].id === scope) { scopeDeck = st.decks[i]; break; }
+      if (!scopeDeck) app.studio.scope = ''; // 牌组被删后自动回到全部
+    }
+    let totalAll = 0;
+    for (let i = 0; i < st.decks.length; i++) totalAll += st.decks[i].cards.length;
+    const srcDecks = scopeDeck ? [scopeDeck] : st.decks;
+    let html = '<header class="studio-top">' +
+      '<button class="stg-btn" data-act="side-toggle" title="隐藏 / 显示侧栏">' + icon('sidebar', 'i18') + '</button>' +
+      '<span class="stg-title">工坊</span>';
+    if (st.decks.length) {
+      html += '<select id="sdScope" class="stg-scope" title="选择要编辑的牌组范围">';
+      html += '<option value=""' + (!scopeDeck ? ' selected' : '') + '>全部</option>';
+      for (let i = 0; i < st.decks.length; i++) {
+        const d = st.decks[i];
+        html += '<option value="' + esc(d.id) + '"' + (scopeDeck === d ? ' selected' : '') + '>' + esc(d.name) + '</option>';
+      }
+      html += '</select>';
+    }
+    html += '<span class="stg-count">' + (scopeDeck ? scopeDeck.cards.length : totalAll) + ' 张卡片</span>' +
+      '<button class="btn btn-sm btn-primary" data-act="new-deck">' + icon('plus', 'i14') + '添加牌组</button>' +
+      '</header>' + '<div class="content">';
 
     // —— 已移除的词书：默认折叠，可恢复重新显示（避免误删后无处找回）——
     const removedList = typeof FC.removedSeries === 'function' ? FC.removedSeries(st) : [];
@@ -1030,14 +1063,14 @@
       html += '</div>';
     }
 
-    // —— 收集全部卡片（所有牌组，含系列分册）——
+    // —— 收集卡片（按当前范围：全部 / 单个牌组）——
     const rows = [];
-    for (let i = 0; i < st.decks.length; i++) {
-      const d = st.decks[i];
+    for (let i = 0; i < srcDecks.length; i++) {
+      const d = srcDecks[i];
       for (let j = 0; j < d.cards.length; j++) rows.push({ deck: d, card: d.cards[j] });
     }
 
-    if (!rows.length) {
+    if (!totalAll) { // 整个词库都没卡才显示引导；范围内空牌组仍进双栏，方便直接加卡
       html += '<div class="card wide wb-welcome">' +
         '<div class="ww-hero"><span class="ww-ico">' + icon('book', 'i28') + '</span>' +
         '<div><b>从这里开始你的词库</b><small>闪星卡默认不带任何词库。导入一份词库，或自己动手做。</small></div></div>' +
@@ -1057,7 +1090,9 @@
       html += '<div class="studio2">' +
         '<div class="studio2-list">' +
         '<div class="studio2-search">' + icon('search', 'i16') +
-        '<input id="sdQuery" type="text" placeholder="搜索正面 / 背面 / 牌组" value="' + esc(app.studio.q || '') + '" autocomplete="off" /></div>' +
+        '<input id="sdQuery" type="text" placeholder="搜索正面 / 背面 / 牌组" value="' + esc(app.studio.q || '') + '" autocomplete="off" />' +
+        (scopeDeck ? '<button class="stg-add" data-act="card-new-scope" title="往「' + esc(scopeDeck.name) + '」添加卡片">' + icon('plus', 'i16') + '</button>' : '') +
+        '</div>' +
         '<div class="studio2-rows" id="sdRows">';
       for (let i = 0; i < shown.length; i++) {
         const d = shown[i].deck, c = shown[i].card;
@@ -1067,6 +1102,7 @@
           '<div class="s2-front">' + (esc(front) || '<i class="s2-blank">（空白）</i>') + '</div>' +
           '<div class="s2-sub"><span class="s2-deck">' + esc(d.name) + '</span>' + esc(String(back).slice(0, 48)) + '</div></div>';
       }
+      if (!rows.length) html += '<div class="s2-none">这个牌组还没有卡片，点右上 ＋ 添加。</div>';
       html += '</div>';
       const moreTxt = rows.length > LIMIT ? ('共 ' + rows.length + ' 张，列表只显示前 ' + LIMIT + ' 张，用上面的搜索定位更多。') : ('共 ' + rows.length + ' 张卡片');
       html += '<div class="s2-more" data-total="' + rows.length + '" data-orig="' + esc(moreTxt).replace(/"/g, '&quot;') + '">' + moreTxt + '</div>';

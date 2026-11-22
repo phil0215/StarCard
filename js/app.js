@@ -2147,8 +2147,11 @@
             if (parent) fullName = parent.name + '::' + name;
           }
           this.pushUndo('新建牌组');
-          this.state.decks.push(FC.newDeck(fullName, desc));
-          this.toast('牌组已创建');
+          const nd = FC.newDeck(fullName, desc);
+          this.state.decks.push(nd);
+          // 工坊语义：建完牌组直接进到这个空牌组里，马上就能加卡片
+          if (this.studio) { this.studio.scope = nd.id; this.studio.sel = ''; this.studio.q = ''; }
+          this.toast('牌组已创建，可以添加卡片了');
         }
       } else if (m.type === 'card-v2') {
         const type = id('eType') ? id('eType').value : 'basic';
@@ -3163,6 +3166,27 @@
         }
         break;
       }
+      case 'side-toggle':
+        App.sideHide = !App.sideHide;
+        App.render();
+        break;
+      // 往当前范围牌组添加卡片（工坊顶部 / 空牌组引导）
+      case 'card-new-scope': {
+        if (!App.studio) App.studio = { q: '', sel: '', scope: '' };
+        let deck = null;
+        if (App.studio.scope) {
+          for (let i = 0; i < App.state.decks.length; i++) if (App.state.decks[i].id === App.studio.scope) { deck = App.state.decks[i]; break; }
+        }
+        if (!deck) {
+          deck = App.state.decks[0];
+          if (!deck) { deck = FC.newDeck('默认牌组', ''); App.state.decks.push(deck); }
+        }
+        App.openModal({
+          type: 'card-v2', id: '', deckId: deck.id, notetype: 'basic',
+          fields: { Front: '', Back: '', Extra: '', Source: '' }, tags: [], media: []
+        });
+        break;
+      }
       // —— 工坊（Anki Browser 式）：左列点行 → 右侧内联编辑；保存走 rebuildNote ——
       case 'studio-row':
         if (!App.studio) App.studio = { q: '', sel: '' };
@@ -3656,6 +3680,15 @@
   document.addEventListener('change', function (e) {
     const t = e.target;
     if (!t) return;
+    // 工坊范围切换：全部 / 某个牌组（计数与列表同步跟着变）
+    if (t.id === 'sdScope') {
+      if (!App.studio) App.studio = { q: '', sel: '', scope: '' };
+      App.studio.scope = t.value;
+      App.studio.sel = '';
+      App.studio.q = '';
+      App.render();
+      return;
+    }
     if (t.id === 'loginAgree') { App.saveLoginDraft(); return; }
     if (t.id === 'avatarFile') {
       App.handleAvatarFile(t.files && t.files[0]);
