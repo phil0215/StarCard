@@ -2574,10 +2574,7 @@
       };
   
       // 一级目录：每个分类点进去才是具体参数
-      const themeName = (function () {
-        const m = s.theme || 'light';
-        return m === 'dark' ? '深色' : (m === 'auto' ? '跟随系统' : '浅色');
-      })();
+      const themeName = '深色玻璃';
       const presetNow = (function () {
         for (let i = 0; i < THEME_PRESETS.length; i++) { if (THEME_PRESETS[i].id === s.preset) return THEME_PRESETS[i].name; }
         return '自定义';
@@ -2593,7 +2590,7 @@
         { k: 'plan', t: '学习计划', d: '每日新卡与复习上限', ico: 'target', tone: 'blue', g: '学习', val: s.newCardsPerDay + ' / ' + s.reviewCardsPerDay },
         { k: 'fsrs', t: '记忆算法', d: 'FSRS-5 留存率与间隔', ico: 'zap', tone: 'purple', g: '学习', val: '' },
         { k: 'study', t: '学习行为', d: '顺序、Leech、提示音与字号', ico: 'bell', tone: 'orange', g: '学习', val: '' },
-        { k: 'appearance', t: '外观与个性化', d: '明暗模式、主题、强调色与底纹', ico: 'palette', tone: 'pink', g: '个性化', val: presetNow + ' · ' + themeName },
+        { k: 'appearance', t: '外观与个性化', d: '主题、强调色与底纹', ico: 'palette', tone: 'pink', g: '个性化', val: themeName },
         { k: 'data', t: '数据与备份', d: '备份提醒与本机数据', ico: 'cloud', tone: 'cyan', g: '系统', val: '' },
         { k: 'privacy', t: '隐私与安全', d: '数据存在哪、怎么清除', ico: 'shield', tone: 'indigo', g: '系统', val: '' },
         { k: 'keys', t: '快捷键', d: '键盘操作一览', ico: 'keyboard', tone: 'slate', g: '系统', val: '' },
@@ -2857,7 +2854,7 @@
       // 外观与个性化
       html += paneBox('appearance',
         '<div class="set-card">' +
-        block('明暗模式', themeModeBtns(s.theme || 'light'), '独立于主题配色，切到任何主题都会生效。') +
+        block('明暗模式', themeModeBtns(s.theme || 'dark'), 'v2 界面固定为深色玻璃质感，此选项保留你的偏好但不再改变外观。') +
         block('主题配色', presetGrid(s.preset || 'default'), '每套配色自带强调色与背景底纹，点选立即生效。') +
         block('强调色', '<div class="swatch-row" id="setAccent">' +
           swatch('brand', '星蓝', s.accent, 'accent') +
