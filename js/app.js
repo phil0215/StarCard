@@ -90,6 +90,22 @@
     accountMenuOpen: false,
     settingsQuery: '',         // 设置页左栏搜索关键词
     // 左栏搜索：纯 DOM 过滤，不重渲染（避免输入时掉焦点）
+    filterStudio(q) {
+      if (!this.studio) this.studio = { q: '', sel: '' };
+      const needle = String(q || '').trim().toLowerCase();
+      const rows = document.querySelectorAll('.s2-row');
+      let visible = 0;
+      for (let i = 0; i < rows.length; i++) {
+        const el = rows[i];
+        const kw = (el.getAttribute('data-key') || '').toLowerCase();
+        const hit = !needle || kw.indexOf(needle) >= 0;
+        el.style.display = hit ? '' : 'none';
+        if (hit) visible += 1;
+      }
+      const more = document.querySelector('.s2-more');
+      if (more) more.textContent = needle ? ('匹配 ' + visible + ' 张') : (more.getAttribute('data-orig') || more.textContent);
+    },
+
     filterSettings(q) {
       this.settingsQuery = q || '';
       const needle = String(this.settingsQuery).trim().toLowerCase();
@@ -3142,8 +3158,43 @@
         if (r) {
           App.pushUndo('删除卡片');
           r.deck.cards = r.deck.cards.filter(function (c) { return c.id !== d.id; });
+          if (App.studio && App.studio.sel === d.id) App.studio.sel = '';
           App.save(); App.render(); App.toast('已删除');
         }
+        break;
+      }
+      // —— 工坊（Anki Browser 式）：左列点行 → 右侧内联编辑；保存走 rebuildNote ——
+      case 'studio-row':
+        if (!App.studio) App.studio = { q: '', sel: '' };
+        App.studio.sel = d.id;
+        App.render();
+        break;
+      case 'studio-save': {
+        if (!App.studio) App.studio = { q: '', sel: '' };
+        const idv = function (x) { return document.getElementById(x); };
+        const type = idv('sdType') ? idv('sdType').value : 'basic';
+        const fields = {
+          Front: idv('sdFront') ? idv('sdFront').value.trim() : '',
+          Back: idv('sdBack') ? idv('sdBack').value.trim() : '',
+          Extra: idv('sdExtra') ? idv('sdExtra').value.trim() : '',
+          Source: idv('sdSource') ? idv('sdSource').value.trim() : ''
+        };
+        const tags = (idv('sdTags') ? idv('sdTags').value : '').split(/[,;\s]+/).filter(function (t) { return t !== ''; });
+        if (type === 'cloze') {
+          if (!FC.hasCloze(fields.Front)) { App.toast('填空文本里需要 {{c1::答案}}'); return; }
+          fields.Back = '';
+        } else if (!fields.Front || !fields.Back) {
+          App.toast('正面和背面都要填');
+          return;
+        }
+        const rr = App.findCard(d.id);
+        if (!rr) { App.toast('卡片不存在'); return; }
+        App.pushUndo('编辑卡片');
+        const noteId = rr.card.noteId || rr.card.id;
+        // rebuildNote 会重写字段，原 media 在卡片对象上保留即可（同弹窗编辑链路）
+        const cards2 = FC.rebuildNote(rr.deck, noteId, { notetype: type, fields: fields, tags: tags });
+        App.save(); App.render();
+        App.toast('已保存' + (cards2.length > 1 ? '，生成 ' + cards2.length + ' 张卡片' : ''));
         break;
       }
       case 'card-batch': App.openModal({ type: 'batch', deckId: d.id }); break;
@@ -3536,6 +3587,12 @@
       App.refreshBrowser();
     }
     // 小星输入框：暂存草稿（不重绘，避免打断输入 / 中文输入法）
+    // 工坊卡片列表搜索：纯 DOM 过滤，不重绘整个应用（保住焦点与中文输入法）
+    if (t.id === 'sdQuery') {
+      if (!App.studio) App.studio = { q: '', sel: '' };
+      App.studio.q = t.value;
+      if (!e.isComposing) App.filterStudio(t.value);
+    }
     if (t.id === 'aiInput') App.aiDraft = t.value;
     // 命令面板：实时过滤（只更新列表 DOM，不重绘整个应用，保住焦点与输入法）
     if (t.id === 'cmdInput') {

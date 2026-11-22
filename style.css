@@ -8031,3 +8031,112 @@ html[data-theme="dark"] .folder-card { background: var(--surface-2); }
   .otp-row { flex-direction: column; align-items: stretch; }
   .otp-row .btn { width: 100%; }
 }
+
+/* ============================================================
+   侧栏「牌组」区 + 工坊 Anki 式双栏（侧栏管牌组与归档，工坊纯做卡）
+   ============================================================ */
+.side-decks-actions {
+  display: flex;
+  gap: 6px;
+  margin: 4px 0 6px;
+  padding: 0 2px;
+}
+.sd-act {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: background .15s var(--ease), color .15s var(--ease), border-color .15s var(--ease);
+}
+.sd-act:hover { background: var(--brand-soft); color: var(--brand-strong); border-color: var(--brand-ring); }
+.sd-act .ic, .sd-act svg { width: 16px; height: 16px; }
+.tab.side-deck { height: 30px; font-size: 12.5px; }
+.tab.side-deck .lab { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 牌组陈列页（所有牌组 / 文件夹）横跨内容网格整行：手机端 2 列网格不再把牌组挤成细条 */
+.content > .series-group, .content > .deck-item, .content > .section-title,
+.content > .removed-series-box, .content > .wb-welcome, .content > .studio2,
+.content > .empty, .content > .card.wide { grid-column: 1 / -1; }
+
+/* 工坊：左列卡片行 + 右侧内联详情（Anki Browser 同构） */
+.studio2 { display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 14px; align-items: start; margin: 6px 0 10px; grid-column: 1 / -1; }
+.studio2-list {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 320px;
+  max-height: calc(100vh - 210px);
+}
+.studio2-search { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-bottom: 1px solid var(--line); color: var(--ink-4); }
+.studio2-search svg { width: 15px; height: 15px; flex: none; }
+.studio2-search input { flex: 1; min-width: 0; border: 0; outline: none; background: transparent; font-size: 13px; color: var(--ink-1); font-family: inherit; }
+.studio2-rows { flex: 1; overflow-y: auto; }
+.s2-row { padding: 9px 12px; cursor: pointer; border-bottom: 1px solid var(--line); transition: background .12s var(--ease); }
+.s2-row:hover { background: var(--surface-2); }
+.s2-row.active { background: var(--brand-soft); box-shadow: inset 2px 0 0 var(--brand); }
+.s2-front { font-size: 13.5px; font-weight: 600; color: var(--ink-1); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.s2-sub { font-size: 11.5px; color: var(--ink-3); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.s2-deck { display: inline-block; margin-right: 6px; padding: 1px 6px; border-radius: 999px; background: var(--surface-2); font-size: 10.5px; color: var(--ink-3); max-width: 130px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+.s2-blank { color: var(--ink-4); font-style: italic; font-weight: 400; }
+.s2-more { padding: 7px 12px; font-size: 11px; color: var(--ink-4); border-top: 1px solid var(--line); }
+
+.studio2-detail { position: sticky; top: 12px; }
+.sd-empty {
+  background: var(--surface);
+  border: 1px dashed var(--line);
+  border-radius: var(--r-md);
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--ink-4);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+.sd-empty b { font-size: 13px; color: var(--ink-3); font-weight: 600; }
+.sd-empty small { font-size: 12px; line-height: 1.6; }
+.sd-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+.sd-deck-chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 10px; border-radius: 999px; background: var(--brand-soft); color: var(--brand-strong); font-size: 12px; font-weight: 600; min-width: 0; }
+.sd-deck-chip svg { width: 13px; height: 13px; flex: none; }
+.sd-form { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-md); padding: 14px; }
+.sd-label { display: block; font-size: 11.5px; font-weight: 600; color: var(--ink-3); margin: 10px 0 4px; }
+.sd-label:first-child { margin-top: 0; }
+.sd-input {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface-2);
+  padding: 8px 10px;
+  font-size: 13px;
+  color: var(--ink-1);
+  font-family: inherit;
+  outline: none;
+  transition: border-color .15s var(--ease);
+}
+.sd-input:focus { border-color: var(--brand-ring); background: var(--surface); }
+.sd-ta { resize: vertical; line-height: 1.55; min-height: 56px; }
+.sd-hint { font-size: 11px; color: var(--ink-4); margin-top: 8px; }
+.sd-actions { display: flex; gap: 8px; margin-top: 12px; }
+
+@media (max-width: 900px) {
+  .studio2 { grid-template-columns: minmax(0, 1fr); }
+  .studio2-detail { position: static; }
+  .studio2-list { max-height: 46vh; min-height: 0; }
+}
+
+/* 手机端：侧栏 60px 图标化 —— 牌组行只留图标，动作按钮收窄居中 */
+@media (max-width: 760px) {
+  .tab.side-deck { width: 44px; height: 40px; justify-content: center; padding: 0; }
+  .side-decks-actions { padding: 0; justify-content: center; gap: 6px; }
+  .sd-act { width: 34px; height: 30px; }
+}

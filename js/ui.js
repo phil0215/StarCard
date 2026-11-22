@@ -453,6 +453,26 @@
           (n.badge && unread > 0 ? '<span class="side-badge">' + unread + '</span>' : '') + '</div>';
       }
     }
+    // —— 牌组区：默认「所有牌组」+ 自建文件夹；加号 = 新建文件夹，下载 = 导入词库 ——
+    // 工坊只管制作卡片，牌组的陈列与归档都在侧栏（用户要求）。
+    const _st = (app && app.state) || {};
+    const _decks = _st.decks || [];
+    html += '<div class="nav-label">牌组</div>';
+    html += '<div class="tab side-deck' + (app && app.folderId === '__all' ? ' active' : '') + '" data-act="folder-open" data-id="__all" title="所有牌组（' + _decks.length + ' 个）">' +
+      '<span class="ico">' + icon('layers', 'i20') + '</span>' +
+      '<span class="lab">所有牌组</span></div>';
+    const _folders = _st.folders || [];
+    for (let fi = 0; fi < _folders.length; fi++) {
+      const _f = _folders[fi];
+      const _n = FC.decksInFolder ? FC.decksInFolder(_st, _f.id).length : 0;
+      html += '<div class="tab side-deck' + (app && app.folderId === _f.id ? ' active' : '') + '" data-act="folder-open" data-id="' + esc(_f.id) + '" title="' + esc(_f.name) + '（' + _n + ' 个牌组）">' +
+        '<span class="ico">' + icon('folder', 'i20') + '</span>' +
+        '<span class="lab">' + esc(_f.name) + '</span></div>';
+    }
+    html += '<div class="side-decks-actions">' +
+      '<button class="sd-act" data-act="folder-new" title="新建文件夹">' + icon('plus', 'i18') + '</button>' +
+      '<button class="sd-act" data-act="import-hub" title="导入词库（.srcd / .apkg / CSV）">' + icon('download', 'i18') + '</button>' +
+      '</div>';
     html += '<div class="side-account' + (on ? ' on' : '') + '" data-act="account-menu" title="账户菜单">' +
       avatarFace(acc, 'ava-sm') +
       '<span class="sa-txt"><span class="sa-name">' + esc(on ? name : '匿名用户') + '</span>' +
@@ -942,46 +962,51 @@
     return app.state.wordBooks.slice();
   }
 
+  // —— 工坊：纯做卡与管理（Anki Browser 式双栏）。牌组的陈列/归档在侧栏「牌组」区，导入入口在侧栏底部 ——
+  // 卡片文本的统一读取（新卡片走 fields，旧数据走 front/back，normalizeCard 已双向兜底）
+  function cardFrontText(c) { return String((c.fields && c.fields.Front) || c.front || ''); }
+  function cardBackText(c) { return String((c.fields && c.fields.Back) || c.back || ''); }
+
+  function studioDetailHtml(app) {
+    const st = app.state;
+    const sel = app.studio && app.studio.sel;
+    if (!sel) {
+      return '<div class="sd-empty">' + icon('pencil', 'i22') +
+        '<b>选中左侧任意一行</b><small>在这里直接改正面、背面、标签，点「保存」立即生效（Anki Browser 同款操作）。</small></div>';
+    }
+    let r = null;
+    for (let i = 0; i < st.decks.length && !r; i++) {
+      for (let j = 0; j < st.decks[i].cards.length; j++) if (st.decks[i].cards[j].id === sel) { r = { deck: st.decks[i], card: st.decks[i].cards[j] }; break; }
+    }
+    if (!r) return '<div class="sd-empty"><b>这张卡片已被删除</b></div>';
+    const c = r.card;
+    const f = c.fields || { Front: c.front || '', Back: c.back || '', Extra: c.extra || '', Source: '' };
+    const type = c.notetype || 'basic';
+    const types = (FC.NOTETYPES || [{ id: 'basic', name: '问答' }, { id: 'cloze', name: '填空' }]);
+    let typeOpts = '';
+    for (let i = 0; i < types.length; i++) typeOpts += '<option value="' + esc(types[i].id) + '"' + (types[i].id === type ? ' selected' : '') + '>' + esc(types[i].name || types[i].id) + '</option>';
+    return '<div class="sd-head"><span class="sd-deck-chip">' + icon('layers', 'i14') + esc(r.deck.name) + '</span>' +
+      '<button class="btn btn-sm btn-more" data-act="deck-menu" data-id="' + esc(r.deck.id) + '" title="牌组选项">' + icon('more', 'i16') + '</button></div>' +
+      '<div class="sd-form">' +
+      '<label class="sd-label">模板</label><select id="sdType" class="sd-input">' + typeOpts + '</select>' +
+      '<label class="sd-label">正面</label><textarea id="sdFront" class="sd-input sd-ta" rows="3">' + esc(f.Front || '') + '</textarea>' +
+      '<label class="sd-label">背面</label><textarea id="sdBack" class="sd-input sd-ta" rows="3">' + esc(f.Back || '') + '</textarea>' +
+      '<label class="sd-label">补充</label><textarea id="sdExtra" class="sd-input sd-ta" rows="2">' + esc(f.Extra || '') + '</textarea>' +
+      '<label class="sd-label">来源</label><input id="sdSource" class="sd-input" value="' + esc(f.Source || '') + '" />' +
+      '<label class="sd-label">标签</label><input id="sdTags" class="sd-input" value="' + esc((c.tags || []).join(' ')) + '" placeholder="空格分隔多个标签" />' +
+      '<div class="sd-hint">填空模板的正面需要写成 {{c1::答案}} 的形式。</div>' +
+      '<div class="sd-actions"><button class="btn btn-primary" data-act="studio-save" data-id="' + esc(c.id) + '">' + icon('check', 'i14') + '保存</button>' +
+      '<button class="btn" data-act="card-del" data-id="' + esc(c.id) + '">' + icon('trash', 'i14') + '删除</button></div>' +
+      '</div>';
+  }
+
   function wordBookPage(app) {
     const st = app.state;
-    const s = new FC.Scheduler(st.settings);
-    const now = Date.now();
-    let html = titlebar('工坊', '制作 · 导入 · 管理', {
-      actions: '<button class="btn btn-sm" data-act="browser-open">' + icon('table', 'i14') + '浏览全部</button>'
+    if (!app.studio) app.studio = { q: '', sel: '' };
+    let html = titlebar('工坊', '制作 · 管理卡片', {
+      actions: '<button class="btn btn-sm" data-act="new-deck">' + icon('plus', 'i14') + '新建牌组</button>' +
+        '<button class="btn btn-sm btn-primary" data-act="card-new-global">' + icon('card', 'i14') + '添加卡片</button>'
     }) + '<div class="content">';
-
-    // —— 系列词书：成套牌组收纳为文件夹式容器（主文件）——
-    const seriesList = typeof FC.visibleSeries === 'function' ? FC.visibleSeries(st) : ((FC.SERIES && FC.SERIES.length) ? FC.SERIES : []);
-    if (seriesList.length) {
-      html += '<div class="section-title">系列词书 · 主文件</div>' +
-        '<div class="series-grid">';
-      for (let si = 0; si < seriesList.length; si++) {
-        html += seriesFolderCard(app, seriesList[si]);
-      }
-      html += '</div>';
-    }
-
-    // —— 我的文件夹：用户在工坊里自建的分类 ——
-    const folders = st.folders || [];
-    {
-      html += '<div class="section-title folder-title">' + icon('folder', 'i14') + '<span>我的文件夹</span>' +
-        '<button class="btn btn-sm folder-new-btn" data-act="folder-new">' + icon('plus', 'i14') + '新建文件夹</button></div>';
-      if (folders.length) {
-        html += '<div class="folder-grid">';
-        for (let fi = 0; fi < folders.length; fi++) {
-          const f = folders[fi];
-          const fdecks = FC.decksInFolder(st, f.id);
-          html += '<div class="folder-card" data-act="folder-open" data-id="' + esc(f.id) + '" title="' + esc(f.name) + '">' +
-            '<span class="fc-ico">' + icon('folder', 'i22') + '</span>' +
-            '<div class="fc-body"><div class="fc-name">' + esc(f.name) + '</div>' +
-            '<div class="fc-meta">' + fdecks.length + ' 个牌组</div></div>' +
-            icon('chevronRight', 'i16') + '</div>';
-        }
-        html += '</div>';
-      } else {
-        html += '<div class="card wide folder-empty">把零散牌组归类到文件夹，点右上「新建文件夹」开始。</div>';
-      }
-    }
 
     // —— 已移除的词书：默认折叠，可恢复重新显示（避免误删后无处找回）——
     const removedList = typeof FC.removedSeries === 'function' ? FC.removedSeries(st) : [];
@@ -1005,74 +1030,51 @@
       html += '</div>';
     }
 
-    // —— 导入与制作 ——（同步到「卡片」页供学习）
-    html += '<div class="card wide studio">' +
-      '<div class="studio-head"><div class="studio-title">导入与制作</div>' +
-      '<div class="studio-sub">从文件导入词库，或新建牌组制作卡片</div></div>' +
-      '<div class="studio-grid">' +
-      '<div class="studio-col">' +
-      '<div class="studio-col-t">' + icon('download', 'i14') + '导入' +
-      '<button class="studio-help" data-act="import-formats" title="查看支持的格式">' + icon('info', 'i14') + '</button></div>' +
-      '<button class="studio-act primary" data-act="import-hub">' + icon('download', 'i20') +
-      '<span><b>导入词库</b><small>支持 .srcd / .apkg / CSV</small></span></button>' +
-      '<button class="studio-act" data-act="import-formats">' + icon('info', 'i18') +
-      '<span><b>支持的格式</b><small>查看每种格式的说明</small></span></button>' +
-      '</div>' +
-      '<div class="studio-col">' +
-      '<div class="studio-col-t">' + icon('pencil', 'i14') + '制作</div>' +
-      '<button class="studio-act primary" data-act="new-deck">' + icon('plus', 'i18') +
-      '<span><b>新建牌组</b><small>从零创建一个卡片集</small></span></button>' +
-      '<button class="studio-act" data-act="card-new-global">' + icon('card', 'i18') +
-      '<span><b>添加卡片</b><small>手动编写单张卡片</small></span></button>' +
-      '</div></div>' +
-      '<div class="studio-note">导入或新建的牌组会落在下方「牌组」；属于某个系列的分册，会归到该系列之下。</div>' +
-      '</div>';
+    // —— 收集全部卡片（所有牌组，含系列分册）——
+    const rows = [];
+    for (let i = 0; i < st.decks.length; i++) {
+      const d = st.decks[i];
+      for (let j = 0; j < d.cards.length; j++) rows.push({ deck: d, card: d.cards[j] });
+    }
 
-    // —— 牌组：先按系列归组（系列 = 主文件，其分册 / 卡为子文件），再列自建牌组 ——
-    const split = splitDecksBySeries(st, seriesList);
-    if (st.decks.length === 0) {
-      html += '<div class="section-title">牌组</div>';
+    if (!rows.length) {
       html += '<div class="card wide wb-welcome">' +
         '<div class="ww-hero"><span class="ww-ico">' + icon('book', 'i28') + '</span>' +
-        '<div><b>从这里开始你的词库</b><small>闪星卡默认不带任何词库。导入一份词库，或自己动手做，学习卡片会自动出现在这里。</small></div></div>' +
+        '<div><b>从这里开始你的词库</b><small>闪星卡默认不带任何词库。导入一份词库，或自己动手做。</small></div></div>' +
         '<div class="ww-steps">' +
-        '<div class="ww-step"><span class="ww-n">1</span><div><b>导入现成词库</b><small>支持闪星 .srcd、Anki .apkg / .colpkg、CSV，导入后自动成为一个系列</small></div>' +
+        '<div class="ww-step"><span class="ww-n">1</span><div><b>导入现成词库</b><small>点侧栏底部的「导入」按钮（下载图标），支持 .srcd / .apkg / CSV</small></div>' +
         '<button class="btn btn-sm btn-primary" data-act="import-hub">去导入</button></div>' +
         '<div class="ww-step"><span class="ww-n">2</span><div><b>自己制作</b><small>新建牌组手动添加卡片，或按行批量粘贴正反面</small></div>' +
         '<button class="btn btn-sm" data-act="new-deck">新建牌组</button></div>' +
-        '<div class="ww-step"><span class="ww-n">3</span><div><b>开始学习</b><small>做好的牌组在工坊里点「学习」即可开始 FSRS 间隔重复复习</small></div>' +
-        '<button class="btn btn-sm btn-primary" data-act="study-all">开始学习</button></div>' +
+        '<div class="ww-step"><span class="ww-n">3</span><div><b>开始学习</b><small>做好的牌组在侧栏「所有牌组」里，点牌组即可开始 FSRS 复习</small></div>' +
+        '<button class="btn btn-sm btn-primary" data-act="folder-open" data-id="__all">去所有牌组</button></div>' +
         '</div></div>';
     } else {
-      for (let si = 0; si < seriesList.length; si++) {
-        const se = seriesList[si];
-        const ds = split.bySeries[se.id];
-        if (!ds || !ds.length) continue;
-        let cardSum = 0;
-        for (let k = 0; k < ds.length; k++) cardSum += ds[k].cards.length;
-        const collapsed = (st.collapsedSeries || []).indexOf(se.id) >= 0;
-        html += '<div class="series-group' + (collapsed ? ' collapsed' : '') + '">' +
-          '<div class="sg-head"><button class="sg-toggle" data-act="series-toggle" data-id="' + esc(se.id) + '" title="折叠/展开">' + icon(collapsed ? 'chevronRight' : 'chevronDown', 'i14') + '</button>' +
-          '<span class="sg-name">' + esc(se.name) + '</span>' +
-          '<span class="sg-meta">' + ds.length + ' 个分册 · 含 ' + cardSum + ' 张卡</span>' +
-          '<button class="btn btn-sm sg-go" data-act="series-open" data-id="' + esc(se.id) + '">查看系列</button></div>';
-        for (let i = 0; i < ds.length; i++) html += deckListItem(app, ds[i], s, now, true);
-        html += '</div>';
+      // —— Anki Browser 式双栏：左列卡片行（DOM 过滤，不重渲染保输入法），右列内联详情 ——
+      const LIMIT = 300;
+      const shown = rows.slice(0, LIMIT);
+      const sel = app.studio.sel;
+      html += '<div class="studio2">' +
+        '<div class="studio2-list">' +
+        '<div class="studio2-search">' + icon('search', 'i16') +
+        '<input id="sdQuery" type="text" placeholder="搜索正面 / 背面 / 牌组" value="' + esc(app.studio.q || '') + '" autocomplete="off" /></div>' +
+        '<div class="studio2-rows" id="sdRows">';
+      for (let i = 0; i < shown.length; i++) {
+        const d = shown[i].deck, c = shown[i].card;
+        const front = cardFrontText(c), back = cardBackText(c);
+        const key = esc((front + ' ' + back + ' ' + d.name).toLowerCase()).replace(/"/g, '&quot;');
+        html += '<div class="s2-row' + (sel === c.id ? ' active' : '') + '" data-act="studio-row" data-id="' + esc(c.id) + '" data-key="' + key + '">' +
+          '<div class="s2-front">' + (esc(front) || '<i class="s2-blank">（空白）</i>') + '</div>' +
+          '<div class="s2-sub"><span class="s2-deck">' + esc(d.name) + '</span>' + esc(String(back).slice(0, 48)) + '</div></div>';
       }
-      if (split.userDecks.length) {
-        html += '<div class="section-title">牌组 · 自建</div>';
-        for (let i = 0; i < split.userDecks.length; i++) html += deckListItem(app, split.userDecks[i], s, now, false);
-      }
+      html += '</div>';
+      const moreTxt = rows.length > LIMIT ? ('共 ' + rows.length + ' 张，列表只显示前 ' + LIMIT + ' 张，用上面的搜索定位更多。') : ('共 ' + rows.length + ' 张卡片');
+      html += '<div class="s2-more" data-total="' + rows.length + '" data-orig="' + esc(moreTxt).replace(/"/g, '&quot;') + '">' + moreTxt + '</div>';
+      html += '</div>' +
+        '<aside class="studio2-detail" id="sdDetail">' + studioDetailHtml(app) + '</aside>' +
+        '</div>';
     }
 
-    // —— 自定义词书：仅在确有数据时展示，避免长期出现一个永远为空的区块 ——
-    if (app.state.wordBooks && app.state.wordBooks.length) {
-      html += '<div class="section-title">我的词书（自定义）</div>';
-      for (let i = 0; i < app.state.wordBooks.length; i++) {
-        const b = app.state.wordBooks[i];
-        html += bookCard(app, b, app.wordProgressOf(b.id, b.words.length), true);
-      }
-    }
     html += '</div>'; // 闭合 .content，确保 tabbar 作为 #root 独立侧栏，而非被塞进内容区
     return html + tabbar(1, app);
   }
@@ -1152,10 +1154,84 @@
       '</div>';
   }
 
+  // 牌组行的稳定配色（与卡片页一致：同一牌组颜色固定）
+  function avToneOf(d) {
+    const key = String((d && d.id) || (d && d.name) || '');
+    let h = 0;
+    for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
+    return h % 8;
+  }
+
+  // 「所有牌组 / 文件夹」视图里的牌组行：点行=学习，另有 管理 / 更多
+  function deckRowStudy(app, d, s, now) {
+    const c = s.deckCounts(d, now);
+    const total = d.cards.length;
+    const isSat = (d.tags || []).indexOf('sat800') >= 0;
+    const tone = avToneOf(d);
+    let inProgress = 0;
+    for (let k = 0; k < d.cards.length; k++) {
+      const cc = d.cards[k];
+      if (cc.state === FC.STATE_LEARNING || cc.state === FC.STATE_RELEARNING) inProgress += 1;
+    }
+    const mastered = Math.max(0, total - c[0] - inProgress);
+    const pct = total ? Math.round(mastered / total * 100) : 0;
+    const chips = (c[0] || c[1])
+      ? '<span class="deck-chips">' + (c[0] ? '<span class="dchip dc-new">新 ' + c[0] + '</span>' : '') +
+        (c[1] ? '<span class="dchip dc-due">到期 ' + c[1] + '</span>' : '') + '</span>'
+      : (total > 0 ? '<span class="deck-chips"><span class="dchip dc-done">今日已完成</span></span>' : '');
+    return '<div class="list-item deck-item dt-' + tone + '" data-act="study-deck" data-id="' + esc(d.id) + '">' +
+      '<div class="avatar deck-av av-tone-' + tone + '">' + icon(isSat ? 'book' : 'layers', 'i20') + '</div>' +
+      '<div class="li-main"><div class="deck-name-row">' +
+      '<div class="name">' + esc(d.name) + '</div>' + chips +
+      '<span class="deck-ring' + (pct >= 100 && total > 0 ? ' done' : '') + '" style="--p:' + pct + '" title="已掌握 ' + pct + '%"><b>' + pct + '%</b></span></div>' +
+      '<div class="meta">' + (d.description ? esc(d.description) + ' · ' : '') + '已掌握 ' + mastered + ' / ' + total + ' 张</div>' +
+      '<div class="progress deck-prog"><span style="width:' + pct + '%"></span></div></div>' +
+      '<div class="li-actions"><button class="btn btn-sm btn-primary" data-act="study-deck" data-id="' + esc(d.id) + '">学习</button>' +
+      '<button class="btn btn-sm" data-act="deck-open" data-id="' + esc(d.id) + '">管理</button>' +
+      '<button class="btn btn-sm btn-more" data-act="deck-menu" data-id="' + esc(d.id) + '" title="更多操作">' + icon('more', 'i16') + '</button></div>' +
+      '</div>';
+  }
+
+  // 「所有牌组」：侧栏默认入口。系列词书成组陈列，其余平铺。
+  function allDecksPage(app) {
+    const st = app.state;
+    const s = new FC.Scheduler(st.settings);
+    const now = Date.now();
+    const seriesList = typeof FC.visibleSeries === 'function' ? FC.visibleSeries(st) : ((FC.SERIES && FC.SERIES.length) ? FC.SERIES : []);
+    const split = splitDecksBySeries(st, seriesList);
+    let html = titlebar('所有牌组', st.decks.length + ' 个牌组 · 点牌组直接开始学习', {
+      back: { act: 'folder-back' }
+    }) + '<div class="content">';
+    if (!st.decks.length) {
+      html += emptyBox('layers', '还没有牌组。点侧栏底部的「导入」拿一份词库，或去「工坊」自己做。');
+    } else {
+      for (let si = 0; si < seriesList.length; si++) {
+        const se = seriesList[si];
+        const ds = split.bySeries[se.id];
+        if (!ds || !ds.length) continue;
+        const collapsed = (st.collapsedSeries || []).indexOf(se.id) >= 0;
+        html += '<div class="series-group' + (collapsed ? ' collapsed' : '') + '">' +
+          '<div class="sg-head"><button class="sg-toggle" data-act="series-toggle" data-id="' + esc(se.id) + '" title="折叠/展开">' + icon(collapsed ? 'chevronRight' : 'chevronDown', 'i14') + '</button>' +
+          '<span class="sg-name">' + esc(se.name) + '</span>' +
+          '<span class="sg-meta">' + ds.length + ' 个分册</span>' +
+          '<button class="btn btn-sm sg-go" data-act="series-open" data-id="' + esc(se.id) + '">查看系列</button></div>';
+        for (let i = 0; i < ds.length; i++) html += deckRowStudy(app, ds[i], s, now);
+        html += '</div>';
+      }
+      if (split.userDecks.length) {
+        html += '<div class="section-title">牌组 · 自建</div>';
+        for (let i = 0; i < split.userDecks.length; i++) html += deckRowStudy(app, split.userDecks[i], s, now);
+      }
+    }
+    html += '</div>';
+    return html + tabbar(app.tab, app);
+  }
+
   // 系列详情页：顶部概览 + 建议 + 分册网格
   // 文件夹详情：列出该自定义文件夹下的牌组，点牌组进入卡片管理
   function folderPage(app) {
     const st = app.state;
+    if (app.folderId === '__all') return allDecksPage(app);
     const f = FC.folderById(st, app.folderId);
     if (!f) { app.folderId = ''; return wordBookPage(app); }
     const ds = FC.decksInFolder(st, f.id);
@@ -1167,7 +1243,7 @@
         '<button class="btn btn-sm btn-danger" data-act="folder-delete" data-id="' + esc(f.id) + '">' + icon('trash', 'i14') + '删除</button>'
     }) + '<div class="content">';
     if (!ds.length) {
-      html += emptyBox('folder', '这个文件夹还是空的。回到工坊，在牌组的「更多」里选「移动到文件夹」即可。');
+      html += emptyBox('folder', '这个文件夹还是空的。在「所有牌组」里点牌组的「更多」→「移动到文件夹」即可归入。');
     } else {
       for (let i = 0; i < ds.length; i++) html += deckListItem(app, ds[i], s, now, false);
     }
