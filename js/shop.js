@@ -885,6 +885,8 @@
     if (act === 'shop-buy') {
       var buyItemObj = findStoreItem(app, d.id);
       if (!buyItemObj) { toast(app, '这件作品不在了'); return true; }
+      var buyAuthor = buyItemObj.author || {};
+      if (buyAuthor.id && app.isBlocked && app.isBlocked(buyAuthor.id)) { toast(app, '作者在你的黑名单里，不能换取他 / 她的作品'); return true; }
       if (el) { el.disabled = true; }
       buyItem(app, buyItemObj).then(function (r) {
         toast(app, r.msg);

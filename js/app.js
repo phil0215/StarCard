@@ -70,7 +70,10 @@
       // 云端登录身份：provider = email | phone；cloudUid 为云端用户 ID
       provider: '', cloudUid: '', cloudEmail: '', cloudPhone: '',
       avatarColor: 0, avatarData: '',
-      privacy: { rememberLogin: true, showNickname: true, privacyBlur: false }
+      privacy: { rememberLogin: true, showNickname: true, privacyBlur: false, allowInvites: true, showInCommunity: true, allowBuyMyCards: true },
+      // 个人资料（社区展示用）与黑名单
+      profile: { bio: '', exp: '', school: '' },
+      blacklist: []
     };
   }
 
@@ -358,6 +361,18 @@
         d.privacy.rememberLogin = p.rememberLogin !== false;
         d.privacy.showNickname = p.showNickname !== false;
         d.privacy.privacyBlur = p.privacyBlur === true;
+        d.privacy.allowInvites = p.allowInvites !== false;
+        d.privacy.showInCommunity = p.showInCommunity !== false;
+        d.privacy.allowBuyMyCards = p.allowBuyMyCards !== false;
+        const pr = (a.profile && typeof a.profile === 'object') ? a.profile : {};
+        d.profile = {
+          bio: typeof pr.bio === 'string' ? pr.bio : '',
+          exp: typeof pr.exp === 'string' ? pr.exp : '',
+          school: typeof pr.school === 'string' ? pr.school : ''
+        };
+        d.blacklist = Array.isArray(a.blacklist)
+          ? a.blacklist.filter(function (b) { return b && typeof b.id === 'string'; }).slice(0, 500)
+          : [];
         // 关闭「记住登录状态」后，每次打开都视为未登录
         if (!d.privacy.rememberLogin) d.loggedIn = false;
         this.account = d;
@@ -708,6 +723,11 @@
       this.render();
       var before = more && c.items.length ? c.items[c.items.length - 1].createdAt : '';
       FC.Community.feed(20, before).then(function (rows) {
+        var bl = (self.account && self.account.blacklist) || [];
+        rows = (rows || []).filter(function (r) {
+          for (var k = 0; k < bl.length; k++) if (bl[k].id === r.authorId) return false;
+          return true;
+        });
         c.items = more ? c.items.concat(rows) : rows;
         c.loading = false; c.error = ''; c.loaded = true;
         // 点赞状态与「已发邀请」状态一并刷新
@@ -899,6 +919,7 @@
     // ---- 邀请 / 接受同桌 ----
     inviteDeskmate: function (uid, name) {
       if (!this.communityReady()) { this.toast('请先登录'); return; }
+      if (this.isBlocked(uid)) { this.toast('该用户在你的黑名单里，先到 设置 › 隐私设置 移出'); return; }
       var self = this;
       FC.Community.invite(uid, '', this.communityPostId, this.accountDisplayName()).then(function () {
         if (!self.communityOutSet) self.communityOutSet = {};
@@ -2128,8 +2149,47 @@
       this.saveAccount();
       if (key === 'privacyBlur' && !p[key]) setPrivacyCover(false);
       this.render();
-      const labels = { rememberLogin: '记住登录状态', showNickname: '显示昵称', privacyBlur: '离开窗口时隐藏内容' };
+      const labels = { rememberLogin: '记住登录状态', showNickname: '显示昵称', privacyBlur: '离开窗口时隐藏内容', allowInvites: '接受同桌邀请', showInCommunity: '在社区展示我的资料', allowBuyMyCards: '允许他人换我的卡组' };
       this.toast((labels[key] || '设置') + (p[key] ? '已开启' : '已关闭'));
+    },
+
+    // ---- 个人信息（简介/经历/学校）----
+    saveProfileInfo: function () {
+      const a = this.account;
+      if (!a.profile) a.profile = { bio: '', exp: '', school: '' };
+      const bio = byId('setBio'), exp = byId('setExp'), sch = byId('setSchool');
+      a.profile.bio = bio ? bio.value.trim().slice(0, 200) : '';
+      a.profile.exp = exp ? exp.value.trim().slice(0, 500) : '';
+      a.profile.school = sch ? sch.value.trim().slice(0, 60) : '';
+      this.saveAccount();
+      this.render();
+      this.toast('个人信息已保存');
+    },
+
+    // ---- 黑名单 ----
+    isBlocked: function (id) {
+      const bl = (this.account && this.account.blacklist) || [];
+      for (let i = 0; i < bl.length; i++) if (bl[i].id === id) return true;
+      return false;
+    },
+    blacklistAdd: function (id, name) {
+      if (!id) return;
+      if (this.isBlocked(id)) { this.toast('已经在黑名单里了'); return; }
+      const a = this.account;
+      if (!a.blacklist) a.blacklist = [];
+      a.blacklist.push({ id: id, name: name || '', at: Date.now() });
+      this.saveAccount();
+      this.render();
+      this.toast('已拉黑「' + (name || '该用户') + '」');
+      if (this.community && this.community.items && this.community.items.length) this.loadCommunity();
+    },
+    blacklistRemove: function (id) {
+      const a = this.account;
+      if (!a.blacklist) return;
+      a.blacklist = a.blacklist.filter(function (b) { return b.id !== id; });
+      this.saveAccount();
+      this.render();
+      this.toast('已移出黑名单');
     },
 
     // ---- 模态 ----
@@ -3588,6 +3648,9 @@
       case 'avatar-color': App.setAvatarColor(d.color); break;
       case 'avatar-clear': App.clearAvatarImage(); break;
       case 'privacy-toggle': App.togglePrivacy(d.key); break;
+      case 'profile-save': App.saveProfileInfo(); break;
+      case 'blacklist-remove': App.blacklistRemove(d.id); break;
+      case 'post-block': App.blacklistAdd(d.id, d.name); break;
       case 'privacy-info': App.saveLoginDraft(); App.openModal({ type: 'privacy' }); break;
       case 'account-logout': App.openModal({ type: 'confirm', title: '退出登录', message: '退出后本机学习数据仍会保留，重新登录即可继续使用。', action: 'logout' }); break;
       case 'account-clear': App.openModal({ type: 'confirm', title: '清除本机账户数据', message: '将删除昵称、邮箱、头像与隐私偏好，并退出登录。牌组与学习记录不受影响。', action: 'account-clear' }); break;

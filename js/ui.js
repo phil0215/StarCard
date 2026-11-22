@@ -1814,6 +1814,14 @@
           icon('userPlus', 'i14') + '加为同桌</button>';
       }
     }
+    let blockBtn = '';
+    if (!mine && me) {
+      const blArr = app.account.blacklist || [];
+      let isBl = false;
+      for (let bi = 0; bi < blArr.length; bi++) if (blArr[bi].id === p.authorId) { isBl = true; break; }
+      blockBtn = '<button class="post-act' + (isBl ? ' on' : '') + '" data-act="post-block" data-id="' + esc(p.authorId) + '" data-name="' + esc(p.authorName || '') + '">' +
+        icon('closeCircle', 'i16') + '<span>' + (isBl ? '已拉黑' : '拉黑') + '</span></button>';
+    }
     let res = '';
     if (p.kind === 'resource' && p.resourcePath) {
       res = '<div class="post-res">' +
@@ -1829,6 +1837,7 @@
       '<div class="post-who"><b>' + esc(p.authorName || '学习者') + '</b><small>' + esc(agoText(p.createdAt)) +
       (p.kind === 'resource' ? ' · 分享了词库' : '') + '</small></div>' +
       mateBtn +
+      blockBtn +
       '</header>' +
       (p.title ? '<h3 class="post-title">' + esc(p.title) + '</h3>' : '') +
       (p.body ? '<p class="post-body">' + esc(p.body) + '</p>' : '') +
@@ -2508,7 +2517,11 @@
       })();
       const lvNow = levelInfo(app);
       const CATS = [
-        { k: 'account', t: '账户与身份', d: '登录、昵称、账户 ID 与隐私', ico: 'user', tone: 'blue', g: '账户', val: (on ? name : '未登录') },
+        { k: 'account', t: '账户与身份', d: '登录、注册与登录状态', ico: 'user', tone: 'blue', g: '账户', val: (on ? name : '未登录') },
+        { k: 'profile', t: '个人信息', d: '头像、昵称、简介、经历与学校', ico: 'image', tone: 'blue', g: '账户', val: (a.nickname ? '已完善' : '未完善') },
+        { k: 'binding', t: '账户绑定', d: '邮箱、手机号与验证码登录', ico: 'link', tone: 'cyan', g: '账户', val: (on ? (a.provider === 'phone' ? '手机号' : '邮箱') : '未绑定') },
+        { k: 'privacyAcc', t: '隐私设置', d: '黑名单与社区隐私', ico: 'eye', tone: 'indigo', g: '账户', val: ((a.blacklist && a.blacklist.length) ? a.blacklist.length + ' 人' : '') },
+        { k: 'security', t: '账户安全', d: '账户 ID、云端备份与登录管理', ico: 'lock', tone: 'amber', g: '账户', val: (on ? '已保护' : '') },
         { k: 'level', t: '我的成就', d: '勋章、等级、任务、积分与碎片', ico: 'trophy', tone: 'amber', g: '账户', val: 'Lv.' + lvNow.level },
         { k: 'plan', t: '学习计划', d: '每日新卡与复习上限', ico: 'target', tone: 'blue', g: '学习', val: s.newCardsPerDay + ' / ' + s.reviewCardsPerDay },
         { k: 'fsrs', t: '记忆算法', d: 'FSRS-5 留存率与间隔', ico: 'zap', tone: 'purple', g: '学习', val: '' },
@@ -2606,16 +2619,78 @@
       html += paneBox('account',
         loginMini +
         '<div class="set-card">' +
-        row('user', 'blue', '昵称与头像',
-          '<button class="set-link" data-act="profile-open">' + esc(a.nickname || (on ? name : '未设置')) + icon('chevronRight', 'i12') + '</button>',
-          '点击修改') +
-        row('phone', 'blue', '手机尾号',
-          '<input class="set-num" id="setPhoneTail" value="' + esc(accountPhoneTail(app)) + '" placeholder="5186" maxlength="4" inputmode="numeric" />',
-          '账户 ID 的后四位') +
         row('shield', 'blue', '登录状态',
           '<span class="set-val' + (on ? ' ok' : '') + '">' + esc(on ? loginLabel : '未登录') + '</span>',
           on ? ((a.provider === 'phone' ? a.phone : a.email) || (a.joinedAt ? '加入于 ' + a.joinedAt.substring(0, 10) : '')) : '登录后账户 ID 可在多台设备间对应') +
         '</div>' +
+        '<div class="set-tip">头像昵称在「<button class="link-btn" data-act="set-pane" data-pane="profile">个人信息</button>」，邮箱手机在「<button class="link-btn" data-act="set-pane" data-pane="binding">账户绑定</button>」，黑名单在「<button class="link-btn" data-act="set-pane" data-pane="privacyAcc">隐私设置</button>」，账户 ID 与云端备份在「<button class="link-btn" data-act="set-pane" data-pane="security">账户安全</button>」。</div>' +
+        saveBar
+      );
+  
+      // —— 个人信息 ——
+      const pf = a.profile || { bio: '', exp: '', school: '' };
+      html += paneBox('profile',
+        '<div class="set-card">' +
+        row('image', 'blue', '头像',
+          '<button class="set-link" data-act="avatar-open">' + (a.avatarData ? '已设置' : '未设置') + icon('chevronRight', 'i12') + '</button>',
+          '换一张图片或选个颜色') +
+        row('user', 'blue', '昵称',
+          '<button class="set-link" data-act="profile-open">' + esc(a.nickname || (on ? name : '未设置')) + icon('chevronRight', 'i12') + '</button>',
+          '点击修改') +
+        '</div>' +
+        '<div class="set-card"><div class="set-block">' +
+        '<div class="set-block-h">简介</div>' +
+        '<textarea class="set-area" id="setBio" maxlength="200" placeholder="一句话介绍自己，会展示在社区（比如：高二 · 背单词狂魔）">' + esc(pf.bio) + '</textarea>' +
+        '<div class="set-block-h" style="margin-top:14px">经历</div>' +
+        '<textarea class="set-area" id="setExp" maxlength="500" placeholder="学习经历、目标、正在用的教材……（选填）">' + esc(pf.exp) + '</textarea>' +
+        '<div class="set-block-h" style="margin-top:14px">学校绑定</div>' +
+        '<div class="field"><input id="setSchool" type="text" value="' + esc(pf.school) + '" placeholder="学校名称（选填）" maxlength="60" autocomplete="off" /></div>' +
+        '<div class="set-block-sub">学校信息只用于班级 / 同桌匹配展示，不会公开给陌生人。</div>' +
+        '<div class="set-actions"><button class="btn btn-primary btn-sm" data-act="profile-save">' + icon('check', 'i14') + '保存资料</button></div>' +
+        '</div></div>'
+      );
+
+      // —— 账户绑定 ——
+      html += paneBox('binding',
+        '<div class="set-card">' +
+        row('mail', 'cyan', '邮箱',
+          '<span class="set-val' + (on && a.provider === 'email' ? ' ok' : '') + '">' + esc(on && a.provider === 'email' ? (a.cloudEmail || a.email || '已绑定') : '未绑定') + '</span>',
+          '邮箱验证码登录即视为绑定') +
+        row('phone', 'cyan', '手机号',
+          '<span class="set-val' + (on && a.provider === 'phone' ? ' ok' : '') + '">' + esc(on && a.provider === 'phone' ? (a.cloudPhone || a.phone || '已绑定') : '未绑定') + '</span>',
+          '手机验证码登录即视为绑定') +
+        row('user', 'cyan', '手机尾号',
+          '<input class="set-num" id="setPhoneTail" value="' + esc(accountPhoneTail(app)) + '" placeholder="5186" maxlength="4" inputmode="numeric" />',
+          '账户 ID 的后四位') +
+        '</div>' +
+        '<div class="set-tip">换绑 = 用新的邮箱 / 手机号重新走一次验证码登录。<button class="link-btn" data-act="set-pane" data-pane="account">去登录 / 换绑</button></div>'
+      );
+
+      // —— 隐私设置（黑名单 + 社区隐私）——
+      const bl = a.blacklist || [];
+      html += paneBox('privacyAcc',
+        '<div class="set-card"><div class="set-block">' +
+        '<div class="set-block-h">社区隐私</div>' +
+        privacyRow('allowInvites', p.allowInvites !== false, '接受同桌邀请', '关闭后，别人在社区里不能邀请你做同桌') +
+        privacyRow('showInCommunity', p.showInCommunity !== false, '在社区展示我的昵称与头像', '关闭后发帖对他人显示为「同学」+ 默认头像') +
+        privacyRow('allowBuyMyCards', p.allowBuyMyCards !== false, '允许他人换取我分享的卡组', '关闭后你的作品不会被别人用积分换走') +
+        '</div></div>' +
+        '<div class="set-card"><div class="set-block">' +
+        '<div class="set-block-h">黑名单' + (bl.length ? '（' + bl.length + ' 人）' : '') + '</div>' +
+        (bl.length
+          ? bl.map(function (b) {
+              return '<div class="bl-row">' +
+                '<span class="ava ava-c0">' + esc(String(b.name || '?').slice(0, 1)) + '</span>' +
+                '<span class="bl-main"><b>' + esc(b.name || '同学') + '</b><small>' + esc(b.id) + '</small></span>' +
+                '<button class="btn btn-sm" data-act="blacklist-remove" data-id="' + esc(b.id) + '">移出</button></div>';
+            }).join('')
+          : '<div class="set-block-sub">还没有拉黑任何人。社区帖子旁的「拉黑」按钮可以把人加进来：被拉黑的人不能邀请你做同桌、不能换取你分享的卡组，你看社区时也会隐藏他 / 她的帖子。</div>') +
+        '</div></div>' +
+        '<div class="set-actions"><button class="btn btn-sm" data-act="privacy-info">' + icon('info', 'i14') + '隐私说明</button></div>'
+      );
+
+      // —— 账户安全 ——
+      html += paneBox('security',
         '<div class="set-card"><div class="set-block">' +
         '<div class="set-block-h">账户 ID</div>' +
         '<div class="set-idbox"><input class="set-id-input" id="setIdCode" value="' + esc(idt.code) + '" placeholder="A20265186__9aK2z3" spellcheck="false" autocapitalize="off" autocomplete="off" /></div>' +
@@ -2623,17 +2698,19 @@
         '<div class="set-actions"><button class="btn btn-sm" data-act="id-regen">' + icon('sparkles', 'i14') + '随机换一个</button></div>' +
         '</div></div>' +
         '<div class="set-card"><div class="set-block">' +
-        '<div class="set-block-h">隐私</div>' +
-        privacyRow('rememberLogin', p.rememberLogin !== false, '记住登录状态', '关闭后每次打开都要重新登录') +
-        privacyRow('showNickname', p.showNickname !== false, '显示我的昵称', '关闭后界面中统一显示为「学习者」') +
-        privacyRow('privacyBlur', p.privacyBlur === true, '离开窗口时隐藏内容', '切到其他窗口时自动遮盖学习界面') +
+        '<div class="set-block-h">云端备份</div>' +
+        '<div class="set-block-sub">' + (on ? '已登录（' + esc(loginLabel) + '）。学习记录与账户资料会随登录同步到云端，换设备不丢。' : '登录后可把学习记录与账户资料备份到云端，换设备不丢。') + '</div>' +
+        '<div class="set-actions"><button class="btn btn-sm" data-act="set-pane" data-pane="data">' + icon('cloud', 'i14') + '前往数据与备份</button></div>' +
+        '</div></div>' +
+        '<div class="set-card"><div class="set-block">' +
+        '<div class="set-block-h">登录管理</div>' +
         '<div class="set-actions">' +
-        '<button class="btn btn-sm" data-act="privacy-info">' + icon('info', 'i14') + '隐私说明</button>' +
         (on ? '<button class="btn btn-sm" data-act="account-logout">' + icon('logout', 'i14') + '退出登录</button>' : '') +
+        '<button class="btn btn-sm" data-act="account-clear">' + icon('trash', 'i14') + '清除本机账户数据</button>' +
         '</div></div></div>' +
         saveBar
       );
-  
+
       // 等级
       const lv = lvNow;
       html += paneBox('level', achievementPane(app, lvNow, streakStat(app)));
