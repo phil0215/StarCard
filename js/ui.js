@@ -261,17 +261,35 @@
         children.push(pe);
       }
     }
-    const sdv = streakStat(app);
-    const sub = on ? (sdv.days > 0 ? '连续打卡 ' + sdv.days + ' 天' : (sdv.doneToday ? '今日已打卡' : '连续打卡 0 天')) : '未登录';
+    // —— 牌组区：与字符串版侧栏保持一致（所有牌组 + 自建文件夹 + 动作）——
+    const _st = (app && app.state) || {};
+    const _decks = _st.decks || [];
+    children.push(new A.El('div', '牌组').cls('nav-label'));
+    children.push(new A.El('div').cls('tab side-deck' + (app && app.folderId === '__all' ? ' active' : ''))
+      .attr('act', 'folder-open').attr('id', '__all').title('所有牌组（' + _decks.length + ' 个）').children([
+        new A.El('span').cls('ico').child(iconEl('layers', 'i20')),
+        new A.El('span', '所有牌组').cls('lab')
+      ]));
+    const _folders = _st.folders || [];
+    for (let fi = 0; fi < _folders.length; fi++) {
+      const _f = _folders[fi];
+      const _n = FC.decksInFolder ? FC.decksInFolder(_st, _f.id).length : 0;
+      children.push(new A.El('div').cls('tab side-deck' + (app && app.folderId === _f.id ? ' active' : ''))
+        .attr('act', 'folder-open').attr('id', _f.id).title(_f.name + '（' + _n + ' 个牌组）').children([
+          new A.El('span').cls('ico').child(iconEl('folder', 'i20')),
+          new A.El('span', _f.name).cls('lab')
+        ]));
+    }
+    children.push(new A.El('div').cls('side-decks-actions').children([
+      new A.El('button').cls('sd-act').attr('act', 'folder-new').attr('title', '新建文件夹').child(iconEl('plus', 'i18')),
+      new A.El('button').cls('sd-act').attr('act', 'import-hub').attr('title', '导入词库（.srcd / .apkg / CSV）').child(iconEl('download', 'i18'))
+    ]));
+    // 账户行：头像 + 单行小字名字（无箭头、无副行）
     children.push(new A.El('div').cls('side-account' + (on ? ' on' : '')).attr('act', 'account-menu').title('账户菜单').children([
       avatarEl(acc, 'ava-sm'),
-      new A.El('span').cls('sa-txt').children([
-        new A.El('span').cls('sa-name-row').children([
-          new A.El('span', on ? name : '匿名用户').cls('sa-name'),
-          iconEl('chevronRight', 'i14')
-        ]),
-        new A.El('span', sub).cls('sa-sub')
-      ])
+      new A.El('span').cls('sa-txt').child(
+        new A.El('span', on ? name : '匿名用户').cls('sa-name')
+      )
     ]));
     return new A.El('nav').cls('tabbar').children(children);
   }
@@ -475,13 +493,9 @@
       '<button class="sd-act" data-act="folder-new" title="新建文件夹">' + icon('plus', 'i18') + '</button>' +
       '<button class="sd-act" data-act="import-hub" title="导入词库（.srcd / .apkg / CSV）">' + icon('download', 'i18') + '</button>' +
       '</div>';
-    const _sd = streakStat(app);
-    const _sub = on ? (_sd.days > 0 ? '连续打卡 ' + _sd.days + ' 天' : (_sd.doneToday ? '今日已打卡' : '连续打卡 0 天')) : '未登录';
     html += '<div class="side-account' + (on ? ' on' : '') + '" data-act="account-menu" title="账户菜单">' +
       avatarFace(acc, 'ava-sm') +
-      '<span class="sa-txt"><span class="sa-name-row"><span class="sa-name">' + esc(on ? name : '匿名用户') + '</span>' +
-      icon('chevronRight', 'i14') + '</span>' +
-      '<span class="sa-sub">' + esc(_sub) + '</span></span>' +
+      '<span class="sa-txt"><span class="sa-name">' + esc(on ? name : '匿名用户') + '</span></span>' +
       '</div>' +
       '</nav>';
     return html;
