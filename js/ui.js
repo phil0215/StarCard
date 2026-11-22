@@ -237,6 +237,7 @@
       new A.El('button').cls('sb-search').attr('act', 'side-search').attr('title', '搜索卡片 / 牌组')
         .attr('aria-label', '搜索').child(iconEl('search', 'i18'))
     ]));
+    children.push(new A.El('div').html(streakMiniHtml(app)));
     const unread = noticeUnread(app);
     let lastGroup = '';
     for (let i = 0; i < NAV.length; i++) {
@@ -431,7 +432,8 @@
     const name = (app && app.accountDisplayName) ? app.accountDisplayName() : (acc.nickname || '学习者');
     let html = '<nav class="tabbar' + (app && app.sideHide ? ' side-hidden' : '') + '">' +
       '<div class="side-brand"><span class="sb-name">闪星卡</span>' +
-      '<button class="sb-search" data-act="side-search" title="搜索卡片 / 牌组" aria-label="搜索">' + icon('search', 'i18') + '</button></div>';
+      '<button class="sb-search" data-act="side-search" title="搜索卡片 / 牌组" aria-label="搜索">' + icon('search', 'i18') + '</button></div>' +
+      streakMiniHtml(app);
     const unread = noticeUnread(app);
     let lastGroup = '';
     for (let i = 0; i < NAV.length; i++) {
