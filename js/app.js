@@ -142,7 +142,7 @@
     activeClassId: '',
     battle: null,
     battleBookId: '',
-    battlePlayersText: '我,同桌A,同桌B',
+    battlePlayersText: '',
     battleHandText: '10',
     modal: null,
     apkgImport: null,
@@ -3732,6 +3732,17 @@
     if (t.classList && t.classList.contains('sd-ta')) {
       t.style.height = 'auto';
       t.style.height = (t.scrollHeight + 2) + 'px';
+    }
+    // 工坊编辑器：正面 / 背面改动即时刷新预览
+    if (t.id === 'sdFront' || t.id === 'sdBack') {
+      const pv = byId(t.id === 'sdFront' ? 'sdPvFront' : 'sdPvBack');
+      if (pv) {
+        let h = String(t.value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        h = h.replace(/==([^=\n]{1,60})==/g, '<mark class="sd-hl">$1</mark>');
+        h = h.replace(/\*\*([^*\n]{1,60})\*\*/g, '<b>$1</b>');
+        h = h.replace(/\n/g, '<br/>');
+        pv.innerHTML = h || '<i class="sd-pv-empty">（空）</i>';
+      }
     }
     // 工坊卡片列表搜索：纯 DOM 过滤，不重绘整个应用（保住焦点与中文输入法）
     if (t.id === 'sdQuery') {

@@ -1,0 +1,347 @@
+/* ============================================================
+   闪星卡 StarCard · v2 皮肤层（HarmonyOS 液态玻璃）
+   只叠加，不改结构；加载顺序在 style.css 之后。
+   ============================================================ */
+:root {
+  --sc-glass-1: rgba(255, 255, 255, .035);
+  --sc-glass-2: rgba(255, 255, 255, .062);
+  --sc-glass-3: rgba(255, 255, 255, .09);
+  --sc-hair: rgba(255, 255, 255, .10);
+  --sc-hair-strong: rgba(255, 255, 255, .16);
+  --sc-blue: #0A59F7;
+  --sc-blue-hover: #2E6BFF;
+  --sc-blue-text: #7FA8FF;
+}
+
+/* ---------- 1. 令牌：纯黑 + 玻璃 ---------- */
+html[data-theme="dark"],
+html[data-theme="dark"][data-look],
+html[data-theme="dark"][data-bg],
+html[data-theme="dark"][data-preset] {
+  --bg: #000000;
+  --bg-side: rgba(255, 255, 255, .035);
+  --surface: rgba(255, 255, 255, .062);
+  --surface-2: rgba(255, 255, 255, .085);
+  --ink-1: #FFFFFF;
+  --ink-2: rgba(255, 255, 255, .80);
+  --ink-3: rgba(255, 255, 255, .56);
+  --ink-4: rgba(255, 255, 255, .36);
+  --line: rgba(255, 255, 255, .10);
+  --line-2: rgba(255, 255, 255, .16);
+  --brand: #7FA8FF;
+  --brand-strong: #3E74FF;
+  --brand-soft: rgba(46, 107, 255, .16);
+  --brand-ring: rgba(46, 107, 255, .34);
+  --green: #3DD68C;      --green-soft: rgba(61, 214, 140, .14);
+  --amber: #FFB020;      --amber-soft: rgba(255, 176, 32, .14);
+  --red: #FF5B6E;        --red-soft: rgba(255, 91, 110, .14);
+  --gold: #FFD166;
+  --pink: #FF7BA0;       --pink-soft: rgba(255, 123, 160, .14);
+  --yellow: #FFD166;     --yellow-soft: rgba(255, 209, 102, .14);
+  --teal: #3DD9BC;       --teal-soft: rgba(61, 217, 188, .14);
+  --orange: #FF9E78;     --orange-soft: rgba(255, 158, 120, .14);
+  --blue: #8AAFFF;       --blue-soft: rgba(138, 175, 255, .14);
+  --sh-xs: 0 1px 0 rgba(255, 255, 255, .05);
+  --sh-sm: 0 10px 30px rgba(0, 0, 0, .35);
+  --sh-md: 0 18px 44px rgba(0, 0, 0, .45);
+  --sh-lg: 0 28px 70px rgba(0, 0, 0, .55);
+}
+
+/* ---------- 2. 画布与外壳 ---------- */
+html, body { background: #000 !important; }
+body {
+  color: var(--ink-1);
+  background-image:
+    radial-gradient(900px 520px at 6% -8%, rgba(10, 89, 247, .20), transparent 62%),
+    radial-gradient(760px 460px at 98% 2%, rgba(120, 80, 255, .13), transparent 58%),
+    radial-gradient(820px 540px at 50% 112%, rgba(10, 89, 247, .09), transparent 62%) !important;
+  background-attachment: fixed !important;
+  -webkit-font-smoothing: antialiased;
+}
+
+html[data-theme="dark"] .tabbar {
+  background: var(--sc-glass-1) !important;
+  border-right: 1px solid rgba(255, 255, 255, .07) !important;
+  backdrop-filter: blur(40px) saturate(150%);
+  -webkit-backdrop-filter: blur(40px) saturate(150%);
+}
+html[data-theme="dark"] .content { background: transparent !important; }
+
+/* 侧栏选中态：浅玻璃 + 左侧细蓝条 */
+html[data-theme="dark"] .tab.active {
+  background: rgba(255, 255, 255, .09) !important;
+  color: #fff !important;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .06);
+  border-radius: 12px;
+}
+html[data-theme="dark"] .tab.active .ico { color: var(--sc-blue-text); }
+html[data-theme="dark"] .tab:hover { background: rgba(255, 255, 255, .05); color: #fff; }
+html[data-theme="dark"] .nav-label { color: rgba(255, 255, 255, .32); letter-spacing: .08em; }
+
+/* ---------- 3. 卡片：玻璃三层 ---------- */
+html[data-theme="dark"] .list-item,
+html[data-theme="dark"] .book-card,
+html[data-theme="dark"] .card,
+html[data-theme="dark"] .panel,
+html[data-theme="dark"] .sheet,
+html[data-theme="dark"] .modal,
+html[data-theme="dark"] .sd-form,
+html[data-theme="dark"] .empty {
+  background: linear-gradient(180deg, rgba(255, 255, 255, .075), rgba(255, 255, 255, .048)) !important;
+  border: 1px solid var(--sc-hair) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .07) !important;
+  backdrop-filter: blur(30px) saturate(160%);
+  -webkit-backdrop-filter: blur(30px) saturate(160%);
+  border-radius: 20px;
+}
+html[data-theme="dark"] .list-item[data-act]:hover,
+html[data-theme="dark"] .book-card:hover {
+  background: rgba(255, 255, 255, .085) !important;
+  border-color: rgba(255, 255, 255, .18) !important;
+  transform: translateY(-2px);
+}
+html[data-theme="dark"] .list-item[data-act]:active { background: rgba(255, 255, 255, .10) !important; }
+
+/* ---------- 4. 按钮：实心蓝只给主动作 ---------- */
+html[data-theme="dark"] .btn {
+  background: rgba(255, 255, 255, .07) !important;
+  border: 1px solid rgba(255, 255, 255, .12) !important;
+  color: rgba(255, 255, 255, .86) !important;
+  box-shadow: none !important;
+  border-radius: 12px;
+}
+html[data-theme="dark"] .btn:hover {
+  background: rgba(255, 255, 255, .11) !important;
+  border-color: rgba(255, 255, 255, .18) !important;
+}
+html[data-theme="dark"] .btn:active { background: rgba(255, 255, 255, .14) !important; }
+
+html[data-theme="dark"] .btn-primary,
+html[data-theme="dark"] .btn-accent {
+  background: #0A59F7 !important;
+  border-color: #0A59F7 !important;
+  color: #fff !important;
+  box-shadow: 0 6px 20px rgba(10, 89, 247, .30) !important;
+  background-image: none !important;
+}
+html[data-theme="dark"] .btn-primary:hover,
+html[data-theme="dark"] .btn-accent:hover {
+  background: #2E6BFF !important;
+  border-color: #2E6BFF !important;
+}
+html[data-theme="dark"] .btn-primary:active { background: #0847CC !important; }
+
+/* ---------- 5. 输入控件 ---------- */
+html[data-theme="dark"] input:not([type="file"]):not([type="checkbox"]):not([type="radio"]),
+html[data-theme="dark"] select,
+html[data-theme="dark"] textarea {
+  background: rgba(255, 255, 255, .06) !important;
+  border: 1px solid rgba(255, 255, 255, .12) !important;
+  color: #fff !important;
+  border-radius: 12px;
+}
+html[data-theme="dark"] input::placeholder,
+html[data-theme="dark"] textarea::placeholder { color: rgba(255, 255, 255, .32) !important; }
+html[data-theme="dark"] input:focus,
+html[data-theme="dark"] select:focus,
+html[data-theme="dark"] textarea:focus {
+  border-color: rgba(46, 107, 255, .55) !important;
+  background: rgba(255, 255, 255, .085) !important;
+  outline: none;
+}
+
+/* ---------- 6. 进度 / 环 / 标签 ---------- */
+html[data-theme="dark"] .progress { background: rgba(255, 255, 255, .09) !important; height: 5px; border-radius: 999px; }
+html[data-theme="dark"] .progress > span {
+  background: #2E6BFF !important;
+  background-image: none !important;
+  border-radius: 999px;
+}
+html[data-theme="dark"] .deck-ring {
+  background: conic-gradient(#2E6BFF calc(var(--p, 0) * 1%), rgba(255, 255, 255, .10) 0) !important;
+}
+html[data-theme="dark"] .deck-ring.done {
+  background: conic-gradient(#3DD68C 100%, rgba(255, 255, 255, .10) 0) !important;
+}
+html[data-theme="dark"] .deck-ring b { color: #fff; }
+html[data-theme="dark"] .dchip { border-radius: 999px; font-weight: 500; }
+html[data-theme="dark"] .dchip.dc-new { background: rgba(255, 255, 255, .10); color: rgba(255, 255, 255, .72); }
+html[data-theme="dark"] .dchip.dc-due { background: rgba(255, 176, 32, .15); color: #FFC46B; }
+html[data-theme="dark"] .dchip.dc-done { background: rgba(61, 214, 140, .13); color: #6FE0AB; }
+
+/* 头像色块：统一压成低饱和玻璃色 */
+html[data-theme="dark"] .avatar,
+html[data-theme="dark"] .deck-av { background: rgba(46, 107, 255, .16) !important; color: #9CBCFF !important; border-radius: 13px; }
+html[data-theme="dark"] .av-tone-0, html[data-theme="dark"] .av-tone-1, html[data-theme="dark"] .av-tone-2,
+html[data-theme="dark"] .av-tone-3, html[data-theme="dark"] .av-tone-4, html[data-theme="dark"] .av-tone-5,
+html[data-theme="dark"] .av-tone-6, html[data-theme="dark"] .av-tone-7 {
+  background: rgba(255, 255, 255, .085) !important; color: #fff !important;
+}
+
+/* ---------- 7. 今日任务（新增组件） ---------- */
+.daily-hero {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 22px;
+  padding: 20px 24px;
+  border-radius: 24px;
+  background: linear-gradient(120deg, rgba(10, 89, 247, .22), rgba(255, 255, 255, .055) 52%, rgba(255, 255, 255, .045)) !important;
+  border: 1px solid rgba(46, 107, 255, .26) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .10), 0 18px 44px rgba(0, 0, 0, .38);
+  backdrop-filter: blur(34px) saturate(160%);
+  -webkit-backdrop-filter: blur(34px) saturate(160%);
+  margin-bottom: 4px;
+}
+.daily-hero .dh-main { min-width: 220px; flex: 1 1 260px; }
+.daily-hero .dh-tag {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 23px; padding: 0 10px; border-radius: 999px;
+  background: rgba(255, 255, 255, .12); color: rgba(255, 255, 255, .82);
+  font-size: 11px; font-weight: 500;
+}
+.daily-hero .dh-tag i { width: 6px; height: 6px; border-radius: 50%; background: #FFB020; display: block; font-style: normal; }
+.daily-hero .dh-num {
+  display: flex; align-items: baseline; gap: 8px;
+  margin: 10px 0 6px; color: #fff;
+}
+.daily-hero .dh-num b { font-size: 40px; font-weight: 600; letter-spacing: -.03em; line-height: 1; }
+.daily-hero .dh-num span { font-size: 12.5px; color: rgba(255, 255, 255, .55); }
+.daily-hero .dh-note { font-size: 11.5px; color: rgba(255, 255, 255, .55); line-height: 1.6; }
+.daily-hero .dh-acts { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+.daily-hero .dh-stats {
+  display: flex; gap: 26px; margin-left: auto; flex: 0 1 auto; flex-wrap: wrap;
+}
+.daily-hero .dh-stat span { display: block; font-size: 10.5px; color: rgba(255, 255, 255, .40); }
+.daily-hero .dh-stat b { display: block; font-size: 17px; font-weight: 600; margin-top: 2px; }
+@media (max-width: 720px) {
+  .daily-hero { gap: 14px; padding: 16px 16px; }
+  .daily-hero .dh-stats { margin-left: 0; width: 100%; gap: 22px; }
+  .daily-hero .dh-num b { font-size: 32px; }
+}
+
+/* ---------- 8. 牌组行：单一“开始” ---------- */
+html[data-theme="dark"] .row-go {
+  flex: none;
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 12.5px; color: var(--sc-blue-text);
+  padding-left: 6px;
+}
+html[data-theme="dark"] .row-go .ic { width: 13px; height: 13px; }
+html[data-theme="dark"] .li-actions { gap: 6px; }
+
+/* ---------- 9. 细节收口 ---------- */
+html[data-theme="dark"] .chev { color: rgba(255, 255, 255, .34); }
+html[data-theme="dark"] .empty { color: var(--ink-3); }
+html[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, .14) !important;
+  background-clip: content-box !important;
+  border: 3px solid transparent !important;
+  border-radius: 999px;
+}
+html[data-theme="dark"] .content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, .14) !important;
+  background-clip: content-box !important;
+}
+html[data-theme="dark"] .sg-head .sg-name,
+html[data-theme="dark"] .sf-name { color: #fff; }
+html[data-theme="dark"] .switch { background: rgba(255, 255, 255, .12); }
+html[data-theme="dark"] .switch.on { background: #0A59F7; }
+
+/* ---------- 11. 覆盖「素白」那层更高特异性的规则 ---------- */
+html[data-theme="dark"][data-look="plain"] .btn-primary,
+html[data-theme="dark"][data-look="plain"] .btn-primary:hover,
+html[data-theme="dark"][data-look="glass"] .btn-primary,
+html[data-theme="dark"][data-look="glass"] .btn-primary:hover {
+  background: var(--sc-blue) !important;
+  background-image: none !important;
+  border-color: transparent !important;
+  color: #fff !important;
+  box-shadow: 0 6px 20px rgba(10, 89, 247, .42) !important;
+  animation: none !important;
+}
+html[data-theme="dark"][data-look="plain"] .btn-primary:hover,
+html[data-theme="dark"][data-look="glass"] .btn-primary:hover { background: var(--sc-blue-hover) !important; }
+html[data-theme="dark"][data-look="plain"] .btn-primary:disabled,
+html[data-theme="dark"][data-look="plain"] .btn-primary.is-off {
+  background: rgba(255, 255, 255, .10) !important; color: rgba(255, 255, 255, .40) !important; box-shadow: none !important;
+}
+
+/* 保存条吸底，滚动时始终可见 */
+html[data-theme="dark"] .set-save {
+  position: sticky; bottom: 14px; z-index: 5;
+  background: rgba(20, 20, 22, .72) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(160%); backdrop-filter: blur(24px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, .10) !important;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, .45);
+}
+
+/* ---------- 12. 商铺货架：宽屏不横滑，全部可见 ---------- */
+@media (min-width: 1100px) {
+  html[data-theme="dark"] .shp-rail {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(196px, 1fr));
+    overflow: visible !important;
+    scroll-snap-type: none !important;
+    padding-bottom: 4px;
+  }
+  html[data-theme="dark"] .shp-card { flex: initial !important; }
+}
+
+/* ---------- 13. 商铺：货架铺满整行 + 封面去艳 ---------- */
+html[data-theme="dark"] .shp-shelf,
+html[data-theme="dark"] .shp-tip,
+html[data-theme="dark"] .shp-owned-hint,
+html[data-theme="dark"] .shp-blank,
+html[data-theme="dark"] .shp-my,
+html[data-theme="dark"] .shp-tabs { grid-column: 1 / -1 !important; width: 100% !important; }
+@media (min-width: 1100px) {
+  html[data-theme="dark"] .shp-rail { grid-template-columns: repeat(auto-fill, minmax(158px, 1fr)) !important; }
+}
+html[data-theme="dark"] .shp-cover { filter: saturate(.62) brightness(.9); }
+html[data-theme="dark"] .shp-card {
+  background: rgba(255, 255, 255, .055) !important;
+  border: 1px solid rgba(255, 255, 255, .09) !important;
+  border-radius: 16px !important;
+  overflow: hidden;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06);
+}
+html[data-theme="dark"] .shp-card:hover { background: rgba(255, 255, 255, .085) !important; }
+
+/* ---------- 14. 内容栅格统一：所有页同一栏宽，居中 ---------- */
+html[data-theme="dark"] .content:not(.content--studio):not(.content--split) {
+  width: 100%;
+  max-width: none !important;
+  margin: 0 !important;
+}
+
+
+/* ---------- 15. 工坊编辑器：卡片预览 ---------- */
+html[data-theme="dark"] .sd-preview {
+  margin: 4px 0 12px;
+  padding: 14px 16px 12px;
+  border-radius: 16px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, .085), rgba(255, 255, 255, .045)) !important;
+  border: 1px solid rgba(255, 255, 255, .11);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .08);
+}
+html[data-theme="dark"] .sd-pv-lab {
+  font-size: 11px; letter-spacing: .06em; color: rgba(255, 255, 255, .34); margin-bottom: 8px;
+}
+html[data-theme="dark"] .sd-pv-front {
+  font-size: 22px; font-weight: 600; color: #fff; line-height: 1.35; letter-spacing: -.3px;
+}
+html[data-theme="dark"] .sd-pv-back {
+  margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, .08);
+  font-size: 13.5px; line-height: 1.7; color: rgba(255, 255, 255, .78);
+}
+html[data-theme="dark"] .sd-hl {
+  background: rgba(10, 89, 247, .28) !important; color: #DCE8FF !important;
+  padding: 0 4px; border-radius: 5px; font-weight: 600;
+}
+html[data-theme="dark"] .sd-pv-empty { color: rgba(255, 255, 255, .28); font-style: normal; }
+html[data-theme="dark"] .sd-pv-note {
+  margin-top: 10px; font-size: 11px; color: rgba(255, 255, 255, .28);
+}

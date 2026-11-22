@@ -373,6 +373,7 @@
 
   const NAV = [
     { kind: 'tab', tab: 1, label: '工坊', ico: 'pencil', group: '学习' },
+    { kind: 'act', act: 'study-all', label: '开始复习', ico: 'play', group: '学习' },
     { kind: 'tab', tab: 2, label: '班级', ico: 'users', group: '一起学' },
     { kind: 'tab', tab: 3, label: '同桌', ico: 'link', group: '一起学' },
     { kind: 'tab', tab: 8, label: '社区', ico: 'chat', group: '一起学' },
@@ -981,6 +982,14 @@
     return Math.max(min, Math.min(24, est + 1));
   }
 
+  function richCard(text) {
+    let h = esc(String(text == null ? '' : text));
+    h = h.replace(/==([^=\n]{1,60})==/g, '<mark class="sd-hl">$1</mark>');
+    h = h.replace(/\*\*([^*\n]{1,60})\*\*/g, '<b>$1</b>');
+    h = h.replace(/\n/g, '<br/>');
+    return h || '<i class="sd-pv-empty">（空）</i>';
+  }
+
   function studioDetailHtml(app) {
     const st = app.state;
     const sel = app.studio && app.studio.sel;
@@ -1017,7 +1026,12 @@
     flagRow += '</div>';
     return '<div class="sd-head"><span class="sd-deck-chip">' + icon('layers', 'i14') + esc(r.deck.name) + '</span>' +
       '<button class="btn btn-sm btn-more" data-act="deck-menu" data-id="' + esc(r.deck.id) + '" title="牌组选项">' + icon('more', 'i16') + '</button></div>' +
-      flagRow + '<div class="sd-form">' +
+      flagRow +
+      '<div class="sd-preview"><div class="sd-pv-lab">学习者看到的样子</div>' +
+      '<div class="sd-pv-front" id="sdPvFront">' + richCard(f.Front) + '</div>' +
+      '<div class="sd-pv-back" id="sdPvBack">' + richCard(f.Back) + '</div>' +
+      '<div class="sd-pv-note">== 包裹的词会高亮，换行保留</div></div>' +
+      '<div class="sd-form">' +
       '<label class="sd-label">模板</label><select id="sdType" class="sd-input">' + typeOpts + '</select>' +
       '<label class="sd-label">正面</label><textarea id="sdFront" class="sd-input sd-ta" data-min="2" rows="' + taRows(f.Front, 2) + '">' + esc(f.Front || '') + '</textarea>' +
       '<label class="sd-label">背面</label><textarea id="sdBack" class="sd-input sd-ta" data-min="3" rows="' + taRows(f.Back, 3) + '">' + esc(f.Back || '') + '</textarea>' +
@@ -1028,6 +1042,55 @@
       '<div class="sd-actions"><button class="btn btn-primary" data-act="studio-save" data-id="' + esc(c.id) + '">' + icon('check', 'i14') + '保存</button>' +
       '<button class="btn" data-act="card-del" data-id="' + esc(c.id) + '">' + icon('trash', 'i14') + '删除</button></div>' +
       '</div>';
+  }
+
+  // 今日任务：到期 / 新卡 / 掌握度，给工坊与所有牌组共用（v2）
+  function todayStat(app) {
+    const st = app.state || {};
+    const s = new FC.Scheduler(st.settings);
+    const now = Date.now();
+    let due = 0, fresh = 0, total = 0, mastered = 0, inProgress = 0;
+    for (let i = 0; i < (st.decks || []).length; i++) {
+      const d = st.decks[i];
+      const c = s.deckCounts(d, now);
+      due += c[1]; fresh += c[0]; total += d.cards.length;
+      for (let k = 0; k < d.cards.length; k++) {
+        const cc = d.cards[k];
+        if (cc.state === FC.STATE_LEARNING || cc.state === FC.STATE_RELEARNING) inProgress += 1;
+      }
+    }
+    mastered = Math.max(0, total - due - fresh - inProgress);
+    return { due: due, fresh: fresh, total: total, mastered: mastered };
+  }
+
+  function dailyHeroHtml(app) {
+    const t = todayStat(app);
+    const sd = streakStat(app);
+    const minutes = Math.max(1, Math.round((t.due + Math.min(t.fresh, 20)) * 0.5));
+    const hasWork = (t.due + t.fresh) > 0;
+    const label = t.due > 0 ? '开始复习' : (t.fresh > 0 ? '开始学习' : '今天已完成');
+    const bigNum = t.due > 0 ? t.due : t.fresh;
+    const bigUnit = t.due > 0 ? '张到期' : '张新卡';
+    return '<section class="daily-hero">' +
+      '<div class="dh-main">' +
+        '<span class="dh-tag"><i></i>今日任务</span>' +
+        '<div class="dh-num"><b>' + bigNum + '</b><span>' + bigUnit + '</span>' +
+          (t.due > 0 && t.fresh > 0 ? '<span style="margin-left:10px">另有 ' + t.fresh + ' 张新卡</span>' : '') + '</div>' +
+        '<div class="dh-note">' + (hasWork ? ('预计 ' + minutes + ' 分钟 · ') : '') +
+          '连续 ' + (sd.days || 0) + ' 天 · 已掌握 ' + t.mastered + ' / ' + t.total + '</div>' +
+        '<div class="dh-acts">' +
+          '<button class="btn btn-primary" data-act="study-all"' + (hasWork ? '' : ' disabled') + '>' +
+            icon('play', 'i14') + label + '</button>' +
+          '<button class="btn" data-act="folder-open" data-id="__all">看所有牌组</button>' +
+        '</div>' +
+      '</div>' +
+      '<div class="dh-stats">' +
+        '<div class="dh-stat"><span>卡片总数</span><b>' + t.total + '</b></div>' +
+        '<div class="dh-stat"><span>今日待复习</span><b>' + t.due + '</b></div>' +
+        '<div class="dh-stat"><span>连续打卡</span><b>' + (sd.days || 0) + ' 天</b></div>' +
+        '<div class="dh-stat"><span>累计掌握</span><b>' + (t.total ? Math.round(t.mastered / t.total * 100) : 0) + '%</b></div>' +
+      '</div>' +
+    '</section>';
   }
 
   function wordBookPage(app) {
@@ -1058,7 +1121,9 @@
       html += '</select>';
     }
     html += '<span class="stg-count">' + (scopeDeck ? scopeDeck.cards.length : totalAll) + ' 张卡片</span>' +
-      '<button class="btn btn-sm btn-primary" data-act="new-deck">' + icon('plus', 'i14') + '添加牌组</button>' +
+      '<button class="btn btn-sm btn-primary" data-act="study-all" title="开始复习今天到期的卡片">' +
+        icon('play', 'i14') + '今日 ' + (function () { const t = todayStat(app); return (t.due > 0 ? t.due + ' 张到期' : (t.fresh > 0 ? '开始学习' : '去复习')); })() + '</button>' +
+      '<button class="btn btn-sm" data-act="new-deck">' + icon('plus', 'i14') + '添加牌组</button>' +
       '</header><div class="content content--studio">';
 
     // —— 已移除的词书：默认折叠，可恢复重新显示（避免误删后无处找回）——
@@ -1199,7 +1264,7 @@
       '<div class="meta">' + (d.description ? esc(d.description) + ' · ' : '') + '已掌握 ' + mastered + ' / ' + total + ' 张' +
       (total && mastered >= total ? ' · 全部掌握' : '') + '</div>' +
       '<div class="progress deck-prog"><span style="width:' + pct + '%"></span></div></div>' +
-      '<div class="li-actions"><button class="btn btn-sm" data-act="deck-open" data-id="' + esc(d.id) + '">管理</button>' +
+      '<div class="li-actions"><span class="row-go">打开' + icon('chevronRight', 'i14') + '</span>' +
       '<button class="btn btn-sm btn-more" data-act="deck-menu" data-id="' + esc(d.id) + '" title="更多操作">' + icon('more', 'i16') + '</button></div>' +
       '</div>';
   }
@@ -1265,8 +1330,7 @@
       '<span class="deck-ring' + (pct >= 100 && total > 0 ? ' done' : '') + '" style="--p:' + pct + '" title="已掌握 ' + pct + '%"><b>' + pct + '%</b></span></div>' +
       '<div class="meta">' + (d.description ? esc(d.description) + ' · ' : '') + '已掌握 ' + mastered + ' / ' + total + ' 张</div>' +
       '<div class="progress deck-prog"><span style="width:' + pct + '%"></span></div></div>' +
-      '<div class="li-actions"><button class="btn btn-sm btn-primary" data-act="study-deck" data-id="' + esc(d.id) + '">学习</button>' +
-      '<button class="btn btn-sm" data-act="deck-open" data-id="' + esc(d.id) + '">管理</button>' +
+      '<div class="li-actions"><span class="row-go">' + (c[1] > 0 ? '继续' : '开始') + icon('chevronRight', 'i14') + '</span>' +
       '<button class="btn btn-sm btn-more" data-act="deck-menu" data-id="' + esc(d.id) + '" title="更多操作">' + icon('more', 'i16') + '</button></div>' +
       '</div>';
   }
@@ -1280,7 +1344,7 @@
     const split = splitDecksBySeries(st, seriesList);
     let html = titlebar('所有牌组', st.decks.length + ' 个牌组 · 点牌组直接开始学习', {
       back: { act: 'folder-back' }
-    }) + '<div class="content">';
+    }) + '<div class="content">' + dailyHeroHtml(app);
     if (!st.decks.length) {
       html += emptyBox('layers', '还没有牌组。点侧栏底部的「导入」拿一份词库，或去「工坊」自己做。');
     } else {
@@ -1534,8 +1598,10 @@
   }
 
   function classroomList(app) {
+    const clsReady = !!(FC.Classroom && FC.Classroom.available());
+    const clsIn = !!(FC.Classroom && FC.Classroom.hasSession());
     let html = titlebar('班级', '一起攒学习量', {
-      actions: '<button class="btn btn-sm btn-primary" data-act="class-new">' + icon('plus', 'i14') + '创建班级</button>'
+      actions: clsIn ? '<button class="btn btn-sm btn-primary" data-act="class-new">' + icon('plus', 'i14') + '创建班级</button>' : ''
     }) + '<div class="content">';
 
     if (!FC.Classroom || !FC.Classroom.available()) {
@@ -1544,7 +1610,6 @@
     }
     if (!FC.Classroom.hasSession()) {
       html += classLoginCard('班级是真实存在的：建班后给你一个 8 位密钥，同学用这个密钥就能加进来，一起攒学习量。');
-      html += '<button class="btn btn-block" data-act="class-login">' + icon('key', 'i16') + '我已有密钥，先去登录</button>';
       return html + '</div>' + tabbar(2, app);
     }
 
@@ -1948,7 +2013,7 @@
       }).join('') +
       '</select></div>' +
       '<div class="field"><label>都有谁</label>' +
-      '<input id="battlePlayers" value="' + esc(app.battlePlayersText) + '" placeholder="我,同桌A,同桌B" />' +
+      '<input id="battlePlayers" value="' + esc(app.battlePlayersText) + '" placeholder="填同学昵称，用逗号分隔" />' +
       '<div class="hint">用逗号隔开，2 到 4 个人。</div></div>' +
       '<div class="field"><label>每人几张牌</label>' +
       '<input id="battleHand" value="' + esc(app.battleHandText) + '" placeholder="10" />' +
@@ -2668,7 +2733,7 @@
           '<span class="set-val' + (on && a.provider === 'phone' ? ' ok' : '') + '">' + esc(on && a.provider === 'phone' ? (a.cloudPhone || a.phone || '已绑定') : '未绑定') + '</span>',
           '手机验证码登录即视为绑定') +
         row('user', 'cyan', '手机尾号',
-          '<input class="set-num" id="setPhoneTail" value="' + esc(accountPhoneTail(app)) + '" placeholder="5186" maxlength="4" inputmode="numeric" />',
+          '<input class="set-num" id="setPhoneTail" value="' + esc(on ? accountPhoneTail(app) : '') + '" placeholder="登录后自动带入" maxlength="4" inputmode="numeric" />',
           '账户 ID 的后四位') +
         '</div>' +
         '<div class="set-tip">换绑 = 用新的邮箱 / 手机号重新走一次验证码登录。<button class="link-btn" data-act="set-pane" data-pane="account">去登录 / 换绑</button></div>'

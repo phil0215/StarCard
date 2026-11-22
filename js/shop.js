@@ -401,7 +401,7 @@
     var ownedCount = 0;
     for (var k in owned) if (owned[k]) ownedCount++;
 
-    cards = railHtml('官方精选', OFFICIAL.length + ' 件 · 左右滑动看全部', officialCards) +
+    cards = railHtml('官方精选', '共 ' + OFFICIAL.length + ' 件', officialCards) +
       railHtml('同学的店', (st.list === null ? '正在加载' : st.list.length + ' 件') + ' · 点开可以点赞 / 关注作者', cloudCards) +
       '<div class="shp-tip">' + icon('info', 'i14') +
       '<span>积分靠学习攒：复习 1 次 +1，学习 1 天 +10，每枚勋章 +20。买下的词库直接并入「词书」。</span></div>' +
