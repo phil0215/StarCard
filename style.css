@@ -8396,6 +8396,7 @@ html[data-look="plain"] .side-account .sa-badge { background: #FF3B30 !important
 .stg-side-item > .ic { width: 14px; height: 14px; flex: none; }
 .stg-side-txt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .ff-n { flex: none; font-size: 10.5px; color: var(--ink-4); font-weight: 550; }
+.stg-side-item .flag-dot.deck-dot { background: var(--ink-3); }
 .stg-side-lab { margin: 8px 8px 2px; font-size: 10.5px; font-weight: 550; letter-spacing: .3px; color: var(--ink-4); flex: none; }
 .stg-side-hint { margin-top: auto; padding: 8px 8px 4px; font-size: 10px; line-height: 1.6; color: var(--ink-4); }
 

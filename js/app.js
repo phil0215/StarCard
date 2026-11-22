@@ -3217,6 +3217,12 @@
         App.render();
         break;
       }
+      case 'studio-scope-deck':
+        if (!App.studio) App.studio = { q: '', sel: '', scope: '' };
+        App.studio.scope = d.id || '';
+        App.studio.sel = '';
+        App.render();
+        break;
       case 'studio-row':
         if (!App.studio) App.studio = { q: '', sel: '' };
         App.studio.sel = d.id;

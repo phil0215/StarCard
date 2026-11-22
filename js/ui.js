@@ -1119,6 +1119,12 @@
           '<span class="flag-dot" style="background:' + FC.FLAG_COLORS[fi] + '"></span><span class="stg-side-txt">' + FF_NAMES[fi - 1] +
           '</span><span class="ff-n">' + flagCounts[fi] + '</span></button>';
       }
+      sideHtml += '<div class="stg-side-lab">卡组</div>';
+      for (let di = 0; di < st.decks.length; di++) {
+        const dd = st.decks[di];
+        sideHtml += '<button class="stg-side-item' + (scopeDeck === dd ? ' on' : '') + '" data-act="studio-scope-deck" data-id="' + esc(dd.id) + '" title="' + esc(dd.name) + '">' +
+          '<span class="flag-dot deck-dot"></span><span class="stg-side-txt">' + esc(dd.name) + '</span><span class="ff-n">' + dd.cards.length + '</span></button>';
+      }
       sideHtml += '<div class="stg-side-hint">Shift+1~7 打标<br/>Shift+0 清除</div></aside>';
       const sel = app.studio.sel;
       html += '<div class="studio2">' + sideHtml +
