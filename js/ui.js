@@ -1038,7 +1038,6 @@
     for (let i = 0; i < st.decks.length; i++) totalAll += st.decks[i].cards.length;
     const srcDecks = scopeDeck ? [scopeDeck] : st.decks;
     let html = '<section class="studio-frame">' +
-      '<div class="sf-curve" aria-hidden="true"></div>' +
       '<header class="studio-top">' +
       '<button class="stg-btn" data-act="side-toggle" title="隐藏 / 显示侧栏">' + icon('sidebar', 'i18') + '</button>' +
       '<span class="stg-title">工坊</span>';
