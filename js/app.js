@@ -1774,6 +1774,7 @@
     // —— 通知页 / 备份中心页（完整页面，非弹窗）——
     openNoticePage: function () {
       this.noticePageOpen = true; this.backupPageOpen = false; this.accountOpen = false;
+      this.accountMenuOpen = false;
       this.aiOpen = false; this.cmdOpen = false;
       this.modal = null; this.render();
     },
