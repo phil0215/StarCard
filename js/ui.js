@@ -1046,7 +1046,9 @@
     let totalAll = 0;
     for (let i = 0; i < st.decks.length; i++) totalAll += st.decks[i].cards.length;
     const srcDecks = scopeDeck ? [scopeDeck] : st.decks;
-    let html = '<header class="studio-top">' +
+    let html = '<section class="studio-frame">' +
+      '<div class="sf-curve" aria-hidden="true"></div>' +
+      '<header class="studio-top">' +
       '<button class="stg-btn" data-act="side-toggle" title="隐藏 / 显示侧栏">' + icon('sidebar', 'i18') + '</button>' +
       '<span class="stg-title">工坊</span>';
     if (st.decks.length) {
@@ -1060,7 +1062,7 @@
     }
     html += '<span class="stg-count">' + (scopeDeck ? scopeDeck.cards.length : totalAll) + ' 张卡片</span>' +
       '<button class="btn btn-sm btn-primary" data-act="new-deck">' + icon('plus', 'i14') + '添加牌组</button>' +
-      '</header>' + '<div class="content content--studio">';
+      '</header><div class="content content--studio">';
 
     // —— 已移除的词书：默认折叠，可恢复重新显示（避免误删后无处找回）——
     const removedList = typeof FC.removedSeries === 'function' ? FC.removedSeries(st) : [];
@@ -1149,7 +1151,7 @@
         '</div>';
     }
 
-    html += '</div>'; // 闭合 .content，确保 tabbar 作为 #root 独立侧栏，而非被塞进内容区
+    html += '</div></section>'; // 闭合 content--studio 与 studio-frame
     return html + tabbar(1, app);
   }
 

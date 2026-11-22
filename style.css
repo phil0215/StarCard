@@ -8061,19 +8061,36 @@ html[data-theme="dark"] .folder-card { background: var(--surface-2); }
 
 /* 工坊顶部小工具条：隐藏侧栏 / 标题 / 范围下拉 / 计数 / 添加牌组 */
 /* 操作栏 = 悬浮凸台：宽度随内容、居中，圆角 + 底部投影做出「凸起物」的托盘感 */
+/* 操作栏：普通一行（各页通用）；工坊页嵌入内容框顶部的弧形凹槽 */
 .studio-top {
   grid-column: 2;
   display: flex; align-items: center; gap: 8px;
-  width: fit-content; max-width: calc(100% - 24px);
-  justify-self: center;
-  margin: 8px auto 0;
-  padding: 4px 10px 4px 6px;
+  padding: 10px 24px 6px;
   min-width: 0;
+}
+
+/* 工坊内容框：一块整框顶上去，顶边做成「两端高、中间凹」的托盘弧线，工具条嵌在弧形里 */
+.studio-frame {
+  grid-column: 2;
+  position: relative;
+  display: flex; flex-direction: column;
+  margin: 10px 24px 14px;
+  min-height: 0;
+  height: calc(100vh - 24px);
   background: var(--surface);
   border: 1px solid var(--line);
+  border-top: none;
   border-radius: 16px;
-  box-shadow: 0 4px 12px -6px rgba(0, 0, 0, .25), 0 1px 2px rgba(0, 0, 0, .08);
 }
+.sf-curve {
+  position: absolute; top: 0; left: 0; right: 0; height: 34px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  border-radius: 0 0 50% 50% / 0 0 34px 34px;
+  pointer-events: none;
+  z-index: 1;
+}
+.studio-frame .studio-top { margin: 40px 14px 0; padding: 0 6px; }
 .stg-btn {
   width: 26px; height: 26px; flex: none;
   display: flex; align-items: center; justify-content: center;
@@ -8099,7 +8116,6 @@ html[data-theme="dark"] .folder-card { background: var(--surface-2); }
 .studio-top .stg-add { width: 24px; height: 24px; }
 
 /* 全站操作栏：标题占中间，动作推到最右 */
-.studio-top { padding: 4px 10px 4px 6px; }
 .studio-top .stg-main { display: flex; align-items: baseline; gap: 8px; min-width: 0; flex: 1; }
 .stg-main .stg-title { flex: none; }
 .stg-sub { font-size: 11.5px; color: var(--ink-4); font-weight: 450; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -8219,7 +8235,10 @@ html[data-theme="dark"] .folder-card { background: var(--surface-2); }
 
 /* 手机端：工坊工具条单行收窄，范围下拉占剩余宽度；隐藏侧栏钮是桌面版专属 */
 @media (max-width: 760px) {
-  .studio-top { margin: 6px auto 0; padding: 3px 8px 3px 6px; gap: 6px; max-width: calc(100% - 16px); }
+  .studio-top { padding: 8px 12px 4px; gap: 6px; }
+  .studio-frame { margin: 6px 8px 10px; height: auto; min-height: 60vh; }
+  .sf-curve { height: 24px; border-radius: 0 0 50% 50% / 0 0 24px 24px; }
+  .studio-frame .studio-top { margin-top: 28px; }
   .stg-btn { display: none; }
   .stg-sub { display: none; }
   .studio-top .stg-title { font-size: 15px; }
@@ -8339,7 +8358,9 @@ html[data-look="plain"] .side-account .sa-badge { background: #FF3B30 !important
    ============================================================ */
 .content--studio {
   display: flex; flex-direction: column;
-  padding-bottom: 14px;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 6px 14px 14px;
 }
 .content--studio .studio2 {
   flex: 1 1 auto;
